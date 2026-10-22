@@ -1,0 +1,41 @@
+# Dados locais: MP3s do usuário, stems, charts gerados, cache, logs.
+# Nada disso vai para o repositório (músicas não são nossas para redistribuir).
+data/
+config.toml
+*.mp3
+*.flac
+*.wav
+*.ogg
+!tests/fixtures/**/*.wav
+!godot/tests/fixtures/**/*.ogg
+
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Ferramentas
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+reports/
+
+# Godot: cache do editor e importações geradas
+godot/.godot/
+godot/**/*.import
+godot/addons/gdUnit4/
+godot/reports/
+*.translation
+
+# Editores e sistema
+.vscode/
+.idea/
+*.swp
+.DS_Store

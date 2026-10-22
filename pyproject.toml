@@ -1,0 +1,69 @@
+[project]
+name = "pbq"
+version = "0.1.0"
+description = "Palheta & Baqueta: transforma MP3s em músicas jogáveis (stems + charts) para o jogo em Godot"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[project.optional-dependencies]
+# Extras por etapa (como no kraoke): o núcleo e os testes rápidos não precisam de torch.
+dev = [
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.2",
+    "mypy==2.4.0",
+    "pre-commit==4.7.0",
+    "gdtoolkit==4.5.0",
+]
+
+[project.scripts]
+pbq = "pbq.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["pbq*"]
+
+# --- testes ------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]  # tools/ (ferramentas de dev) não é instalado como pacote
+markers = [
+    "slow: roda modelos de IA reais (minutos, baixa modelos); fora da CI rápida",
+]
+addopts = [
+    "-m", "not slow",
+    "--cov=pbq",
+    "--cov=tools",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-fail-under=80",
+]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+
+# --- qualidade ---------------------------------------------------------------
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# Comentários e mensagens são em português: aspas e travessões tipográficos são intencionais.
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["pbq", "tools"]
+strict = true
