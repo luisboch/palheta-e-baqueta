@@ -1,0 +1,41 @@
+# Lint + testes rápidos (Python com cobertura mínima de 80%, GDScript com GdUnit4).
+# Os testes @pytest.mark.slow (modelos reais) não rodam aqui: ver docs/testing.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Dependências de sistema
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Godot (versão de scripts/versions.env)
+        run: |
+          source scripts/versions.env
+          mkdir -p "$HOME/Applications"
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d "$HOME/Applications"
+
+      - name: Setup (o mesmo script do desenvolvimento)
+        run: scripts/setup.sh
+
+      - name: Lint e documentação viva (pre-commit)
+        run: uv run pre-commit run --all-files --show-diff-on-failure
+
+      - name: Testes Python (cobertura ≥ 80%)
+        run: scripts/test.sh python
+
+      - name: Testes GDScript (GdUnit4)
+        run: scripts/test.sh godot

@@ -1,0 +1,42 @@
+# Hooks locais via `uv run`: as versões vêm do uv.lock (uma fonte só para pre-commit, CI e terminal).
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff (lint)
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff (format)
+        entry: uv run ruff format
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: gdformat
+        name: gdformat
+        entry: uv run gdformat
+        language: system
+        files: ^godot/(?!addons/).*\.gd$
+      - id: gdlint
+        name: gdlint
+        entry: uv run gdlint
+        language: system
+        files: ^godot/(?!addons/).*\.gd$
+      - id: docs-check
+        name: documentação viva
+        entry: uv run python -m tools.docs_check
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: no-user-audio
+        name: sem áudio de usuário
+        entry: áudio só em tests/fixtures (sintético); músicas e stems nunca vão para o git
+        language: fail
+        files: \.(mp3|flac|ogg|wav|m4a)$
+        exclude: ^(tests|godot/tests)/fixtures/
