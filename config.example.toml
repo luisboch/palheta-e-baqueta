@@ -1,0 +1,13 @@
+# Configuração do backend. Copie para config.toml (não versionado) para mudar algo.
+# Sem config.toml, vale este arquivo. Cada valor vem comentado com o motivo.
+
+[paths]
+input = "data/input"      # MP3s a processar (o menu do pendrive copia para cá)
+work = "data/work"        # intermediários + estado por música (<id>/song.json)
+library = "data/library"  # saída final, lida pelo jogo (contrato: docs/library-format.md)
+state = "data"            # eventos do worker, lock, ajustes do jogo
+
+[drive]
+# Pasta na raiz do pendrive: MP3s para processar + library/ (músicas prontas).
+# Separada da "kraoke/" para um pendrive servir aos dois sem um pegar os arquivos do outro.
+folder = "palheta"
