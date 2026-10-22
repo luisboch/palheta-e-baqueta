@@ -1,0 +1,12 @@
+; Palheta & Baqueta — projeto Godot (versão fixada em scripts/versions.env).
+
+config_version=5
+
+[application]
+
+config/name="Palheta & Baqueta"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
