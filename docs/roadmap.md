@@ -8,7 +8,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 1 | Estrutura, tooling, CI, testes "hello" | ✅ concluída | ver abaixo | sem medição ([ADR 0005](adr/0005-testes-e-cobertura.md)) |
 | 2 | Importação via pendrive (do kraoke) e cache | ✅ concluída | 99% | sem medição |
 | 3 | Separação de stems e instrumento ausente | ✅ concluída | 97,7% | sem medição |
-| 4 | Mapa de batidas e chart de bateria | ⏳ próxima | | |
+| 4 | Mapa de batidas e chart de bateria | 🟡 falta validar batidas reais | 96,4% | sem medição |
 | 5 | Charts de guitarra, violão e baixo; 4 dificuldades | | | |
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | | | |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | | | |
@@ -47,3 +47,16 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 - Cobertura Python ao fechar: 97,7% (rodando sem torch, como na CI). GDScript: sem mudanças.
 - Depois do fechamento: violão e guitarra mesclados num instrumento só, **Cordas**
   ([ADR 0010](adr/0010-cordas-um-instrumento.md)). Sai a `guitar_split` (PANNs).
+
+## Fase 4
+
+- Núcleo de charts em Python puro (`pbq/charts/`): mapa de tempo a partir das batidas, grade de
+  semicolcheias e tercinas, `.chart` do Clone Hero (escrita e leitura), lanes da bateria.
+- Etapas `beats` (beat_this), `drums_chart` (ADTOF) e `chart` (`notes.chart`).
+- ADTOF com implementação própria, conferida contra o port: mesmas batidas nas 5 peças
+  ([ADR 0011](adr/0011-batidas-e-bateria.md)). 4 a 7 s por música no Deck.
+- **Projeto não comercial** por causa dos pesos do ADTOF (CC BY-NC-SA 4.0); créditos no README.
+- **Pendente:** o servidor dos pesos do beat_this (JKU) ficou fora do ar (HTTP 503) durante toda a
+  fase. A etapa `beats` foi testada só com fake, e o teste `slow` do pipeline inteiro é pulado.
+  Quando o servidor voltar: rodar `uv run pytest -m slow --no-cov` e as 4 músicas reais.
+- Cobertura Python: 96,4% (sem torch, como na CI). GDScript: sem mudanças.
