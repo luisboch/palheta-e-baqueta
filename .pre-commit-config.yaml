@@ -36,7 +36,7 @@ repos:
         always_run: true
       - id: no-user-audio
         name: sem áudio de usuário
-        entry: áudio só em tests/fixtures (sintético); músicas e stems nunca vão para o git
+        entry: áudio só em tests/fixtures (sintético) ou godot/game/sfx/ (efeitos da interface); músicas e stems nunca vão para o git
         language: fail
         files: \.(mp3|flac|ogg|wav|m4a)$
-        exclude: ^(tests|godot/tests)/fixtures/
+        exclude: ^(tests|godot/tests)/fixtures/|^godot/game/sfx/

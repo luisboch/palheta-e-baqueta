@@ -8,6 +8,7 @@ config.toml
 *.ogg
 !tests/fixtures/**/*.wav
 !godot/tests/fixtures/**/*.ogg
+!godot/game/sfx/**/*.wav
 
 # Python / uv
 .venv/

@@ -17,6 +17,7 @@ var auto_start := true
 var session: PlaySession
 var player: AudioStreamPlayer
 var paused := false
+var sfx: SoundEffects
 var _stem_index := -1  ## índice do stem do jogador no AudioStreamSynchronized
 var _started_audio := false
 var _lead := LEAD_IN
@@ -33,6 +34,8 @@ var _spectrum: AudioEffectSpectrumAnalyzerInstance  ## null sem o bus Music (tes
 
 
 func _ready() -> void:
+	sfx = SoundEffects.new()
+	add_child(sfx)
 	InputProfile.apply()
 	hud.again.connect(App.goto.bind(App.PLAY))  # a mesma escolha, do começo
 	hud.choose_song.connect(leave)
@@ -123,6 +126,8 @@ func _process(delta: float) -> void:
 	if _autoplay:
 		_play_by_itself(now)
 	var events := session.update(now, delta)
+	if not events["missed"].is_empty() and sfx:
+		sfx.play_miss()
 	for note: PlayNote in events["missed"]:
 		highway.on_miss(note)
 	if _stem_index >= 0:
@@ -234,6 +239,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed(action):
 			var result := session.strum(now)
 			highway.on_strum(result)
+			if result.get("grade") == Judge.OVERSTRUM and sfx:
+				sfx.play_error()
 
 
 func _args() -> Dictionary:
