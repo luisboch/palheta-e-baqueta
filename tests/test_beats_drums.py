@@ -57,7 +57,7 @@ def test_tracker_and_transcriber_from_config(config, monkeypatch):
     made = []
     monkeypatch.setattr(beat_this_model, "BeatThisTracker", lambda **kw: made.append(kw) or FakeTracker())
     assert Beats(config).tracker()[0] == "beat_this"
-    assert made == [{"checkpoint": "final0", "device": "cpu"}]
+    assert made == [{"models_dir": config.paths.state / "models", "checkpoint": "final0", "device": "cpu"}]
     config.stages["beats"] = {"tracker": "nenhum"}
     with pytest.raises(ValueError, match="tracker inválido"):
         Beats(config)
@@ -136,23 +136,31 @@ def test_chart_uses_file_name_without_title(config, song):
     assert parse_chart(song.path("notes.chart").read_text()).name == "Artista - Música"
 
 
-def test_beat_this_adapter_reports_unreachable_server(monkeypatch):
+def test_beat_this_adapter_checks_the_weights_before_loading(monkeypatch, tmp_path):
     import sys
     import types
 
+    loaded = []
     fake = types.ModuleType("beat_this.inference")
-
-    def broken(**kw):
-        raise ValueError("Could not load the checkpoint")
-
-    fake.Audio2Beats = broken
+    fake.Audio2Beats = lambda **kw: (
+        loaded.append(kw) or (lambda signal, sr: (np.array([0.5, 1.0]), np.array([0.5])))
+    )
     monkeypatch.setitem(sys.modules, "beat_this", types.ModuleType("beat_this"))
     monkeypatch.setitem(sys.modules, "beat_this.inference", fake)
-    with pytest.raises(RuntimeError, match="servidor dos pesos"):
-        beat_this_model.BeatThisTracker()
 
-    fake.Audio2Beats = lambda **kw: lambda signal, sr: (np.array([0.5, 1.0]), np.array([0.5]))
-    tracker = beat_this_model.BeatThisTracker()
+    def offline(asset, dest):
+        raise RuntimeError("não consegui baixar beat_this-final0.ckpt: HTTP 503")
+
+    monkeypatch.setattr(beat_this_model, "fetch", offline)
+    with pytest.raises(RuntimeError, match="503"):  # a etapa cai na reserva
+        beat_this_model.BeatThisTracker(models_dir=tmp_path)
+    assert loaded == []  # nada foi aberto sem o hash conferido
+    with pytest.raises(ValueError, match="sem hash conferido"):
+        beat_this_model.BeatThisTracker(models_dir=tmp_path, checkpoint="final1")
+
+    monkeypatch.setattr(beat_this_model, "fetch", lambda asset, dest: dest)
+    tracker = beat_this_model.BeatThisTracker(models_dir=tmp_path)
+    assert loaded[0]["checkpoint_path"] == str(tmp_path / "beat_this-final0.ckpt")
     assert tracker.track(np.zeros(10, dtype=np.float32)) == ([0.5, 1.0], [0.5])
 
 

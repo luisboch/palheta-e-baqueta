@@ -36,11 +36,11 @@ min_onsets = 30.0       # ataques por minuto: menos que isso não dá um chart j
 onset_delta = 1.0
 
 [stages.beats]
-tracker = "beat_this"   # MIT; pesos do servidor dos autores, no cache do torch.hub
+tracker = "beat_this"   # MIT; pesos (81 MB) do servidor dos autores, conferidos por sha256, em data/models
 # Reserva quando o beat_this não carrega (servidor fora, sem internet): grade pior, refeita sozinha
 # com o beat_this quando ele voltar (ADR 0013). "" desliga a reserva (a música espera na fila).
 fallback = "librosa"
-checkpoint = "final0"   # o modelo padrão dos autores (treinado em tudo menos o GTZAN)
+checkpoint = "final0"   # o modelo padrão dos autores; só os de hash conferido (pbq/models/beat_this.py)
 device = "cpu"
 
 [stages.drums_chart]

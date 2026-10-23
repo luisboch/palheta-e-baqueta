@@ -23,7 +23,9 @@ def _beat_this(opts: dict[str, Any]) -> BeatTracker:
     from pbq.models.beat_this import BeatThisTracker
 
     return BeatThisTracker(
-        checkpoint=str(opts.get("checkpoint", "final0")), device=str(opts.get("device", "cpu"))
+        models_dir=Path(str(opts["models_dir"])),
+        checkpoint=str(opts.get("checkpoint", "final0")),
+        device=str(opts.get("device", "cpu")),
     )
 
 
@@ -102,7 +104,8 @@ class Beats(Stage):
             if self._failed_at is not None and now - self._failed_at < RETRY_SECONDS:
                 return None
             try:
-                self._primary = TRACKERS[self.primary_name](self.opts)
+                opts = {"models_dir": str(self.config.paths.state / "models"), **self.opts}
+                self._primary = TRACKERS[self.primary_name](opts)
             except RuntimeError:
                 self._failed_at = now
                 return None
