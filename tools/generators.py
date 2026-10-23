@@ -90,6 +90,53 @@ def gen_index_example(root: Path) -> str:
     return "```json\n" + json.dumps(example, indent=2, ensure_ascii=False) + "\n```\n"
 
 
+def gen_sample_chart(root: Path) -> str:
+    """godot/tests/fixtures/pipeline_sample.chart: um chart feito pelas funções reais do pipeline.
+
+    O parser do jogo (godot/core/chart_parser.gd) é testado contra ele: se o formato que o
+    backend escreve mudar, o arquivo muda e os testes do Godot mostram o efeito.
+    """
+    from pbq.charts.chart_file import write_chart
+    from pbq.charts.difficulty import drum_track, pitched_track
+    from pbq.charts.drums import drum_notes
+    from pbq.charts.model import DIFFICULTIES, Chart, track_name
+    from pbq.charts.pitched import STRINGS, RawNote, events
+    from pbq.charts.tempo import TempoMap, time_signatures
+
+    # 8 batidas a 120 BPM a partir de 0,5 s, depois 4 a 150 BPM; tempos fortes a cada 4.
+    beats = [0.5 + 0.5 * i for i in range(8)] + [4.5 + 0.4 * i for i in range(4)]
+    downbeats = beats[::4]
+    tempo_map = TempoMap.from_beats(beats)
+    signatures = time_signatures(beats, downbeats, tempo_map.resolution, tempo_map.lead_beats)
+    hits = {
+        "kick": beats[::2],
+        "snare": beats[1::2],
+        "hihat": beats,
+        "tom": [beats[-1]],
+        "cymbal": [beats[0]],
+    }
+    melody = [RawNote(b, b + 0.3, 52 + 2 * i, 0.8) for i, b in enumerate(beats[:6])]
+    melody += [RawNote(beats[6], beats[6] + 1.2, 55, 0.8), RawNote(beats[6] + 0.01, beats[6] + 1.2, 59, 0.8)]
+    evts = events(melody, tempo_map, STRINGS)
+    expert_drums = drum_notes(hits, tempo_map)
+    chart = Chart(
+        name="Exemplo do pipeline",
+        artist="Palheta & Baqueta",
+        tempos=tempo_map.tempos,
+        time_signatures=signatures,
+        resolution=tempo_map.resolution,
+        streams={"MusicStream": "song.ogg", "GuitarStream": "guitar.ogg", "DrumStream": "drums.ogg"},
+    )
+    for difficulty in DIFFICULTIES:
+        chart.tracks[track_name("strings", difficulty)] = pitched_track(
+            evts, difficulty, tempo_map.resolution, signatures
+        )
+        chart.tracks[track_name("drums", difficulty)] = drum_track(
+            expert_drums, difficulty, tempo_map.resolution
+        )
+    return write_chart(chart)
+
+
 def _gd_dict(types: dict[str, tuple[str, ...]]) -> str:
     lines = [
         f'\t"{name}": [{", ".join(f"{chr(34)}{f}{chr(34)}" for f in fields)}],'
@@ -146,4 +193,5 @@ DOC_GENERATORS: dict[str, Generator] = {
 # Arquivos inteiros gerados (caminho relativo à raiz do repositório).
 FILE_GENERATORS: dict[Path, Generator] = {
     Path("godot/core/backend_protocol.gd"): gen_gd_protocol,
+    Path("godot/tests/fixtures/pipeline_sample.chart"): gen_sample_chart,
 }

@@ -2,3 +2,4 @@
 *.png binary
 *.wav binary
 *.ogg binary
+*.chart -text

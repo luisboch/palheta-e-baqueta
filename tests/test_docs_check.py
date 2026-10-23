@@ -167,4 +167,11 @@ def test_repository_generated_contract_is_fresh():
     from tools.generators import FILE_GENERATORS
 
     for rel, gen in FILE_GENERATORS.items():
-        assert (REPO / rel).read_text() == gen(REPO), rel
+        assert (REPO / rel).read_bytes() == gen(REPO).encode("utf-8"), rel
+
+
+def test_generated_files_keep_crlf(root):
+    files = {Path("x.chart"): lambda r: "[Song]\r\n{\r\n}\r\n"}
+    assert run(root, fix=True, files=files) == []
+    assert (root / "x.chart").read_bytes() == b"[Song]\r\n{\r\n}\r\n"
+    assert run(root, files=files) == []

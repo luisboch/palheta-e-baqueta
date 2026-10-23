@@ -222,16 +222,19 @@ def check_adrs(root: Path) -> Iterable[Problem]:
 
 
 def check_generated_files(root: Path, files: dict[Path, Generator], fix: bool) -> Iterable[Problem]:
-    """Arquivos inteiros gerados (ex.: o contrato do backend em GDScript)."""
+    """Arquivos inteiros gerados (ex.: o contrato do backend em GDScript).
+
+    Comparados em bytes: read_text() trocaria CRLF por LF, e o .chart é CRLF de propósito.
+    """
     for rel, gen in files.items():
         path = root / rel
-        fresh = gen(root)
-        current = path.read_text() if path.exists() else None
+        fresh = gen(root).encode("utf-8")
+        current = path.read_bytes() if path.exists() else None
         if current == fresh:
             continue
         if fix:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(fresh)
+            path.write_bytes(fresh)
         else:
             yield Problem(rel, "arquivo gerado desatualizado (rode: python -m tools.docs_check --fix)")
 
