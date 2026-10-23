@@ -6,10 +6,16 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "mutagen==1.48.1",
+    "numpy==2.4.6",
 ]
 
 [project.optional-dependencies]
 # Extras por etapa (como no kraoke): o núcleo e os testes rápidos não precisam de torch.
+# torch 2.8.0: a mesma do kraoke (cache do uv compartilhado no Deck).
+separate = ["demucs==4.1.0", "torch==2.8.0"]
+# librosa < 1.0: o torchlibrosa (2023) do PANNs não acompanha a 1.0 (ago/2026).
+classify = ["panns-inference==0.1.1", "librosa==0.11.0", "torch==2.8.0"]
+ai = ["pbq[separate,classify]"]
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -28,6 +34,19 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["pbq*"]
+
+[tool.uv]
+# Só Linux (Steam Deck e CI): no macOS Intel o Demucs exige numpy < 2 e torch < 2.3.
+environments = ["sys_platform == 'linux'"]
+
+# PyTorch só-CPU: o Deck não tem CUDA e as wheels padrão trazem ~3 GB de libs NVIDIA (ADR 0004).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 # --- testes ------------------------------------------------------------------
 
@@ -73,3 +92,8 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 python_version = "3.12"
 files = ["pbq", "tools"]
 strict = true
+
+[[tool.mypy.overrides]]
+# Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/.
+module = ["panns_inference.*", "demucs.*", "mutagen.*"]
+ignore_missing_imports = true
