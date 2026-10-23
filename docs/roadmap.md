@@ -11,7 +11,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 4 | Mapa de batidas e chart de bateria | 🟡 falta validar batidas reais | 96,4% | sem medição |
 | 5 | Charts de Cordas e baixo; 4 dificuldades | ✅ concluída | 96,8% | sem medição |
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | ✅ concluída | ver abaixo | 91,2% |
-| 7 | Visual: notas quadradas e redondas, fundo no ritmo | | | |
+| 7 | Visual: notas quadradas e redondas, fundo no ritmo | ✅ concluída | 95,5% | 93,2% |
 | 8 | 2 jogadores, controles USB, calibração | | | |
 | 9 | Menus, seleção (bloqueando ausentes), resultados | | | |
 
@@ -88,3 +88,20 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 - **Cobertura de GDScript medida pela primeira vez**: instrumentador próprio (`tools/gd_coverage.py`),
   91,2%, com o limiar de 80% na CI.
 - Cobertura Python: 95,4%; GDScript: 43 testes, 91,2%.
+- Depois do fechamento, no primeiro teste jogado: teclado e controle tocam a nota no traste, sem
+  palhetada ([ADR 0015](adr/0015-tocar-no-traste-sem-palhetada.md)); o F5 do editor abre a música
+  com mais instrumentos, em Cordas no Difícil.
+
+## Fase 7
+
+- Fundo animado em shader (`godot/game/background.gdshader`), atrás da pista: anel a cada
+  batida, cor nova a cada compasso (a paleta das lanes), horizonte pelos graves, raios pelos
+  médios, estrelas pelos agudos. Discreto, para as notas continuarem legíveis.
+- Batidas do `beatmap.json` em lógica pura (`godot/core/beat_grid.gd`); sem beatmap, saem do mapa
+  de tempo. Níveis do som por um `AudioEffectSpectrumAnalyzer` no bus `Music`, normalizados pelo
+  pico recente de cada faixa (`godot/core/spectrum_bands.gd`): medido no Deck, o espectro fica entre
+  -85 e -25 dB e varia muito entre músicas.
+- Na pista: linhas de batida correndo com as notas (compasso mais forte), linha de acerto
+  pulsando no tempo e o alvo "estourando" no acerto.
+- 60 FPS estáveis no Deck (modo desktop, partida real com áudio).
+- Cobertura Python: 95,5%; GDScript: 50 testes, 93,2%.
