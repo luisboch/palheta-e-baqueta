@@ -73,3 +73,5 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
   etapas, mais ~2 min da separação.
 - Ainda pendente da fase 4: as batidas reais com beat_this (servidor fora do ar).
 - Cobertura Python ao fechar: 96,8% (sem torch, como na CI). GDScript: sem mudanças.
+- Depois do fechamento: librosa como reserva das batidas, com refazer automático quando o
+  beat_this voltar ([ADR 0013](adr/0013-reserva-de-batidas-librosa.md)).

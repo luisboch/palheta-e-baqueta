@@ -36,7 +36,7 @@ Etapas implementadas (gerado de `pbq/stages/__init__.py`):
 | 1 | `ingest` | 1 | — | sim | metadados (artista, música, duração) e capa |
 | 2 | `separate` | 1 | `ingest` | sim | stems por instrumento (Demucs htdemucs_6s) |
 | 3 | `presence` | 2 | `separate` | sim | quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados |
-| 4 | `beats` | 1 | `ingest` | sim | batidas, tempos fortes e energia por batida (beat_this) |
+| 4 | `beats` | 2 | `ingest` | sim | batidas, tempos fortes e energia por batida (beat_this; reserva: librosa) |
 | 5 | `drums_chart` | 1 | `separate`, `beats`, `presence` | sim | chart de bateria Muito difícil (ADTOF), na grade de batidas |
 | 6 | `pitched_chart` | 1 | `separate`, `beats`, `presence` | sim | Cordas e baixo Muito difícil (basic-pitch), na grade de batidas |
 | 7 | `chart` | 2 | `beats`, `drums_chart`, `pitched_chart` | sim | notes.chart (Clone Hero): mapa de tempo, compassos e as 4 dificuldades |

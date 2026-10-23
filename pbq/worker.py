@@ -174,5 +174,6 @@ class Worker:
         return report
 
     def _complete(self, song: Song) -> bool:
-        # A última etapa (package) só fica "feita" com a biblioteca atualizada.
-        return self.stages()[-1].is_done(song)
+        # Todas as etapas, não só a última: uma etapa pode deixar de estar "feita" sozinha (ex.:
+        # batidas da reserva quando o beat_this volta), e o pipeline refaz ela e as seguintes.
+        return all(stage.is_done(song) for stage in self.stages())

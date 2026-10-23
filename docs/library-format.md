@@ -101,6 +101,7 @@ início do áudio.
 ```json
 {
   "version": 1,
+  "tracker": "beat_this",
   "beats": [0.52, 1.03, 1.55],
   "downbeats": [0.52, 2.58],
   "bpm": 116.4,
@@ -108,6 +109,7 @@ início do áudio.
 }
 ```
 
+- `tracker`: quem gerou as batidas, `beat_this` ou `librosa` (a reserva, [ADR 0013](adr/0013-reserva-de-batidas-librosa.md)).
 - `beats`: cada batida detectada. No `notes.chart`, a batida *i* fica no tick
   `(introdução + i) × 192`.
 - `downbeats`: os tempos fortes (primeira batida de cada compasso), um subconjunto de `beats`.

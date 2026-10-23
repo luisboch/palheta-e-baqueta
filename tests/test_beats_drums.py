@@ -42,7 +42,7 @@ def test_beats_stage_writes_beatmap(config, song):
     seen = []
     Beats(config, tracker=FakeTracker()).run(song, seen.append)
     beatmap = json.loads(song.path("beatmap.json").read_text())
-    assert beatmap["version"] == 1 and beatmap["bpm"] == 120.0
+    assert beatmap["version"] == 1 and beatmap["bpm"] == 120.0 and beatmap["tracker"] == "beat_this"
     assert beatmap["beats"][:3] == [0.5, 1.0, 1.5] and beatmap["downbeats"][:2] == [0.5, 2.5]
     assert len(beatmap["energy"]) == len(beatmap["beats"]) and max(beatmap["energy"]) == 1.0
     assert seen[-1] == 0.9
@@ -56,11 +56,11 @@ def test_beats_stage_refuses_silence(config, song):
 def test_tracker_and_transcriber_from_config(config, monkeypatch):
     made = []
     monkeypatch.setattr(beat_this_model, "BeatThisTracker", lambda **kw: made.append(kw) or FakeTracker())
-    Beats(config).tracker()
+    assert Beats(config).tracker()[0] == "beat_this"
     assert made == [{"checkpoint": "final0", "device": "cpu"}]
     config.stages["beats"] = {"tracker": "nenhum"}
     with pytest.raises(ValueError, match="tracker inválido"):
-        Beats(config).tracker()
+        Beats(config)
 
     from pbq.models import adtof
 
@@ -72,7 +72,9 @@ def test_tracker_and_transcriber_from_config(config, monkeypatch):
     config.stages["drums_chart"] = {"transcriber": "nenhum"}
     with pytest.raises(ValueError, match="transcriber inválido"):
         DrumsChart(config).transcriber()
-    assert set(beats_stage.TRACKERS) == {"beat_this"} and set(drums_stage.TRANSCRIBERS) == {"adtof"}
+    assert set(beats_stage.TRACKERS) == {"beat_this", "librosa"} and set(drums_stage.TRANSCRIBERS) == {
+        "adtof"
+    }
 
 
 def test_drums_chart_on_grid(config, song):
@@ -152,3 +154,99 @@ def test_beat_this_adapter_reports_unreachable_server(monkeypatch):
     fake.Audio2Beats = lambda **kw: lambda signal, sr: (np.array([0.5, 1.0]), np.array([0.5]))
     tracker = beat_this_model.BeatThisTracker()
     assert tracker.track(np.zeros(10, dtype=np.float32)) == ([0.5, 1.0], [0.5])
+
+
+# --- reserva da librosa ----------------------------------------------------------
+
+
+class Unavailable:
+    """Fábrica do rastreador principal que falha como o beat_this sem servidor (conta as tentativas)."""
+
+    def __init__(self):
+        self.tries = 0
+        self.works = False
+
+    def __call__(self, opts):
+        self.tries += 1
+        if not self.works:
+            raise RuntimeError("servidor dos pesos fora do ar")
+        return FakeTracker()
+
+
+@pytest.fixture
+def flaky(monkeypatch):
+    factory = Unavailable()
+    monkeypatch.setitem(beats_stage.TRACKERS, "beat_this", factory)
+    monkeypatch.setitem(beats_stage.TRACKERS, "librosa", lambda opts: FakeTracker(bpm=60))
+    return factory
+
+
+def test_fallback_when_primary_does_not_load(config, song, flaky):
+    t = [0.0]
+    stage = Beats(config, clock=lambda: t[0])
+    stage.run(song)
+    beatmap = json.loads(song.path("beatmap.json").read_text())
+    assert beatmap["tracker"] == "librosa" and beatmap["bpm"] == 60.0
+    song.mark("beats", "done", Beats.version)
+    assert stage.is_done(song)  # principal fora: a reserva vale
+    assert flaky.tries == 1  # e não insiste antes do intervalo
+
+    flaky.works = True  # o servidor voltou...
+    assert stage.is_done(song)  # ...mas ainda dentro do intervalo
+    t[0] += beats_stage.RETRY_SECONDS
+    assert not stage.is_done(song)  # passou o intervalo: refazer com o principal
+    stage.run(song)
+    assert json.loads(song.path("beatmap.json").read_text())["tracker"] == "beat_this"
+    assert stage.is_done(song)
+
+
+def test_no_fallback_configured(config, song, flaky):
+    config.stages["beats"] = {"fallback": ""}
+    with pytest.raises(RuntimeError, match="sem reserva"):
+        Beats(config).run(song)
+
+
+def test_worker_redoes_songs_made_by_the_fallback(config, flaky):
+    """Música completa com batidas da reserva volta para a fila quando o principal carrega."""
+    from pbq.stages.ingest import Ingest
+    from pbq.worker import Worker
+    from tests.fakes import Publish
+
+    class Grid(Beats):
+        name = "beats"
+
+    class AfterBeats(Publish):
+        requires = ("beats",)
+
+    make_mp3(config.paths.input / "a.mp3", seconds=3.0)
+    worker = Worker(config, stage_classes=[Ingest, Grid, AfterBeats])
+    worker.run_once()
+    assert worker.run_once() == 1  # pronta com a reserva
+    assert worker.run_once() == 0
+    flaky.works = True
+    # Etapas novas (o worker as recria depois de a fila esvaziar) tentam o principal na hora.
+    worker._stages = None
+    assert worker.run_once() == 1  # refeita com o principal
+    beatmap = next(config.paths.work.glob("*/beatmap.json"))
+    assert json.loads(beatmap.read_text())["tracker"] == "beat_this"
+
+
+def test_downbeats_follow_the_strongest_phase():
+    from pbq.models.librosa_beats import downbeats
+
+    beats = [float(i) for i in range(10)]
+    strength = np.array([1, 1, 5, 1, 1, 1, 5, 1, 1, 1.0])  # grave forte nas batidas 2 e 6
+    assert downbeats(beats, strength) == [2.0, 6.0]
+    assert downbeats([], np.array([])) == []
+    assert downbeats([0.0, 1.0], np.array([0.0, 3.0])) == [1.0]
+
+
+def test_librosa_tracker_on_a_click_track():
+    pytest.importorskip("librosa")
+    from pbq.models.librosa_beats import SAMPLE_RATE, LibrosaTracker
+    from tests.test_dsp import clicks
+
+    signal = clicks([0.5 + 0.5 * i for i in range(16)], seconds=9.0, rate=SAMPLE_RATE, freq=60.0)
+    beats, downs = LibrosaTracker().track(signal)
+    assert len(beats) >= 12 and abs(60 / np.median(np.diff(beats)) - 120) < 5
+    assert set(downs) <= set(beats) and len(downs) >= 3

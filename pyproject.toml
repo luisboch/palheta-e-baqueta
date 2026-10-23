@@ -14,7 +14,8 @@ dependencies = [
 # torch 2.8.0: a mesma do kraoke (cache do uv compartilhado no Deck).
 separate = ["demucs==4.1.0", "torch==2.8.0"]
 # beat_this (MIT): batidas e compassos; torchaudio casado com o torch (mesmo índice só-CPU).
-beats = ["beat-this==1.1.0", "torch==2.8.0", "torchaudio==2.8.0"]
+# librosa (ISC): a reserva quando o beat_this não carrega (ADR 0013).
+beats = ["beat-this==1.1.0", "torch==2.8.0", "torchaudio==2.8.0", "librosa==0.11.0"]
 # Bateria: rede ADTOF implementada aqui (pbq/models/adtof.py); só precisa de torch.
 drums = ["torch==2.8.0"]
 # basic-pitch (Spotify, Apache-2.0): notas de Cordas e baixo, pelo modelo ONNX que vem no pacote.
@@ -104,5 +105,5 @@ strict = true
 
 [[tool.mypy.overrides]]
 # Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/.
-module = ["demucs.*", "mutagen.*", "beat_this.*", "basic_pitch.*"]
+module = ["demucs.*", "mutagen.*", "beat_this.*", "basic_pitch.*", "librosa.*"]
 ignore_missing_imports = true

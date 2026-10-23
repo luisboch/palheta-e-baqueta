@@ -37,6 +37,9 @@ onset_delta = 1.0
 
 [stages.beats]
 tracker = "beat_this"   # MIT; pesos do servidor dos autores, no cache do torch.hub
+# Reserva quando o beat_this não carrega (servidor fora, sem internet): grade pior, refeita sozinha
+# com o beat_this quando ele voltar (ADR 0013). "" desliga a reserva (a música espera na fila).
+fallback = "librosa"
 checkpoint = "final0"   # o modelo padrão dos autores (treinado em tudo menos o GTZAN)
 device = "cpu"
 
