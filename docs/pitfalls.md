@@ -50,3 +50,8 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   lá). O que deve ser visto e ajustado no editor tem de ser nó da cena.
 - **2026-10-22 · MP3 baixado da internet:** alguns trazem o link do vídeo na tag de título. O
   `ingest` ignora título que é URL e usa o nome do arquivo.
+- **2026-10-23 · Deck em modo desktop:** o Steam converte os botões em teclado e mouse e o
+  Godot não vê controle nenhum (`Input.get_connected_joypads()` vazio). Teste com teclado ou
+  rode o jogo pelo Steam.
+- **2026-10-23 · `override.cfg` não muda os argumentos do F5:** o editor ignora esse arquivo. O
+  padrão do F5 (música e dificuldade) fica no próprio `godot/game/play.gd`.

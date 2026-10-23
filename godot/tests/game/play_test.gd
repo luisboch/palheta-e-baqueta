@@ -53,7 +53,7 @@ func test_autoplay_plays_the_whole_song_without_audio() -> void:
 func test_drums_and_defaults() -> void:
 	var scene := _play(_song_dir('{"strings": false, "drums": true}'), "strings", "Impossível")
 	assert_str(scene.session.instrument).is_equal("drums")  # Cordas ausente: cai na bateria
-	assert_str(scene.session.difficulty).is_equal("Expert")
+	assert_str(scene.session.difficulty).is_equal("Hard")
 	_run_to_end(scene)
 	assert_int(scene.session.scoring.misses).is_equal(0)
 
@@ -80,3 +80,18 @@ func test_input_reaches_the_session() -> void:
 	fret.pressed = false
 	scene._unhandled_input(fret)
 	assert_array(scene.session.held).is_empty()
+
+
+func test_default_song_has_the_most_instruments() -> void:
+	var library := create_temp_dir("biblioteca")
+	for entry: Array in [["a", '{"strings": true}'], ["b", '{"strings": true, "drums": true}']]:
+		DirAccess.make_dir_absolute(library.path_join(entry[0]))
+		var song := FileAccess.open(
+			library.path_join(entry[0]).path_join("song.json"), FileAccess.WRITE
+		)
+		song.store_string('{"instruments": %s}' % entry[1])
+		song.close()
+	DirAccess.make_dir_absolute(library.path_join("incompleta"))
+	var play: GDScript = load("res://game/play.gd")
+	assert_str(play.default_song(library)).is_equal(library.path_join("b"))
+	assert_str(play.default_song(library.path_join("nada"))).is_equal("")

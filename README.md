@@ -56,9 +56,14 @@ $GODOT --path godot -- --song data/library/<id> --instrument strings --difficult
 ```
 
 - `--instrument`: `strings` (Cordas), `bass` ou `drums`; `--difficulty`: `Easy`, `Medium`, `Hard`
-  ou `Expert`. Sem `--song`, abre a primeira música de `data/library/`.
+  ou `Expert`. Sem `--song`, abre a música de `data/library/` com mais instrumentos; sem escolha,
+  Cordas no Difícil (o que existir mais perto disso). É o que o F5 do editor abre.
 - Teclado: trastes `1`–`5` (ou `A S D F G`), palhetada `↑`/`↓`/`Enter`; bateria: bumbo `Espaço`,
   pads `H J K L`. Controle: trastes A B Y X LB, palhetada no direcional. `Esc` sai.
+- No modo desktop do Deck, o Steam converte os controles em teclado e mouse e o jogo não vê o
+  controle: use um teclado ou rode pelo Steam (o atalho para o modo jogo vem na fase 9).
+- A música toca do começo ao fim; o instrumento escolhido baixa 18 dB a cada erro e volta no
+  acerto. Numa música só de Cordas (como uma de violão e voz), errar deixa quase só a voz.
 - `--autoplay 1`: o jogo toca sozinho (para ver um chart sem tocar).
 As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU e Demucs;
 ~1,5 GB). O modelo baixa no primeiro uso (~80 MB). O jogo chega na fase 6.

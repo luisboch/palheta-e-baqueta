@@ -4,11 +4,14 @@
 ##   godot --path godot -- --song <pasta da música> [--instrument strings|bass|drums]
 ##                         [--difficulty Easy|Medium|Hard|Expert] [--autoplay 1]
 ## --autoplay: o jogo toca sozinho, acertando cada nota no tempo (depuração e demonstração).
-## Sem --song, abre a primeira música de data/library (ao lado do projeto Godot).
+## Sem --song, abre a música de data/library (ao lado do projeto Godot) com mais instrumentos.
 extends Node3D
 
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
 const DEFAULT_LIBRARY := "../data/library"
+## Sem escolha (antes dos menus): Cordas no Difícil, o ponto de partida dos testes de jogo.
+const DEFAULT_INSTRUMENT := "strings"
+const DEFAULT_DIFFICULTY := "Hard"
 
 ## Falso: quem criou a cena chama `start()` (os menus, na fase 9; os testes). Verdadeiro: a
 ## partida vem da linha de comando.
@@ -31,15 +34,15 @@ func _ready() -> void:
 	if auto_start:
 		var args := _args()
 		start(
-			args.get("song", _first_song()),
+			args.get("song", default_song(_library_dir())),
 			args.get("instrument", ""),
 			args.get("difficulty", ""),
 			args.has("autoplay")
 		)
 
 
-## Começa a partida. Instrumento ou dificuldade vazios/indisponíveis: o primeiro instrumento
-## jogável, na dificuldade mais alta que ele tem.
+## Começa a partida. Instrumento ou dificuldade vazios/indisponíveis: Cordas (senão o primeiro
+## instrumento jogável) no Difícil (senão a dificuldade mais alta que ele tem).
 func start(dir: String, instrument: String, difficulty: String, autoplay := false) -> void:
 	_autoplay = autoplay
 	_loaded = SongLoader.load_dir(dir)
@@ -51,10 +54,14 @@ func start(dir: String, instrument: String, difficulty: String, autoplay := fals
 		hud.show_message("Esta música não tem nenhum instrumento jogável")
 		return
 	if not available.has(instrument):
-		instrument = available.keys()[0]
+		instrument = (
+			DEFAULT_INSTRUMENT if available.has(DEFAULT_INSTRUMENT) else available.keys()[0]
+		)
 	var levels: Array = available[instrument]
 	if difficulty not in levels:
-		difficulty = levels[levels.size() - 1]
+		difficulty = (
+			DEFAULT_DIFFICULTY if DEFAULT_DIFFICULTY in levels else levels[levels.size() - 1]
+		)
 
 	session = PlaySession.new(_loaded["chart"], instrument, difficulty)
 	highway.setup(session)
@@ -174,16 +181,29 @@ func _args() -> Dictionary:
 	return out
 
 
-func _first_song() -> String:
-	var library := (
-		ProjectSettings.globalize_path("res://").path_join(DEFAULT_LIBRARY).simplify_path()
-	)
+func _library_dir() -> String:
+	return ProjectSettings.globalize_path("res://").path_join(DEFAULT_LIBRARY).simplify_path()
+
+
+## A música com mais instrumentos presentes (empate: a primeira pelo nome da pasta); "" se nenhuma.
+static func default_song(library: String) -> String:
 	var dir := DirAccess.open(library)
 	if dir == null:
 		return ""
 	var names := dir.get_directories()
 	names.sort()
+	var best := ""
+	var best_count := -1
 	for name in names:
-		if FileAccess.file_exists(library.path_join(name).path_join("song.json")):
-			return library.path_join(name)
-	return ""
+		var path := library.path_join(name)
+		var json := JSON.new()
+		if json.parse(FileAccess.get_file_as_string(path.path_join("song.json"))) != OK:
+			continue
+		var present: Dictionary = (
+			json.data.get("instruments", {}) if json.data is Dictionary else {}
+		)
+		var count := present.values().count(true)
+		if count > best_count:
+			best = path
+			best_count = count
+	return best
