@@ -7,8 +7,8 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 |---|---|---|---|---|
 | 1 | Estrutura, tooling, CI, testes "hello" | ✅ concluída | ver abaixo | sem medição ([ADR 0005](adr/0005-testes-e-cobertura.md)) |
 | 2 | Importação via pendrive (do kraoke) e cache | ✅ concluída | 99% | sem medição |
-| 3 | Separação de stems e instrumento ausente | ⏳ próxima | | |
-| 4 | Mapa de batidas e chart de bateria | | | |
+| 3 | Separação de stems e instrumento ausente | ✅ concluída | 97,7% | sem medição |
+| 4 | Mapa de batidas e chart de bateria | ⏳ próxima | | |
 | 5 | Charts de guitarra, violão e baixo; 4 dificuldades | | | |
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | | | |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | | | |
@@ -35,3 +35,13 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
   com `EventReader` e `BackendMessage` no Godot.
 - Primeira etapa real: `ingest` (metadados e capa), testada com MP3 sintético.
 - Cobertura Python ao fechar: 99,4%. GDScript: 13 testes, cobertura não medida.
+
+## Fase 3
+
+- Etapas `separate` (Demucs `htdemucs_6s`), `guitar_split` (PANNs: guitarra × violão) e
+  `presence` (instrumentos ausentes), com os modelos atrás de `Protocol`s e fakes nos testes.
+- Medido no Deck com 4 músicas reais ([ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md)):
+  separação ~0,43× o tempo da música, divisão de guitarra em 10–18 s.
+- Detector de ataques próprio em numpy (`pbq/dsp.py`), que a fase 4 vai reaproveitar.
+- Teste `slow` com os modelos reais numa banda sintética (13 s).
+- Cobertura Python ao fechar: 97,7% (rodando sem torch, como na CI). GDScript: sem mudanças.

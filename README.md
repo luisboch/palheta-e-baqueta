@@ -47,7 +47,8 @@ uv run pbq drive list                # pendrives montados (o menu do jogo usa os
 ```
 
 Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/backend-protocol.md).
-Por enquanto só a etapa `ingest` existe; o jogo chega na fase 6 (ver o roadmap).
+As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU, Demucs,
+PANNs; ~1,5 GB). Os modelos baixam no primeiro uso (~400 MB). O jogo chega na fase 6.
 
 ## Testes
 

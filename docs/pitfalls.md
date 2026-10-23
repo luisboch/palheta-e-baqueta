@@ -16,3 +16,13 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   `scripts/test.sh` roda `--import` antes do GdUnit4.
 - **2026-10-22 · Godot:** o `JSON` do Godot devolve todo número como `float` (`"pending": 3` →
   `3.0`). Campos inteiros do backend (`pending`, `done`, `count`...) precisam de `int()` no jogo.
+- **2026-10-22 · panns_inference:** importar o pacote baixa o CSV de rótulos para
+  `~/panns_data` com `wget` (e quebra sem internet); o `AudioTagging` faz o mesmo com os pesos.
+  `pbq/models/panns.py` garante os dois arquivos antes, por download conferido (sha256), e usa só
+  o `Cnn14`.
+- **2026-10-22 · uv:** o lock resolve para todas as plataformas, e no macOS Intel o Demucs exige
+  numpy < 2. Por isso `[tool.uv] environments` limita o lock a Linux.
+- **2026-10-22 · SteamOS:** não existe `/usr/bin/time`. Meça o tempo dentro do script.
+- **2026-10-22 · ataques:** guitarra distorcida tem ataques de só ~1–2 dB, e um limiar pensado
+  para bateria (3 dB) "esconde" a palhetada inteira. Ver
+  [ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md).
