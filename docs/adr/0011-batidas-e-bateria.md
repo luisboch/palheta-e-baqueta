@@ -3,6 +3,10 @@
 - **Status:** Aceita
 - **Data:** 2026-10-22
 
+> **2026-10-23:** o servidor dos pesos voltou. O checkpoint `final0` agora é baixado pelo
+> backend para `data/models/` e conferido por sha256 antes de abrir (é um pickle); as músicas
+> feitas pela reserva foram refeitas com o beat_this.
+
 ## Contexto
 
 O [ADR 0006](0006-modelos-de-ia.md) propunha o `beat_this` para batidas e o ADTOF para bateria.

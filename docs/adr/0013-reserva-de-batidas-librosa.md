@@ -3,6 +3,9 @@
 - **Status:** Aceita
 - **Data:** 2026-10-22
 
+> **2026-10-23:** o refazer automático funcionou na prática: com o beat_this de volta, as duas
+> músicas da biblioteca foram refeitas a partir de `beats` sem intervenção.
+
 ## Contexto
 
 Os pesos do `beat_this` só existem no servidor dos autores, que ficou horas fora do ar

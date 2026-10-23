@@ -8,7 +8,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 1 | Estrutura, tooling, CI, testes "hello" | ✅ concluída | ver abaixo | sem medição na época ([ADR 0005](adr/0005-testes-e-cobertura.md)) |
 | 2 | Importação via pendrive (do kraoke) e cache | ✅ concluída | 99% | sem medição |
 | 3 | Separação de stems e instrumento ausente | ✅ concluída | 97,7% | sem medição |
-| 4 | Mapa de batidas e chart de bateria | 🟡 falta validar batidas reais | 96,4% | sem medição |
+| 4 | Mapa de batidas e chart de bateria | ✅ concluída | 96,4% | sem medição |
 | 5 | Charts de Cordas e baixo; 4 dificuldades | ✅ concluída | 96,8% | sem medição |
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | ✅ concluída | ver abaixo | 91,2% |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | ✅ concluída | 95,5% | 93,2% |
@@ -59,6 +59,10 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 - **Pendente:** o servidor dos pesos do beat_this (JKU) ficou fora do ar (HTTP 503) durante toda a
   fase. A etapa `beats` foi testada só com fake, e o teste `slow` do pipeline inteiro é pulado.
   Quando o servidor voltar: rodar `uv run pytest -m slow --no-cov` e as 4 músicas reais.
+- **2026-10-23:** o servidor voltou. Pesos baixados por nós e conferidos por sha256
+  (`pbq/models/beat_this.py`), testes `slow` passando com o modelo real (inclusive o do pipeline
+  inteiro), e as duas músicas da biblioteca refeitas sozinhas a partir de `beats`, em 1,5 min no
+  total (sem nova separação). BPM pela librosa → beat_this: 92,3 → 90,9 e 89,1 → 90,9.
 - Cobertura Python: 96,4% (sem torch, como na CI). GDScript: sem mudanças.
 
 ## Fase 5
@@ -119,6 +123,7 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
   thread. Nos testes fica inerte (sem worker, comandos ou troca de cena).
 - Conferido: as três telas renderizadas com a biblioteca real; o worker sobe com o menu e morre
   com o jogo; `pbq drive list` de verdade pela ponte.
-- **Falta para o uso diário no Deck:** atalho para o modo jogo (Steam), pausa na partida. A fase 8
-  (2 jogadores, controles USB, calibração, tela de controles com a palhetada) vem a seguir.
+- Depois: pausa na partida (`Esc`/Start, e ao perder o foco) e atalho para o modo jogo
+  (`scripts/steamdeck/install.sh`, lançador testado com o PATH mínimo do modo jogo).
+- A seguir: fase 8 (2 jogadores, controles USB, calibração, tela de controles com a palhetada).
 - Cobertura Python: 95,5%; GDScript: 64 testes, 90,9%.
