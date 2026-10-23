@@ -73,3 +73,24 @@ charts entram nas fases 3 a 5, cada um documentado aqui quando existir):
 `<pendrive>/palheta/library/<id>/` tem a mesma pasta. Importar recusa `version` maior que a
 nossa e pasta cujo nome não bate com o `id` ([ADR 0003](adr/0003-pendrive-pelo-menu.md)).
 O `index.json` não vai para o pendrive: quem importa regenera o seu.
+
+## <id>/beatmap.json
+
+A grade de batidas, também usada pelo fundo animado do jogo. Tempos em segundos, a partir do
+início do áudio.
+
+```json
+{
+  "version": 1,
+  "beats": [0.52, 1.03, 1.55],
+  "downbeats": [0.52, 2.58],
+  "bpm": 116.4,
+  "energy": [0.61, 0.44, 1.0]
+}
+```
+
+- `beats`: cada batida detectada. No `notes.chart`, a batida *i* fica no tick
+  `(introdução + i) × 192`.
+- `downbeats`: os tempos fortes (primeira batida de cada compasso), um subconjunto de `beats`.
+- `bpm`: o andamento mediano, só para exibir. O mapa de tempo de verdade está no `[SyncTrack]`.
+- `energy`: energia da mixagem em cada batida, de 0 a 1, onde 1 é a batida mais forte da música.

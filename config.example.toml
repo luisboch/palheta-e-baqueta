@@ -32,3 +32,12 @@ min_onsets = 30.0       # ataques por minuto: menos que isso não dá um chart j
 # Guitarra distorcida é comprimida: em Anna Júlia, 3 dB achava 12 ataques/min numa palhetada de
 # ~216/min e 1 dB achava 141. Bateria dá quase o mesmo com 1 ou 3 dB.
 onset_delta = 1.0
+
+[stages.beats]
+tracker = "beat_this"   # MIT; pesos do servidor dos autores, no cache do torch.hub
+checkpoint = "final0"   # o modelo padrão dos autores (treinado em tudo menos o GTZAN)
+device = "cpu"
+
+[stages.drums_chart]
+transcriber = "adtof"   # pesos CC BY-NC-SA 4.0 (projeto não comercial, ADR 0011); ~4 MB em data/models
+device = "cpu"          # 4 a 7 s por música no Deck

@@ -36,18 +36,23 @@ Etapas implementadas (gerado de `pbq/stages/__init__.py`):
 | 1 | `ingest` | 1 | — | sim | metadados (artista, música, duração) e capa |
 | 2 | `separate` | 1 | `ingest` | sim | stems por instrumento (Demucs htdemucs_6s) |
 | 3 | `presence` | 2 | `separate` | sim | quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados |
+| 4 | `beats` | 1 | `ingest` | sim | batidas, tempos fortes e energia por batida (beat_this) |
+| 5 | `drums_chart` | 1 | `separate`, `beats`, `presence` | sim | chart de bateria Muito difícil (ADTOF), na grade de batidas |
+| 6 | `chart` | 1 | `beats`, `drums_chart` | sim | notes.chart (Clone Hero): mapa de tempo, compassos e trilhas |
 <!-- /gen:stages -->
 
-Planejadas (fases 4 e 5):
+Planejadas (fase 5):
 
 | Etapa | Saída | Ferramenta (ver [ADR 0006](adr/0006-modelos-de-ia.md)) |
 |---|---|---|
-| `beats` | batidas, compassos, mapa de tempo | beat tracker |
-| `drums_chart` | notas de bateria (Muito difícil) | transcrição de bateria |
 | `pitched_chart` | notas de Cordas e baixo (Muito difícil) | transcrição de altura |
 | `difficulty` | Fácil, Médio e Difícil, por redução | regras puras |
 | `package` | `data/library/<id>/` | ffmpeg |
 
+O núcleo dos charts (`pbq/charts/`) não depende de modelos: mapa de tempo a partir das batidas
+(`pbq/charts/tempo.py`), encaixe na grade (`pbq/charts/quantize.py`), lanes da bateria
+(`pbq/charts/drums.py`) e o formato `.chart` (`pbq/charts/chart_file.py`).
+Batidas e bateria: [ADR 0011](adr/0011-batidas-e-bateria.md).
 Medidas e limiares das etapas de áudio: [ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md).
 Os modelos ficam atrás das interfaces de `pbq/models/__init__.py`; o adaptador real
 (`pbq/models/demucs.py`) importa torch só ao ser construído. Instrumentos jogáveis: bateria,

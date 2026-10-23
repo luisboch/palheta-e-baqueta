@@ -13,7 +13,11 @@ dependencies = [
 # Extras por etapa (como no kraoke): o núcleo e os testes rápidos não precisam de torch.
 # torch 2.8.0: a mesma do kraoke (cache do uv compartilhado no Deck).
 separate = ["demucs==4.1.0", "torch==2.8.0"]
-ai = ["pbq[separate]"]
+# beat_this (MIT): batidas e compassos; torchaudio casado com o torch (mesmo índice só-CPU).
+beats = ["beat-this==1.1.0", "torch==2.8.0", "torchaudio==2.8.0"]
+# Bateria: rede ADTOF implementada aqui (pbq/models/adtof.py); só precisa de torch.
+drums = ["torch==2.8.0"]
+ai = ["pbq[separate,beats,drums]"]
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -40,6 +44,7 @@ environments = ["sys_platform == 'linux'"]
 # PyTorch só-CPU: o Deck não tem CUDA e as wheels padrão trazem ~3 GB de libs NVIDIA (ADR 0004).
 [tool.uv.sources]
 torch = [{ index = "pytorch-cpu" }]
+torchaudio = [{ index = "pytorch-cpu" }]
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
@@ -93,5 +98,5 @@ strict = true
 
 [[tool.mypy.overrides]]
 # Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/.
-module = ["demucs.*", "mutagen.*"]
+module = ["demucs.*", "mutagen.*", "beat_this.*"]
 ignore_missing_imports = true
