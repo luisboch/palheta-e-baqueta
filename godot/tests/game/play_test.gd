@@ -76,10 +76,25 @@ func test_input_reaches_the_session() -> void:
 	strum.action = "strum_down"
 	strum.pressed = true
 	scene._unhandled_input(strum)
-	assert_int(scene.session.scoring.overstrums).is_equal(1)  # ainda na contagem: sem nota
+	assert_int(scene.session.scoring.overstrums).is_equal(0)  # sem palhetada (ADR 0015)
 	fret.pressed = false
 	scene._unhandled_input(fret)
 	assert_array(scene.session.held).is_empty()
+
+
+func test_fret_press_plays_the_note() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	scene._autoplay = false
+	var note: PlayNote = scene.session.notes[0]
+	while scene._lead > 0.0 or scene.session.clock.now() < note.time - 0.02:
+		scene._process(1.0 / 60.0)
+	for lane in note.lanes:
+		var fret := InputEventAction.new()
+		fret.action = InputProfile.FRETS[lane]
+		fret.pressed = true
+		scene._unhandled_input(fret)
+	assert_int(note.state).is_equal(PlayNote.State.HIT)
+	assert_int(scene.session.scoring.hits).is_equal(1)
 
 
 func test_default_song_has_the_most_instruments() -> void:

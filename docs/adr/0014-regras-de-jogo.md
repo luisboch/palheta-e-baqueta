@@ -3,6 +3,9 @@
 - **Status:** Aceita
 - **Data:** 2026-10-22
 
+> **2026-10-23:** no teclado e no controle comum, a nota toca no traste, sem palhetada
+> ([ADR 0015](0015-tocar-no-traste-sem-palhetada.md)). A palhetada fica para a guitarra USB.
+
 ## Contexto
 
 A fase 6 pôs a partida de pé (`godot/core/judge.gd`, `godot/core/scoring.gd`,

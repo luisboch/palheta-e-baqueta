@@ -159,9 +159,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed(InputProfile.FRETS[lane]):
 			session.press_fret(lane)
 			highway.set_fret(lane, true)
+			if InputProfile.FRET_TAPS:
+				var tapped := session.tap(now)
+				if not tapped.is_empty():
+					highway.on_strum(tapped)
 		elif event.is_action_released(InputProfile.FRETS[lane]):
 			session.release_fret(lane)
 			highway.set_fret(lane, false)
+	if InputProfile.FRET_TAPS:
+		return  # sem palhetada: depois de um acerto no traste, ela viraria overstrum
 	for action: String in InputProfile.STRUM:
 		if event.is_action_pressed(action):
 			var result := session.strum(now)

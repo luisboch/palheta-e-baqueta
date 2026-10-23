@@ -41,6 +41,8 @@ func test_drums_pads_and_frets_bookkeeping() -> void:
 	assert_array(s.held).is_equal(PackedInt32Array([4]))
 	assert_str(s.strum(-5.0)["grade"]).is_equal(Judge.OVERSTRUM)
 	assert_int(s.scoring.overstrums).is_equal(1)
+	assert_dict(s.tap(-5.0)).is_empty()
+	assert_int(s.scoring.overstrums).is_equal(1)  # traste sem nota não pune
 	assert_bool(s.finished(0.0)).is_false()
 
 

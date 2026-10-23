@@ -55,3 +55,11 @@ func test_drum_pads() -> void:
 	assert_dict(judge.hit_pad(1.02, 4)).is_empty()  # batida a mais: ignorada
 	assert_str(judge.hit_pad(1.2, 1)["grade"]).is_equal("good")
 	assert_dict(judge.hit_pad(1.6, 1)).is_empty()
+
+
+func test_tap_builds_chords_without_penalty() -> void:
+	var judge := Judge.new(_notes([[1.0, [0, 2]], [2.0, [3]]]))
+	assert_dict(judge.tap(1.0, PackedInt32Array([0]))).is_empty()  # montando o acorde
+	assert_str(judge.tap(1.01, PackedInt32Array([0, 2]))["grade"]).is_equal("perfect")
+	assert_dict(judge.tap(1.5, PackedInt32Array([3]))).is_empty()  # cedo demais: nada
+	assert_str(judge.tap(2.1, PackedInt32Array([0, 3]))["grade"]).is_equal("ok")  # ancoragem

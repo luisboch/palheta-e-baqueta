@@ -58,8 +58,9 @@ $GODOT --path godot -- --song data/library/<id> --instrument strings --difficult
 - `--instrument`: `strings` (Cordas), `bass` ou `drums`; `--difficulty`: `Easy`, `Medium`, `Hard`
   ou `Expert`. Sem `--song`, abre a música de `data/library/` com mais instrumentos; sem escolha,
   Cordas no Difícil (o que existir mais perto disso). É o que o F5 do editor abre.
-- Teclado: trastes `1`–`5` (ou `A S D F G`), palhetada `↑`/`↓`/`Enter`; bateria: bumbo `Espaço`,
-  pads `H J K L`. Controle: trastes A B Y X LB, palhetada no direcional. `Esc` sai.
+- Teclado: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
+  ([ADR 0015](docs/adr/0015-tocar-no-traste-sem-palhetada.md)). Bateria: bumbo `Espaço`, pads
+  `H J K L`. Controle: trastes A B Y X LB. `Esc` sai.
 - No modo desktop do Deck, o Steam converte os controles em teclado e mouse e o jogo não vê o
   controle: use um teclado ou rode pelo Steam (o atalho para o modo jogo vem na fase 9).
 - A música toca do começo ao fim; o instrumento escolhido baixa 18 dB a cada erro e volta no

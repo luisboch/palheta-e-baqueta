@@ -1,6 +1,6 @@
 ## Ações do jogo e as teclas/botões padrão. A tela de mapeamento (fase 8) parte daqui.
 ##
-## Cordas/baixo: 5 trastes + palhetada (para cima ou para baixo). Bateria: 4 pads + bumbo.
+## Cordas/baixo: 5 trastes + palhetada (só no modo com palhetada). Bateria: 4 pads + bumbo.
 ## No controle (layout Xbox do Steam Input): trastes nos botões A B Y X LB e palhetada no
 ## direcional; bateria com pads em B Y X A e bumbo no LB.
 class_name InputProfile
@@ -11,6 +11,9 @@ const STRUM := ["strum_up", "strum_down"]
 ## Pads da bateria por lane (0 = bumbo).
 const PADS := ["kick", "pad_red", "pad_yellow", "pad_blue", "pad_green"]
 const PAUSE := "pause"
+## Cordas/baixo sem palhetada: a nota toca ao apertar o traste (ADR 0015). Teclado e controle
+## comum; a guitarra USB (fase 8) desliga, porque lá a palhetada é o gesto do instrumento.
+const FRET_TAPS := true
 
 ## ação → [["key", keycode] | ["joy", botão]]
 const DEFAULTS := {

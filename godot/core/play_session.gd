@@ -49,6 +49,14 @@ func strum(now: float) -> Dictionary:
 	return result
 
 
+## Traste apertado agora, no modo sem palhetada (ADR 0015). {} se não tocou nota.
+func tap(now: float) -> Dictionary:
+	var result := judge.tap(now, held)
+	if not result.is_empty():
+		_score(result)
+	return result
+
+
 ## Batida no pad `lane` (bateria). {} se não havia nota.
 func pad(now: float, lane: int) -> Dictionary:
 	var result := judge.hit_pad(now, lane)
