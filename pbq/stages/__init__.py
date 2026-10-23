@@ -8,7 +8,18 @@ from pbq.stages.beats import Beats
 from pbq.stages.chart import ChartFile
 from pbq.stages.drums_chart import DrumsChart
 from pbq.stages.ingest import Ingest
+from pbq.stages.package import Package
+from pbq.stages.pitched_chart import PitchedChart
 from pbq.stages.presence import Presence
 from pbq.stages.separate import Separate
 
-STAGES: list[type[Stage]] = [Ingest, Separate, Presence, Beats, DrumsChart, ChartFile]
+STAGES: list[type[Stage]] = [
+    Ingest,
+    Separate,
+    Presence,
+    Beats,
+    DrumsChart,
+    PitchedChart,
+    ChartFile,
+    Package,
+]

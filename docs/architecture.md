@@ -38,21 +38,17 @@ Etapas implementadas (gerado de `pbq/stages/__init__.py`):
 | 3 | `presence` | 2 | `separate` | sim | quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados |
 | 4 | `beats` | 1 | `ingest` | sim | batidas, tempos fortes e energia por batida (beat_this) |
 | 5 | `drums_chart` | 1 | `separate`, `beats`, `presence` | sim | chart de bateria Muito difícil (ADTOF), na grade de batidas |
-| 6 | `chart` | 1 | `beats`, `drums_chart` | sim | notes.chart (Clone Hero): mapa de tempo, compassos e trilhas |
+| 6 | `pitched_chart` | 1 | `separate`, `beats`, `presence` | sim | Cordas e baixo Muito difícil (basic-pitch), na grade de batidas |
+| 7 | `chart` | 2 | `beats`, `drums_chart`, `pitched_chart` | sim | notes.chart (Clone Hero): mapa de tempo, compassos e as 4 dificuldades |
+| 8 | `package` | 1 | `presence`, `chart` | sim | pasta da música na biblioteca (stems em OGG, chart, mapa de batidas, song.json) |
 <!-- /gen:stages -->
-
-Planejadas (fase 5):
-
-| Etapa | Saída | Ferramenta (ver [ADR 0006](adr/0006-modelos-de-ia.md)) |
-|---|---|---|
-| `pitched_chart` | notas de Cordas e baixo (Muito difícil) | transcrição de altura |
-| `difficulty` | Fácil, Médio e Difícil, por redução | regras puras |
-| `package` | `data/library/<id>/` | ffmpeg |
 
 O núcleo dos charts (`pbq/charts/`) não depende de modelos: mapa de tempo a partir das batidas
 (`pbq/charts/tempo.py`), encaixe na grade (`pbq/charts/quantize.py`), lanes da bateria
-(`pbq/charts/drums.py`) e o formato `.chart` (`pbq/charts/chart_file.py`).
-Batidas e bateria: [ADR 0011](adr/0011-batidas-e-bateria.md).
+(`pbq/charts/drums.py`), contorno de Cordas e baixo (`pbq/charts/pitched.py`), as 4 dificuldades
+(`pbq/charts/difficulty.py`) e o formato `.chart` (`pbq/charts/chart_file.py`).
+Batidas e bateria: [ADR 0011](adr/0011-batidas-e-bateria.md). Cordas, baixo e dificuldades:
+[ADR 0012](adr/0012-charts-de-cordas-baixo-e-dificuldades.md).
 Medidas e limiares das etapas de áudio: [ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md).
 Os modelos ficam atrás das interfaces de `pbq/models/__init__.py`; o adaptador real
 (`pbq/models/demucs.py`) importa torch só ao ser construído. Instrumentos jogáveis: bateria,

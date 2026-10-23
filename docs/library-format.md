@@ -40,8 +40,7 @@ ou importada, a partir dos `song.json`.
 
 ## <id>/song.json
 
-Por enquanto só o que o pendrive precisa (os campos de stems, presença dos instrumentos e
-charts entram nas fases 3 a 5, cada um documentado aqui quando existir):
+Escrito por último pela etapa `package`: pasta sem `song.json` está incompleta.
 
 ```json
 {
@@ -49,13 +48,25 @@ charts entram nas fases 3 a 5, cada um documentado aqui quando existir):
   "id": "3f2a9c1b7e00",
   "title": "…",
   "artist": "…",
+  "album": "…",
   "duration": 214.3,
-  "files": {"chart": "notes.chart", "cover": null}
+  "bpm": 116.4,
+  "instruments": {"drums": true, "bass": true, "strings": false},
+  "files": {
+    "song": "song.ogg",
+    "strings": null,
+    "bass": "bass.ogg",
+    "drums": "drums.ogg",
+    "chart": "notes.chart",
+    "beatmap": "beatmap.json",
+    "cover": "cover.jpg",
+    "ini": "song.ini"
+  }
 }
 ```
 
-- `instruments` (a partir da fase 4, com o `package`): `{id: true|false}`, se o instrumento toca
-  na música (etapa `presence`). O jogo não deixa escolher um instrumento `false`. Ids:
+- `instruments`: `{id: true|false}`, se o instrumento toca na música (etapa `presence`). O jogo
+  não deixa escolher um instrumento `false`. Ids:
 
 <!-- gen:instruments -->
 | Id | Stem tocado |
@@ -65,6 +76,14 @@ charts entram nas fases 3 a 5, cada um documentado aqui quando existir):
 | `strings` | `stems/guitar.flac` |
 <!-- /gen:instruments -->
 
+- **Áudio:** cada instrumento presente tem o seu OGG (`files.<id>`), que o jogo abaixa quando o
+  jogador erra. O `song.ogg` é o resto: voz, piano, outros, **e o stem dos instrumentos
+  ausentes**, porque eles também têm som (ex.: o percussivo do violão no stem de bateria). Tocar
+  `song.ogg` mais os OGGs presentes dá a música inteira. Tudo em Vorbis a 44,1 kHz estéreo.
+- `notes.chart`: as 4 dificuldades de cada instrumento presente (`Easy|Medium|Hard|Expert` ×
+  `Single` (Cordas), `DoubleBass`, `Drums`), formato do Clone Hero
+  ([ADR 0007](adr/0007-formato-de-chart.md)).
+- `song.ini`: metadados para o Clone Hero (`diff_guitar = -1` quando não há chart).
 - `files.*`: nomes de arquivo relativos à pasta da música; `null` = não existe. "Salvar no
   pendrive" e "Importar" copiam exatamente estes arquivos, mais o `song.json`.
 

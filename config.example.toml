@@ -43,3 +43,9 @@ device = "cpu"
 [stages.drums_chart]
 transcriber = "adtof"   # pesos CC BY-NC-SA 4.0 (projeto não comercial, ADR 0011); ~4 MB em data/models
 device = "cpu"          # 4 a 7 s por música no Deck
+
+[stages.pitched_chart]
+transcriber = "basic_pitch"  # Spotify, Apache-2.0; modelo ONNX do pacote, 5 a 8 s por stem no Deck
+
+[stages.package]
+audio_quality = 6       # Vorbis 0-10 (6 ≈ 192 kbps); um OGG por instrumento presente + o fundo

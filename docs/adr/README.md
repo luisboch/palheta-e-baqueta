@@ -23,6 +23,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0009 | [Separação, violão × guitarra e presença: medidos no Deck](0009-separacao-violao-e-presenca-medidos.md) | Aceita |
 | 0010 | [Violão e guitarra num instrumento só: Cordas](0010-cordas-um-instrumento.md) | Aceita |
 | 0011 | [Batidas com beat_this e bateria com ADTOF (projeto não comercial)](0011-batidas-e-bateria.md) | Aceita |
+| 0012 | [Charts de Cordas e baixo, e as 4 dificuldades](0012-charts-de-cordas-baixo-e-dificuldades.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

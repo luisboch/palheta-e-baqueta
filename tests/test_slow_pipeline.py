@@ -1,4 +1,4 @@
-"""Pipeline real (Demucs, beat_this, ADTOF) numa música sintética curta.
+"""Pipeline real (Demucs, beat_this, ADTOF, basic-pitch) numa música sintética curta.
 
     uv run pytest -m slow --no-cov
 
@@ -56,3 +56,5 @@ def test_real_pipeline_on_synthetic_band(config, stages):
     assert presence["drums"]["present"]
     assert abs(beatmap["bpm"] - 120) < 3
     assert any(n.lane == 0 for n in chart.tracks["ExpertDrums"])
+    library = json.loads((config.paths.library / song.id / "song.json").read_text())
+    assert library["instruments"]["drums"] is True and library["files"]["drums"] == "drums.ogg"

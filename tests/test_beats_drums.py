@@ -113,7 +113,8 @@ def test_chart_file_assembles_everything(config, song):
     assert chart.streams == {"MusicStream": "song.ogg", "DrumStream": "drums.ogg"}
     assert [t.milli_bpm for t in chart.tempos] == [120000]
     assert [(ts.tick, ts.beats) for ts in chart.time_signatures] == [(0, 1), (R, 4)]  # anacruse da introdução
-    assert list(chart.tracks) == ["ExpertDrums"] and chart.tracks["ExpertDrums"][0].tick == R
+    assert list(chart.tracks) == ["EasyDrums", "MediumDrums", "HardDrums", "ExpertDrums"]
+    assert chart.tracks["ExpertDrums"][0].tick == R
 
 
 def test_chart_without_drums(config, song):

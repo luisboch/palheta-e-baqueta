@@ -6,7 +6,7 @@
 > **2026-10-22:** separação e violão × guitarra medidos e aceitos no
 > [ADR 0009](0009-separacao-violao-e-presenca-medidos.md). Violão × guitarra retirado no
 > [ADR 0010](0010-cordas-um-instrumento.md). Batidas e bateria aceitas no [ADR 0011](0011-batidas-e-bateria.md).
-> Cordas e baixo seguem como proposta.
+> Cordas e baixo aceitos no [ADR 0012](0012-charts-de-cordas-baixo-e-dificuldades.md).
 
 ## Contexto
 
