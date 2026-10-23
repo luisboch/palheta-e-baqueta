@@ -119,3 +119,23 @@ class FakeTranscriber:
             "hihat": np.concatenate([b, b + 0.25]),
             "cymbal": b[:1],
         }
+
+
+class FakePitch:
+    """PitchTranscriber falso: escala subindo em semínimas (120 BPM, a partir de 0,5 s)."""
+
+    def __init__(self, base: int = 52, n: int = 8, chord: bool = False):
+        self.base = base
+        self.n = n
+        self.chord = chord
+        self.calls = []
+
+    def transcribe(self, path):
+        self.calls.append(path.name)
+        notes = []
+        for i in range(self.n):
+            t = 0.5 + 0.5 * i
+            notes.append((t, t + 0.3, self.base + 2 * i, 0.8))
+            if self.chord:
+                notes.append((t + 0.01, t + 0.3, self.base + 2 * i + 7, 0.7))
+        return notes

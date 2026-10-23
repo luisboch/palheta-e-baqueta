@@ -17,7 +17,10 @@ separate = ["demucs==4.1.0", "torch==2.8.0"]
 beats = ["beat-this==1.1.0", "torch==2.8.0", "torchaudio==2.8.0"]
 # Bateria: rede ADTOF implementada aqui (pbq/models/adtof.py); só precisa de torch.
 drums = ["torch==2.8.0"]
-ai = ["pbq[separate,beats,drums]"]
+# basic-pitch (Spotify, Apache-2.0): notas de Cordas e baixo, pelo modelo ONNX que vem no pacote.
+# setuptools < 81: o resampy < 0.4.3 (fixado pelo basic-pitch) importa pkg_resources, que saiu na 81.
+pitch = ["basic-pitch==0.4.0", "onnxruntime==1.23.2", "setuptools==80.9.0"]
+ai = ["pbq[separate,beats,drums,pitch]"]
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -40,6 +43,9 @@ include = ["pbq*"]
 [tool.uv]
 # Só Linux (Steam Deck e CI): no macOS Intel o Demucs exige numpy < 2 e torch < 2.3.
 environments = ["sys_platform == 'linux'"]
+# O basic-pitch 0.4.0 pede tensorflow < 2.15.1, que não existe para Python 3.12. Usamos o modelo
+# ONNX que vem no pacote (onnxruntime): o TensorFlow nunca é instalado.
+override-dependencies = ["tensorflow; sys_platform == 'never'"]
 
 # PyTorch só-CPU: o Deck não tem CUDA e as wheels padrão trazem ~3 GB de libs NVIDIA (ADR 0004).
 [tool.uv.sources]
@@ -98,5 +104,5 @@ strict = true
 
 [[tool.mypy.overrides]]
 # Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/.
-module = ["demucs.*", "mutagen.*", "beat_this.*"]
+module = ["demucs.*", "mutagen.*", "beat_this.*", "basic_pitch.*"]
 ignore_missing_imports = true

@@ -44,3 +44,9 @@ class DrumTranscriber(Protocol):
     classes: tuple[str, ...]
 
     def transcribe(self, signal: Audio) -> dict[str, npt.NDArray[np.float64]]: ...
+
+
+class PitchTranscriber(Protocol):
+    """Notas (início, fim, altura MIDI, intensidade) de um stem de instrumento com altura."""
+
+    def transcribe(self, path: Path) -> list[tuple[float, float, int, float]]: ...
