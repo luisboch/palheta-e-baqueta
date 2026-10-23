@@ -29,6 +29,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0015 | [Teclado e controle tocam no traste, sem palhetada](0015-tocar-no-traste-sem-palhetada.md) | Aceita |
 | 0016 | [Menus e navegação](0016-menus-e-navegacao.md) | Aceita |
 | 0017 | [Dois jogadores: Banda e Duelo](0017-modos-banda-e-duelo.md) | Aceita |
+| 0018 | [Distribuição em .deb, só Linux, com o backend instalado pelo uv](0018-pacote-deb.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

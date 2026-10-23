@@ -66,7 +66,8 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   música (`godot/game/song_select.tscn`), pendrive (`godot/game/drive.tscn`) e a partida. O visual
   dos menus vem de um tema só (`godot/game/theme.tres`). Linhas de lista (músicas, pendrives) são
   cópias de um botão-modelo que está na cena.
-- **Autoload `App`** (`godot/game/app.gd`): caminhos de `data/`, a escolha do jogador, a troca de
+- **Autoload `App`** (`godot/game/app.gd`): caminhos de `data/` (na raiz do repositório, ou em
+  `$PALHETA_HOME` no jogo instalado pelo `.deb`, [ADR 0018](adr/0018-pacote-deb.md)), a escolha do jogador, a troca de
   tela, o worker (iniciado pelo menu, pausado durante a partida) e os comandos `pbq`, rodados
   por `godot/game/backend_job.gd` numa thread. Nos testes ele fica inerte: sem worker, sem
   comandos e sem trocar de cena.

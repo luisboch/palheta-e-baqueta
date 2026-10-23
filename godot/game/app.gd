@@ -8,6 +8,9 @@ const DRIVE := "res://game/drive.tscn"
 const PLAY := "res://game/play.tscn"
 ## O repositório fica um nível acima do projeto Godot (godot/): data/ e .venv/ estão lá.
 const REPO_FROM_PROJECT := ".."
+## Instalado pelo .deb (ADR 0018), o jogo exportado não tem repositório: o lançador põe o backend,
+## data/ e .venv/ numa pasta do usuário e a passa nesta variável.
+const HOME_ENV := "PALHETA_HOME"
 const PBQ := ".venv/bin/pbq"  ## instalado por scripts/setup.sh
 const ENV := "/usr/bin/env"  ## `env -C <repo>`: roda o pbq na raiz do repositório
 const WORKER_LOCK := ".worker.lock"
@@ -20,10 +23,18 @@ var last_scene := ""
 ## A partida escolhida no menu: {dir, instrument, difficulty}. Vazio: play.tscn rodando sozinha
 ## (F6 no editor ou linha de comando).
 var selection := {}
-var repo := ProjectSettings.globalize_path("res://").path_join(REPO_FROM_PROJECT).simplify_path()
+var repo := home_dir()
 var data_dir := repo.path_join("data")
 var library_dir := data_dir.path_join("library")
 var _worker_pid := -1
+
+
+## Onde ficam data/ e o backend: $PALHETA_HOME, senão a raiz do repositório.
+static func home_dir() -> String:
+	var home := OS.get_environment(HOME_ENV)
+	if home != "":
+		return home
+	return ProjectSettings.globalize_path("res://").path_join(REPO_FROM_PROJECT).simplify_path()
 
 
 static func _under_tests() -> bool:

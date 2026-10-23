@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Lançador instalado pelo .deb em /usr/bin (ADR 0018).
+#
+# O jogo exportado fica em /opt (só leitura); o backend precisa de uma pasta gravável com o
+# código, o config, data/ e o .venv. Ela é $PALHETA_HOME (padrão ~/.local/share/palheta-e-baqueta),
+# e o jogo a recebe pela mesma variável. Na primeira execução de cada versão, o uv embutido
+# instala o backend (Python fixado e dependências do uv.lock, alguns GB com o torch).
+set -uo pipefail
+
+APP=/opt/palheta-e-baqueta
+VERSION="$(cat "$APP/VERSION")"
+export PALHETA_HOME="${PALHETA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/palheta-e-baqueta}"
+mkdir -p "$PALHETA_HOME/data"
+cd "$PALHETA_HOME" || exit 1
+[ -f data/game.log ] && mv -f data/game.log data/game.log.1  # guarda o log da execução anterior
+exec >data/game.log 2>&1
+echo "Palheta & Baqueta $VERSION: $(date -Is)"
+
+install_backend() {
+    # O código do backend é da versão instalada: copia por cima (config.toml e data/ não mudam).
+    rm -rf pbq
+    cp -r "$APP/backend/." .
+    "$APP/uv" sync --frozen --extra ai && echo "$VERSION" >.venv/.palheta-version
+}
+
+if [ "$(cat .venv/.palheta-version 2>/dev/null)" != "$VERSION" ]; then
+    echo "Instalando o backend da versão $VERSION"
+    if command -v zenity >/dev/null && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
+        install_backend | zenity --progress --pulsate --auto-close --no-cancel \
+            --title="Palheta & Baqueta" \
+            --text="Preparando a IA que transforma MP3 em música jogável.\nSó na primeira vez; pode demorar alguns minutos." \
+            || true
+    else
+        install_backend || echo "Backend não instalado: o jogo abre, mas não processa músicas"
+    fi
+fi
+
+exec "$APP/palheta-e-baqueta.x86_64" "$@"

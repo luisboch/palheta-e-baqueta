@@ -40,6 +40,18 @@ func test_app_is_safe_under_tests() -> void:
 	assert_str(App.library_dir).ends_with("data/library")
 
 
+func test_home_dir_comes_from_the_launcher() -> void:
+	var saved := OS.get_environment(App.HOME_ENV)
+	OS.set_environment(App.HOME_ENV, "/tmp/palheta-casa")
+	assert_str(App.home_dir()).is_equal("/tmp/palheta-casa")
+	OS.unset_environment(App.HOME_ENV)
+	assert_str(App.home_dir()).is_equal(
+		ProjectSettings.globalize_path("res://").get_base_dir().get_base_dir()
+	)
+	if saved != "":
+		OS.set_environment(App.HOME_ENV, saved)
+
+
 func test_worker_pid_ignores_stale_lock() -> void:
 	var saved := App.data_dir
 	App.data_dir = create_temp_dir("dados")

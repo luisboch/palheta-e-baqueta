@@ -1,0 +1,77 @@
+# Pacote .deb (ADR 0018): em todo push na main vira artefato do run; numa tag v* vira release.
+name: Pacote
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deb:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot e templates de exportação (versão de scripts/versions.env)
+        id: godot
+        run: |
+          source scripts/versions.env
+          echo "version=$GODOT_VERSION" >>"$GITHUB_OUTPUT"
+          mkdir -p "$HOME/Applications"
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d "$HOME/Applications"
+
+      - uses: actions/cache@v4
+        id: templates
+        with:
+          path: ~/.local/share/godot/export_templates/${{ steps.godot.outputs.version }}.stable
+          key: godot-templates-${{ steps.godot.outputs.version }}
+
+      - name: Baixar templates (sem cache)
+        if: steps.templates.outputs.cache-hit != 'true'
+        run: |
+          v=${{ steps.godot.outputs.version }}
+          dest="$HOME/.local/share/godot/export_templates/${v}.stable"
+          curl -fsSL -o /tmp/templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${v}-stable/Godot_v${v}-stable_export_templates.tpz"
+          mkdir -p "$dest"
+          # Só o que o preset Linux usa: o .tpz inteiro tem todas as plataformas.
+          unzip -q -j /tmp/templates.tpz 'templates/linux_*x86_64' 'templates/version.txt' -d "$dest"
+
+      - name: Versão
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "deb=${GITHUB_REF_NAME#v}" >>"$GITHUB_OUTPUT"
+          else
+            base=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml)
+            echo "deb=${base}+git${GITHUB_RUN_NUMBER}.$(git rev-parse --short HEAD)" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Montar o .deb
+        run: scripts/package_deb.sh "${{ steps.version.outputs.deb }}"
+
+      - name: Conferir o pacote
+        run: |
+          deb=$(ls build/*.deb)
+          dpkg-deb --info "$deb"
+          dpkg-deb --contents "$deb" | grep -E 'opt/palheta-e-baqueta/(palheta-e-baqueta.x86_64|uv|backend/uv.lock)$'
+          sudo apt-get install -y --no-install-recommends "./$deb"
+          # O jogo exportado abre e fecha sozinho (sem janela), com o backend apontado para uma pasta temporária.
+          PALHETA_HOME=$(mktemp -d) timeout 60 /opt/palheta-e-baqueta/palheta-e-baqueta.x86_64 --headless --quit
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: palheta-e-baqueta-deb
+          path: build/*.deb
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" build/*.deb --generate-notes --title "Palheta & Baqueta $GITHUB_REF_NAME"

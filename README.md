@@ -21,7 +21,16 @@ pendrive/palheta/*.mp3 ─(menu do jogo)─► data/input ─► worker (Python)
 - Os dois conversam **só por arquivos**. Detalhes em [docs/architecture.md](docs/architecture.md)
   e decisões em [docs/adr/](docs/adr/README.md).
 
-## Instalação
+## Instalar o jogo (Debian, Ubuntu)
+
+Baixe o `.deb` da [página de releases](https://github.com/luisboch/palheta-e-baqueta/releases)
+e instale com `sudo apt install ./palheta-e-baqueta_<versão>_amd64.deb`. Na primeira vez que o
+jogo abre, ele instala a IA do backend (alguns GB, precisa de internet) em
+`~/.local/share/palheta-e-baqueta`, onde também ficam as músicas. Só Linux por enquanto
+([ADR 0018](docs/adr/0018-pacote-deb.md)). Para montar o pacote localmente:
+`scripts/package_deb.sh` (precisa dos templates de exportação do Godot e do `dpkg-deb`).
+
+## Instalação (desenvolvimento)
 
 Requisitos:
 - [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`);
