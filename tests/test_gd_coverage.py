@@ -124,3 +124,13 @@ def test_real_run_on_the_project():
     assert by_path["core/judge.gd"].percent > 80
     assert 0 < gc.total(reports) <= 100
     json.dumps([r.path for r in reports])
+
+
+def test_prepare_joins_existing_autoload_section(tmp_path):
+    project = tmp_path / "godot"
+    (project / "core").mkdir(parents=True)
+    (project / "project.godot").write_text('[autoload]\n\nApp="*res://game/app.gd"\n\n[display]\n')
+    gc.prepare(project, measured=("core",))
+    text = (project / "project.godot").read_text()
+    assert text.count("[autoload]") == 1  # duas seções iguais: o Godot ficaria só com uma
+    assert 'GdCovWriter="*res://__coverage__/gd_cov_writer.gd"\nApp=' in text

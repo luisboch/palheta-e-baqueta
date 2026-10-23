@@ -151,8 +151,11 @@ def prepare(project: Path, measured: Sequence[str] = MEASURED) -> dict[int, tupl
     (cov_dir / "gd_cov_writer.gd").write_text(COV_WRITER)
     settings = project / "project.godot"
     text = settings.read_text()
-    autoload = '[autoload]\n\nGdCovWriter="*res://__coverage__/gd_cov_writer.gd"\n'
-    settings.write_text(text + "\n" + autoload)
+    writer = 'GdCovWriter="*res://__coverage__/gd_cov_writer.gd"\n'
+    if "[autoload]\n\n" in text:  # o projeto já tem autoloads: entra na mesma seção
+        settings.write_text(text.replace("[autoload]\n\n", "[autoload]\n\n" + writer, 1))
+    else:
+        settings.write_text(text + "\n[autoload]\n\n" + writer)
     return files
 
 
