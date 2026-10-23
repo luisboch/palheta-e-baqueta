@@ -28,6 +28,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0014 | [Regras de jogo: janela de acerto, palhetada, pontuação e stem](0014-regras-de-jogo.md) | Aceita |
 | 0015 | [Teclado e controle tocam no traste, sem palhetada](0015-tocar-no-traste-sem-palhetada.md) | Aceita |
 | 0016 | [Menus e navegação](0016-menus-e-navegacao.md) | Aceita |
+| 0017 | [Dois jogadores: Banda e Duelo](0017-modos-banda-e-duelo.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

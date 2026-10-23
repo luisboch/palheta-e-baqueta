@@ -59,8 +59,8 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
 ## Godot
 
 - `godot/core/`: lógica pura (`RefCounted`). Inclui o parser de chart, o mapa de tempo, o
-  relógio da música, o julgamento de acertos, a pontuação, as regras de seleção de
-  instrumento e os perfis de entrada. Tudo testado com GdUnit4.
+  relógio da música, o julgamento de acertos, a pontuação, o placar de 2 jogadores
+  (`godot/core/match_result.gd`), as regras de seleção de instrumento e os perfis de entrada. Tudo testado com GdUnit4.
 - **Telas** (`godot/game/`, uma cena por tela, montada com nós no editor; regras em
   [ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal (`godot/game/main_menu.tscn`), escolha de
   música (`godot/game/song_select.tscn`), pendrive (`godot/game/drive.tscn`) e a partida. O visual
@@ -75,7 +75,9 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   só as notas nascem em tempo de jogo. Pista 3D
   (`godot/game/highway.gd`), placar (`godot/game/hud.gd`), áudio sincronizado e entrada. Só desenham e
   encaminham entrada para o `core` (`godot/core/play_session.gd` junta juiz, pontuação e relógio).
-  Regras de jogo: [ADR 0014](adr/0014-regras-de-jogo.md).
+  Regras de jogo: [ADR 0014](adr/0014-regras-de-jogo.md). Com 2 jogadores, duas pistas lado a
+  lado (a segunda é cópia da primeira) e o placar da Banda ou do Duelo
+  ([ADR 0017](adr/0017-modos-banda-e-duelo.md)).
 - **Fundo no ritmo** (`godot/game/background.gd` + `godot/game/background.gdshader`): uma
   `CanvasLayer` atrás da pista (o `Environment` usa o fundo "Canvas"). Recebe as batidas do
   `beatmap.json` (`godot/core/beat_grid.gd`: pulso, fase da batida, compasso) e os níveis de

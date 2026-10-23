@@ -12,7 +12,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 5 | Charts de Cordas e baixo; 4 dificuldades | ✅ concluída | 96,8% | sem medição |
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | ✅ concluída | ver abaixo | 91,2% |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | ✅ concluída | 95,5% | 93,2% |
-| 8 | 2 jogadores, controles USB, calibração | | | |
+| 8 | 2 jogadores, controles USB, calibração | 🚧 em andamento | | |
 | 9 | Menus, seleção (bloqueando ausentes), resultados | ✅ concluída (MVP) | 95,5% | 90,9% |
 
 ## Fase 1
@@ -127,3 +127,12 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
   (`scripts/steamdeck/install.sh`, lançador testado com o PATH mínimo do modo jogo).
 - A seguir: fase 8 (2 jogadores, controles USB, calibração, tela de controles com a palhetada).
 - Cobertura Python: 95,5%; GDScript: 64 testes, 90,9%.
+
+## Fase 8 (em andamento)
+
+- Entrada independente para P1 e P2 (`godot/core/input_profile.gd`).
+- Duas pistas e duas sessões simultâneas na partida, com o stem de cada um.
+- Modos Banda e Duelo ([ADR 0017](adr/0017-modos-banda-e-duelo.md)): placar da Banda (pontos e
+  multiplicador) ou de P1 × P2 com quem está na frente; sequência de cada um sobre a pista;
+  resultado com estrelas e a parte de cada um (Banda) ou o vencedor e a comparação (Duelo).
+- A seguir: escolher o modo e o instrumento do P2 no menu, controles USB, calibração.

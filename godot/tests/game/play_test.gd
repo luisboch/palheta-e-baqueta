@@ -189,10 +189,67 @@ func test_two_player_mode_spawns_two_highways_and_runs_both() -> void:
 	assert_float(scene.highway.position.x).is_less(0.0)
 	assert_float(scene.highway_2.position.x).is_greater(0.0)
 
+	# Banda: placar único no centro, sequência de cada um sobre a própria pista.
+	var band: Label = scene.get_node("%Band")
+	assert_bool(band.visible).is_true()
+	assert_bool(scene.get_node("%Duel").visible).is_false()
+	assert_bool(scene.get_node("Hud/Score").visible).is_false()
+
 	_run_to_end(scene)
 	assert_bool(scene._done).is_true()
 	assert_int(scene.session.scoring.hits).is_greater(0)
 	assert_int(scene.session_2.scoring.hits).is_greater(0)
+	assert_bool(band.visible).is_false()  # o resultado ocupa o lugar dele
+	var total: int = scene.session.scoring.score + scene.session_2.scoring.score
+	assert_str(band.text).contains("%d pontos" % total)
+	assert_bool(scene.highway.combo.visible).is_true()
+	assert_bool(scene.highway_2.combo.visible).is_true()
+	assert_str(scene.highway.combo.text).starts_with("P1 · Cordas")
+	assert_str(scene.highway_2.combo.text).starts_with("P2 · Bateria")
+	assert_str(scene.highway_2.combo.text).contains("%d seguidas" % scene.session_2.scoring.streak)
+	# Resultado: estrelas (autoplay acerta tudo) e a parte de cada um.
+	assert_bool(scene.get_node("%Results").visible).is_true()
+	assert_str(scene.get_node("%Stars").text).is_equal("★★★★★")
+	assert_str(scene.get_node("%Points").text).is_equal("%d pontos" % total)
+	assert_str(scene.get_node("%Accuracy").text).starts_with("P1 · Cordas")
+	assert_str(scene.get_node("%Detail").text).starts_with("P2 · Bateria")
+	assert_str(scene.get_node("%Detail").text).contains("acerto 100%")
+
+
+func test_versus_mode_shows_leader_and_winner() -> void:
+	var dir := _song_dir('{"strings": true, "bass": true}')
+	var scene: Node = PlayScene.instantiate()
+	scene.auto_start = false
+	add_child(scene)
+	auto_free(scene)
+
+	scene.start(dir, "strings", "Hard", true, "versus", "bass", "Hard")
+	assert_str(scene.get_node("Hud/Title").text).contains("Duelo")
+	assert_bool(scene.get_node("%Duel").visible).is_true()
+	assert_bool(scene.get_node("%Band").visible).is_false()
+	_run_to_end(scene)
+	assert_bool(scene.get_node("%Results").visible).is_true()
+	assert_bool(scene.get_node("%Stars").visible).is_false()
+	assert_str(scene.get_node("%Detail").text).starts_with("Notas:")
+
+	var p1: Scoring = scene.session.scoring
+	var p2: Scoring = scene.session_2.scoring
+	p1.score = 500
+	p2.score = 300
+	scene.hud.update_score(p1, p2)
+	assert_str(scene.get_node("%DuelP1").text).is_equal("P1  500")
+	assert_str(scene.get_node("%DuelP2").text).is_equal("300  P2")
+	assert_str(scene.get_node("%Lead").text).starts_with("◄")
+	scene.hud.show_results(p1, p2)
+	assert_str(scene.get_node("%Header").text).is_equal("P1 VENCEU!")
+	p2.score = 900
+	scene.hud.update_score(p1, p2)
+	assert_str(scene.get_node("%Lead").text).ends_with("►")
+	scene.hud.show_results(p1, p2)
+	assert_str(scene.get_node("%Header").text).is_equal("P2 VENCEU!")
+	p1.score = 900
+	scene.hud.show_results(p1, p2)
+	assert_str(scene.get_node("%Header").text).is_equal("EMPATE!")
 
 
 func test_two_player_mode_routes_inputs_to_correct_player() -> void:

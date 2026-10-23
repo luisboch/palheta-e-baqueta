@@ -106,6 +106,8 @@ func start(
 	)
 
 	var is_2p := instrument_p2 != "" or play_mode in ["coop", "versus"]
+	if is_2p and play_mode not in ["coop", "versus"]:
+		play_mode = "coop"  # segundo instrumento sem modo: tocam juntos
 	if is_2p:
 		var choice_p2 := InstrumentRules.choose(
 			available,
@@ -128,7 +130,18 @@ func start(
 		highway.position.x = 0.0
 
 	highway.setup(session)
-	hud.setup(_loaded["song"], instrument, difficulty)
+	var combos: Array[Label3D] = []
+	if session_2:
+		combos = [highway.combo, highway_2.combo]
+	hud.setup(
+		_loaded["song"],
+		instrument,
+		difficulty,
+		play_mode,
+		session_2.instrument if session_2 else "",
+		session_2.difficulty if session_2 else "",
+		combos
+	)
 	_setup_audio(instrument, session_2.instrument if session_2 else "")
 
 
@@ -213,11 +226,11 @@ func _process(delta: float) -> void:
 
 	highway.update_view(now, _grid)
 	background.update(now, _grid, _bands.update(_magnitudes(), delta))
-	hud.update_score(session.scoring)
+	hud.update_score(session.scoring, session_2.scoring if session_2 else null)
 	var finished_all := session.finished(now) and (session_2 == null or session_2.finished(now))
 	if finished_all and (player == null or not player.playing or now > session.duration + 3.0):
 		_done = true
-		hud.show_results(session.scoring)
+		hud.show_results(session.scoring, session_2.scoring if session_2 else null)
 
 
 ## Tempo da música: contagem regressiva no começo, depois o relógio sincronizado com o áudio.

@@ -31,6 +31,8 @@ var _next := 0  ## próxima nota que ainda não ganhou desenho
 var _flash := 0.0
 var _beat_lines: Array[MeshInstance3D] = []
 
+## Sequência do jogador sobre a pista, com 2 jogadores (o texto vem do Hud).
+@onready var combo: Label3D = $Combo
 @onready var _board: MeshInstance3D = $Board
 @onready var _strikeline: MeshInstance3D = $Strikeline
 @onready var _lines: Node3D = $Lines
