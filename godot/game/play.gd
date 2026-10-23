@@ -16,6 +16,7 @@ const MUSIC_BUS := "Music"
 var auto_start := true
 var session: PlaySession
 var player: AudioStreamPlayer
+var paused := false
 var _stem_index := -1  ## índice do stem do jogador no AudioStreamSynchronized
 var _started_audio := false
 var _lead := LEAD_IN
@@ -35,6 +36,7 @@ func _ready() -> void:
 	InputProfile.apply()
 	hud.again.connect(App.goto.bind(App.PLAY))  # a mesma escolha, do começo
 	hud.choose_song.connect(leave)
+	hud.resume.connect(set_paused.bind(false))
 	if not auto_start:
 		return
 	if not App.selection.is_empty():
@@ -115,7 +117,7 @@ func _setup_audio(instrument: String) -> void:
 
 
 func _process(delta: float) -> void:
-	if session == null or _done:
+	if session == null or _done or paused:
 		return
 	var now := _song_time(delta)
 	if _autoplay:
@@ -180,11 +182,34 @@ func _play_by_itself(now: float) -> void:
 			highway.on_strum(session.strum(note.time))
 
 
+## Pausa: para o áudio e o relógio (o _process não anda), solta os trastes (soltar uma tecla
+## com o jogo pausado não chegaria à partida) e mostra Continuar / Recomeçar / Sair.
+func set_paused(value: bool) -> void:
+	if session == null or _done or value == paused:
+		return
+	paused = value
+	if player:
+		player.stream_paused = value
+	for lane in session.held.duplicate():
+		session.release_fret(lane)
+		highway.set_fret(lane, false)
+	hud.show_pause(value)
+
+
+## Apertar o botão Steam ou trocar de janela pausa a partida.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		set_paused(true)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(InputProfile.PAUSE):
-		leave()
+		if session == null or _done:
+			leave()
+		else:
+			set_paused(not paused)
 		return
-	if session == null or _done or event.is_echo():
+	if session == null or _done or paused or event.is_echo():
 		return
 	var now := session.clock.now() if _lead <= 0.0 else -_lead
 	if session.drums:

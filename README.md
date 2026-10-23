@@ -61,7 +61,8 @@ O jogo abre no menu:
 - Menus: setas/direcional e `Enter`/A; `Esc`/B volta.
 - Partida: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
   ([ADR 0015](docs/adr/0015-tocar-no-traste-sem-palhetada.md)). Bateria: bumbo `Espaço`, pads
-  `H J K L`. Controle: trastes A B Y X LB. `Esc` volta para a escolha de música.
+  `H J K L`. Controle: trastes A B Y X LB. `Esc`/Start pausa (Continuar, Recomeçar, Sair da
+  música); apertar o botão Steam também pausa.
 - No modo desktop do Deck, o Steam converte os controles em teclado e mouse e o jogo não vê o
   controle: use um teclado ou rode pelo Steam.
 - A música toca do começo ao fim; o instrumento escolhido baixa 18 dB a cada erro e volta no

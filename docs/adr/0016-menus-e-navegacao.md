@@ -3,6 +3,9 @@
 - **Status:** Aceita
 - **Data:** 2026-10-23
 
+> **2026-10-23:** a partida ganhou pausa (`Esc`/Start, e sozinha quando o jogo perde o foco, como
+> no botão Steam): Continuar, Recomeçar ou Sair da música.
+
 ## Contexto
 
 A fase 9 tira a linha de comando do caminho: no Deck, tudo tem de ser feito com o controle. O

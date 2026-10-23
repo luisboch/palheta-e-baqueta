@@ -137,8 +137,38 @@ func test_results_and_leaving_go_back_to_the_menu() -> void:
 	scene.get_node("%Choose").pressed.emit()
 	assert_str(App.last_scene).is_equal(App.SONG_SELECT)
 	App.selection = {}
+
+
+func test_pause_stops_the_clock_and_resumes() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	for i in 30:
+		scene._process(1.0 / 60.0)
+	var fret := InputEventAction.new()
+	fret.action = "fret_2"
+	fret.pressed = true
+	scene._unhandled_input(fret)
 	var esc := InputEventAction.new()
 	esc.action = InputProfile.PAUSE
 	esc.pressed = true
-	scene._unhandled_input(esc)  # cena sozinha, nos testes: não fecha nada
+	scene._unhandled_input(esc)
+	assert_bool(scene.paused).is_true()
+	assert_bool(scene.get_node("%Pause").visible).is_true()
+	assert_array(scene.session.held).is_empty()  # trastes soltos na pausa
+	var lead: float = scene._lead
+	scene._process(0.5)
+	assert_float(scene._lead).is_equal(lead)  # parado
+	scene._unhandled_input(fret)  # ignorado na pausa
+	assert_array(scene.session.held).is_empty()
+	scene.get_node("%Resume").pressed.emit()
+	assert_bool(scene.paused).is_false()
+	assert_bool(scene.get_node("%Pause").visible).is_false()
+	scene._notification(NOTIFICATION_APPLICATION_FOCUS_OUT)  # botão Steam
+	assert_bool(scene.paused).is_true()
+	scene._unhandled_input(esc)
+	assert_bool(scene.paused).is_false()
+	App.selection = {"dir": "x"}
+	scene.get_node("%QuitSong").pressed.emit()
 	assert_str(App.last_scene).is_equal(App.SONG_SELECT)
+	scene.get_node("%Restart").pressed.emit()
+	assert_str(App.last_scene).is_equal(App.PLAY)
+	App.selection = {}

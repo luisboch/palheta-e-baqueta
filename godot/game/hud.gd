@@ -5,6 +5,8 @@ extends CanvasLayer
 ## Botões do resultado: jogar a mesma música de novo, ou voltar para a escolha.
 signal again
 signal choose_song
+## Botões da pausa (Recomeçar usa `again`; Sair da música, `choose_song`).
+signal resume
 
 @onready var _title: Label = $Title
 @onready var _score: Label = $Score
@@ -15,6 +17,15 @@ signal choose_song
 func _ready() -> void:
 	%Again.pressed.connect(again.emit)
 	%Choose.pressed.connect(choose_song.emit)
+	%Resume.pressed.connect(resume.emit)
+	%Restart.pressed.connect(again.emit)
+	%QuitSong.pressed.connect(choose_song.emit)
+
+
+func show_pause(visible_now: bool) -> void:
+	%Pause.visible = visible_now
+	if visible_now:
+		%Resume.grab_focus()
 
 
 func setup(song: Dictionary, instrument: String, difficulty: String) -> void:
