@@ -1,21 +1,18 @@
 ## Partida de um jogador: áudio, entrada e a pista 3D. A lógica toda está em PlaySession.
 ##
-## Uso (fase 6, antes dos menus):
-##   godot --path godot -- --song <pasta da música> [--instrument strings|bass|drums]
-##                         [--difficulty Easy|Medium|Hard|Expert] [--autoplay 1]
+## Vindo do menu, toca a escolha em App.selection. Rodando a cena sozinha (F6 no editor ou
+## linha de comando):
+##   godot --path godot res://game/play.tscn -- --song <pasta da música>
+##         [--instrument strings|bass|drums] [--difficulty Easy|Medium|Hard|Expert] [--autoplay 1]
 ## --autoplay: o jogo toca sozinho, acertando cada nota no tempo (depuração e demonstração).
-## Sem --song, abre a música de data/library (ao lado do projeto Godot) com mais instrumentos.
+## Sem --song, abre a música de data/library com mais instrumentos.
 extends Node3D
 
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
-const DEFAULT_LIBRARY := "../data/library"
 const MUSIC_BUS := "Music"
-## Sem escolha (antes dos menus): Cordas no Difícil, o ponto de partida dos testes de jogo.
-const DEFAULT_INSTRUMENT := "strings"
-const DEFAULT_DIFFICULTY := "Hard"
 
-## Falso: quem criou a cena chama `start()` (os menus, na fase 9; os testes). Verdadeiro: a
-## partida vem da linha de comando.
+## Falso: quem criou a cena chama `start()` (os testes). Verdadeiro: a partida vem do menu
+## (App.selection) ou da linha de comando.
 var auto_start := true
 var session: PlaySession
 var player: AudioStreamPlayer
@@ -36,10 +33,16 @@ var _spectrum: AudioEffectSpectrumAnalyzerInstance  ## null sem o bus Music (tes
 
 func _ready() -> void:
 	InputProfile.apply()
-	if auto_start:
+	hud.again.connect(App.goto.bind(App.PLAY))  # a mesma escolha, do começo
+	hud.choose_song.connect(leave)
+	if not auto_start:
+		return
+	if not App.selection.is_empty():
+		start(App.selection["dir"], App.selection["instrument"], App.selection["difficulty"])
+	else:
 		var args := _args()
 		start(
-			args.get("song", default_song(_library_dir())),
+			args.get("song", default_song(App.library_dir)),
 			args.get("instrument", ""),
 			args.get("difficulty", ""),
 			args.has("autoplay")
@@ -58,17 +61,12 @@ func start(dir: String, instrument: String, difficulty: String, autoplay := fals
 	if available.is_empty():
 		hud.show_message("Esta música não tem nenhum instrumento jogável")
 		return
-	if not available.has(instrument):
-		instrument = (
-			DEFAULT_INSTRUMENT if available.has(DEFAULT_INSTRUMENT) else available.keys()[0]
-		)
-	var levels: Array = available[instrument]
-	if difficulty not in levels:
-		difficulty = (
-			DEFAULT_DIFFICULTY if DEFAULT_DIFFICULTY in levels else levels[levels.size() - 1]
-		)
+	var choice := InstrumentRules.choose(available, instrument, difficulty)
+	instrument = choice[0]
+	difficulty = choice[1]
 
 	session = PlaySession.new(_loaded["chart"], instrument, difficulty)
+	App.pause_worker(true)
 	_grid = (
 		BeatGrid.from_beatmap(_loaded["beatmap"])
 		if not _loaded["beatmap"].get("beats", []).is_empty()
@@ -77,6 +75,19 @@ func start(dir: String, instrument: String, difficulty: String, autoplay := fals
 	highway.setup(session)
 	hud.setup(_loaded["song"], instrument, difficulty)
 	_setup_audio(instrument)
+
+
+func _exit_tree() -> void:
+	if session:
+		App.pause_worker(false)
+
+
+## Sai da partida: para a escolha de música (vindo do menu) ou fecha o jogo (cena sozinha).
+func leave() -> void:
+	if not App.selection.is_empty():
+		App.goto(App.SONG_SELECT)
+	elif App.live:  # nos testes, fechar o jogo fecharia o executor de testes
+		get_tree().quit()
 
 
 func _setup_audio(instrument: String) -> void:
@@ -171,7 +182,7 @@ func _play_by_itself(now: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(InputProfile.PAUSE):
-		get_tree().quit()
+		leave()
 		return
 	if session == null or _done or event.is_echo():
 		return
@@ -211,10 +222,6 @@ func _args() -> Dictionary:
 		else:
 			i += 1
 	return out
-
-
-func _library_dir() -> String:
-	return ProjectSettings.globalize_path("res://").path_join(DEFAULT_LIBRARY).simplify_path()
 
 
 ## A música com mais instrumentos presentes (empate: a primeira pelo nome da pasta); "" se nenhuma.

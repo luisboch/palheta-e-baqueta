@@ -3,11 +3,8 @@
 [ext_resource type="Script" uid="uid://c6am3w0yoacwi" path="res://game/play.gd" id="1_l2lu5"]
 [ext_resource type="Script" uid="uid://bkwv8wnuv8loy" path="res://game/highway.gd" id="2_ktf2h"]
 [ext_resource type="Script" uid="uid://boo8lqst1ymnv" path="res://game/hud.gd" id="3_fxqnm"]
-[ext_resource type="Script" path="res://game/background.gd" id="4_bkgnd"]
-[ext_resource type="Shader" path="res://game/background.gdshader" id="5_bkgsh"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_bkgnd"]
-shader = ExtResource("5_bkgsh")
+[ext_resource type="PackedScene" path="res://game/background.tscn" id="4_bkgnd"]
+[ext_resource type="Theme" path="res://game/theme.tres" id="5_theme"]
 
 [sub_resource type="Environment" id="Environment_crsts"]
 background_mode = 3
@@ -121,17 +118,7 @@ height = 0.1
 [node name="Play" type="Node3D" unique_id=1359401120]
 script = ExtResource("1_l2lu5")
 
-[node name="Background" type="CanvasLayer" parent="."]
-layer = -1
-script = ExtResource("4_bkgnd")
-
-[node name="Sky" type="ColorRect" parent="Background"]
-material = SubResource("ShaderMaterial_bkgnd")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Background" parent="." instance=ExtResource("4_bkgnd")]
 
 [node name="Highway" type="Node3D" parent="." unique_id=1360344792]
 script = ExtResource("2_ktf2h")
@@ -263,3 +250,65 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
+
+[node name="Results" type="PanelContainer" parent="Hud"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -230.0
+offset_right = 300.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_theme")
+
+[node name="Box" type="VBoxContainer" parent="Hud/Results"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Hud/Results/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 44
+text = "Fim!"
+horizontal_alignment = 1
+
+[node name="Points" type="Label" parent="Hud/Results/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "41900 pontos"
+horizontal_alignment = 1
+
+[node name="Accuracy" type="Label" parent="Hud/Results/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Acertos: 380 de 412 (92%)"
+horizontal_alignment = 1
+
+[node name="BestStreak" type="Label" parent="Hud/Results/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Maior sequência: 138"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Hud/Results/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Again" type="Button" parent="Hud/Results/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+text = "Jogar de novo"
+
+[node name="Choose" type="Button" parent="Hud/Results/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+text = "Escolher outra música"

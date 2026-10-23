@@ -48,26 +48,36 @@ uv run pbq drive list                # pendrives montados (o menu do jogo usa os
 
 Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/backend-protocol.md).
 
-### Jogar (fase 6: antes dos menus)
+### Jogar
 
-```bash
-GODOT=$(scripts/godot.sh)
-$GODOT --path godot -- --song data/library/<id> --instrument strings --difficulty Hard
-```
+Abra `godot/project.godot` no editor e aperte **F5** (ou rode `$(scripts/godot.sh) --path godot`).
+O jogo abre no menu:
 
-- `--instrument`: `strings` (Cordas), `bass` ou `drums`; `--difficulty`: `Easy`, `Medium`, `Hard`
-  ou `Expert`. Sem `--song`, abre a música de `data/library/` com mais instrumentos; sem escolha,
-  Cordas no Difícil (o que existir mais perto disso). É o que o F5 do editor abre.
-- Teclado: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
+- **Jogar**: lista de músicas prontas → instrumento (os que não tocam na música ficam
+  desabilitados) → dificuldade → Jogar. "Editar nome" corrige título e artista.
+- **Pendrive**: escolha o pendrive e a ação: trazer os MP3s novos de `palheta/` (eles são
+  processados sozinhos, com o andamento embaixo do menu), importar músicas prontas ou salvar a
+  biblioteca no pendrive. Nada é lido antes de você escolher ([ADR 0003](docs/adr/0003-pendrive-pelo-menu.md)).
+- Menus: setas/direcional e `Enter`/A; `Esc`/B volta.
+- Partida: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
   ([ADR 0015](docs/adr/0015-tocar-no-traste-sem-palhetada.md)). Bateria: bumbo `Espaço`, pads
-  `H J K L`. Controle: trastes A B Y X LB. `Esc` sai.
+  `H J K L`. Controle: trastes A B Y X LB. `Esc` volta para a escolha de música.
 - No modo desktop do Deck, o Steam converte os controles em teclado e mouse e o jogo não vê o
-  controle: use um teclado ou rode pelo Steam (o atalho para o modo jogo vem na fase 9).
+  controle: use um teclado ou rode pelo Steam.
 - A música toca do começo ao fim; o instrumento escolhido baixa 18 dB a cada erro e volta no
   acerto. Numa música só de Cordas (como uma de violão e voz), errar deixa quase só a voz.
-- `--autoplay 1`: o jogo toca sozinho (para ver um chart sem tocar).
+
+Para depurar uma partida sem o menu (F6 em `godot/game/play.tscn`, ou pela linha de comando):
+
+```bash
+$(scripts/godot.sh) --path godot res://game/play.tscn -- --song data/library/<id> \
+    --instrument strings --difficulty Hard --autoplay 1
+```
+
+`--autoplay 1` toca sozinho; sem `--song`, abre a música com mais instrumentos.
+
 As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU e Demucs;
-~1,5 GB). O modelo baixa no primeiro uso (~80 MB). O jogo chega na fase 6.
+~1,5 GB). O modelo baixa no primeiro uso (~80 MB).
 
 ## Testes
 

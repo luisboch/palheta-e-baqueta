@@ -5,6 +5,9 @@ extends RefCounted
 const UNKNOWN_ARTIST := "Artista desconhecido"
 ## Nomes dos instrumentos na tela, na ordem do contrato (BackendProtocol.INSTRUMENTS).
 const INSTRUMENT_NAMES := {"drums": "Bateria", "bass": "Baixo", "strings": "Cordas"}
+const DIFFICULTY_NAMES := {
+	"Easy": "Fácil", "Medium": "Médio", "Hard": "Difícil", "Expert": "Muito difícil"
+}
 
 
 ## Entradas do índice ordenadas por artista e título (sem diferenciar maiúsculas). [] se o texto

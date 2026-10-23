@@ -2,14 +2,19 @@
 class_name Hud
 extends CanvasLayer
 
-const INSTRUMENT_NAMES := {"strings": "Cordas", "bass": "Baixo", "drums": "Bateria"}
-const DIFFICULTY_NAMES := {
-	"Easy": "Fácil", "Medium": "Médio", "Hard": "Difícil", "Expert": "Muito difícil"
-}
+## Botões do resultado: jogar a mesma música de novo, ou voltar para a escolha.
+signal again
+signal choose_song
 
 @onready var _title: Label = $Title
 @onready var _score: Label = $Score
 @onready var _center: Label = $Center
+@onready var _results: PanelContainer = %Results
+
+
+func _ready() -> void:
+	%Again.pressed.connect(again.emit)
+	%Choose.pressed.connect(choose_song.emit)
 
 
 func setup(song: Dictionary, instrument: String, difficulty: String) -> void:
@@ -18,8 +23,8 @@ func setup(song: Dictionary, instrument: String, difficulty: String) -> void:
 		% [
 			song.get("title", "?"),
 			song.get("artist", "") if song.get("artist") else "Artista desconhecido",
-			INSTRUMENT_NAMES.get(instrument, instrument),
-			DIFFICULTY_NAMES.get(difficulty, difficulty),
+			SongCatalog.INSTRUMENT_NAMES.get(instrument, instrument),
+			SongCatalog.DIFFICULTY_NAMES.get(difficulty, difficulty),
 		]
 	)
 	_score.position.y = 100
@@ -38,13 +43,11 @@ func show_message(text: String) -> void:
 
 
 func show_results(scoring: Scoring) -> void:
-	_center.text = (
-		"Fim!\n%d pontos\nAcertos: %d de %d (%d%%)\nMaior sequência: %d\n\nEsc para sair"
-		% [
-			scoring.score,
-			scoring.hits,
-			scoring.hits + scoring.misses,
-			roundi(scoring.accuracy() * 100),
-			scoring.best_streak,
-		]
+	%Points.text = "%d pontos" % scoring.score
+	%Accuracy.text = (
+		"Acertos: %d de %d (%d%%)"
+		% [scoring.hits, scoring.hits + scoring.misses, roundi(scoring.accuracy() * 100)]
 	)
+	%BestStreak.text = "Maior sequência: %d" % scoring.best_streak
+	_results.visible = true
+	%Again.grab_focus()

@@ -33,13 +33,15 @@ const DEFAULTS := {
 }
 
 
-## Cria as ações no InputMap (sem apagar as que já existem com outros eventos).
+## Cria as ações no InputMap (sem apagar as que já existem com outros eventos nem repetir).
 static func apply(bindings: Dictionary = DEFAULTS) -> void:
 	for action: String in bindings:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
 		for binding: Array in bindings[action]:
-			InputMap.action_add_event(action, event_for(binding))
+			var event := event_for(binding)
+			if not InputMap.action_has_event(action, event):  # cada partida chama de novo
+				InputMap.action_add_event(action, event)
 
 
 static func event_for(binding: Array) -> InputEvent:

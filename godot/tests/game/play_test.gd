@@ -120,3 +120,25 @@ func test_default_song_has_the_most_instruments() -> void:
 	var play: GDScript = load("res://game/play.gd")
 	assert_str(play.default_song(library)).is_equal(library.path_join("b"))
 	assert_str(play.default_song(library.path_join("nada"))).is_equal("")
+
+
+func test_results_and_leaving_go_back_to_the_menu() -> void:
+	var dir := _song_dir('{"strings": true}')
+	App.selection = {"id": "x", "dir": dir, "instrument": "strings", "difficulty": "Easy"}
+	var scene: Node = PlayScene.instantiate()  # auto_start: vem do menu (App.selection)
+	add_child(scene)
+	auto_free(scene)
+	assert_str(scene.session.difficulty).is_equal("Easy")
+	scene._autoplay = true
+	_run_to_end(scene)
+	assert_bool(scene.get_node("%Results").visible).is_true()
+	scene.get_node("%Again").pressed.emit()
+	assert_str(App.last_scene).is_equal(App.PLAY)
+	scene.get_node("%Choose").pressed.emit()
+	assert_str(App.last_scene).is_equal(App.SONG_SELECT)
+	App.selection = {}
+	var esc := InputEventAction.new()
+	esc.action = InputProfile.PAUSE
+	esc.pressed = true
+	scene._unhandled_input(esc)  # cena sozinha, nos testes: não fecha nada
+	assert_str(App.last_scene).is_equal(App.SONG_SELECT)

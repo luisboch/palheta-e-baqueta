@@ -31,3 +31,12 @@ func test_stem_mix_ducks_on_miss() -> void:
 	assert_float(mix.volume_db).is_equal(StemMix.MISSED_DB)
 	mix.on_hit()
 	assert_float(mix.update(1.0)).is_equal(StemMix.NORMAL_DB)
+
+
+func test_choose_falls_back_to_strings_on_hard() -> void:
+	var all := {"drums": ["Easy", "Expert"], "strings": ["Easy", "Hard", "Expert"]}
+	assert_array(InstrumentRules.choose(all, "", "")).is_equal(["strings", "Hard"])
+	assert_array(InstrumentRules.choose(all, "drums", "Hard")).is_equal(["drums", "Expert"])
+	assert_array(InstrumentRules.choose(all, "bass", "Easy")).is_equal(["strings", "Easy"])
+	assert_array(InstrumentRules.choose({"bass": ["Medium"]}, "", "")).is_equal(["bass", "Medium"])
+	assert_array(InstrumentRules.choose({}, "", "")).is_empty()

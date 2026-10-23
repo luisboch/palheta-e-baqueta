@@ -33,7 +33,7 @@ func test_job_failure_and_missing_program() -> void:
 
 
 func test_app_is_safe_under_tests() -> void:
-	assert_bool(App.backend_enabled).is_false()
+	assert_bool(App.live).is_false()
 	assert_object(App.run_pbq(["drive", "list"])).is_null()
 	App.start_worker()
 	App.pause_worker(true)

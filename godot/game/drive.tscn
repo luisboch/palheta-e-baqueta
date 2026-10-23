@@ -1,0 +1,117 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/drive.gd" id="1_drive"]
+[ext_resource type="Theme" path="res://game/theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://game/background.tscn" id="3_bkgnd"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_drives"]
+
+[node name="Drive" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_drive")
+
+[node name="Background" parent="." instance=ExtResource("3_bkgnd")]
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -330.0
+offset_right = 420.0
+offset_bottom = 330.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Panel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 34
+text = "Pendrive"
+
+[node name="Hint" type="Label" parent="Panel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "Coloque os MP3 na pasta palheta/ do pendrive. Nada é lido antes de você escolher uma ação."
+autowrap_mode = 3
+
+[node name="DriveList" type="VBoxContainer" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Example" type="Button" parent="Panel/Box/DriveList"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_drives")
+text = "PENDRIVE · pasta palheta/ encontrada"
+alignment = 0
+
+[node name="NoDrive" type="Label" parent="Panel/Box"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Nenhum pendrive encontrado. Conecte e toque em Procurar de novo."
+autowrap_mode = 3
+
+[node name="Rescan" type="Button" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 20
+text = "Procurar de novo"
+
+[node name="Spacer" type="Control" parent="Panel/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Process" type="Button" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Trazer MP3s novos (processa sozinho depois)"
+
+[node name="Import" type="Button" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Importar músicas prontas"
+
+[node name="Export" type="Button" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Salvar a biblioteca no pendrive"
+
+[node name="Progress" type="ProgressBar" parent="Panel/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+max_value = 1.0
+step = 0.001
+value = 0.4
+show_percentage = false
+
+[node name="Message" type="Label" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Copiando 2 de 5"
+autowrap_mode = 3
+
+[node name="Back" type="Button" parent="Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Voltar"

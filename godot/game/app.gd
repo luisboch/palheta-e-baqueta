@@ -13,8 +13,10 @@ const ENV := "/usr/bin/env"  ## `env -C <repo>`: roda o pbq na raiz do repositó
 const WORKER_LOCK := ".worker.lock"
 
 ## Falso nos testes (GdUnit4, pela linha de comando ou pelo editor): nada de worker nem comandos
-## contra a data/ real (AGENTS.md).
-var backend_enabled := not _under_tests()
+## contra a data/ real (AGENTS.md), nem troca de cena (trocaria a cena do executor de testes).
+var live := not _under_tests()
+## A última tela pedida a goto() (os testes conferem a navegação por aqui).
+var last_scene := ""
 ## A partida escolhida no menu: {dir, instrument, difficulty}. Vazio: play.tscn rodando sozinha
 ## (F6 no editor ou linha de comando).
 var selection := {}
@@ -32,13 +34,15 @@ static func _under_tests() -> bool:
 
 
 func goto(scene: String) -> void:
-	get_tree().change_scene_to_file.call_deferred(scene)
+	last_scene = scene
+	if live:
+		get_tree().change_scene_to_file.call_deferred(scene)
 
 
 ## Inicia o worker uma vez por execução do jogo. Ele morre junto com o jogo
 ## (--die-with-parent) e, se outro já estiver rodando, sai sozinho (lock).
 func start_worker() -> void:
-	if not backend_enabled or _worker_pid > 0 or not has_backend():
+	if not live or _worker_pid > 0 or not has_backend():
 		return
 	_worker_pid = OS.create_process(ENV, _pbq_args(["watch", "--die-with-parent"]))
 
@@ -47,7 +51,7 @@ func start_worker() -> void:
 ## com o áudio e o desenho. Vale também para um worker que não fomos nós que iniciamos.
 func pause_worker(paused: bool) -> void:
 	var pid := worker_pid()
-	if not backend_enabled or pid <= 0:
+	if not live or pid <= 0:
 		return
 	OS.execute("kill", ["-STOP" if paused else "-CONT", str(pid)])
 
@@ -72,7 +76,7 @@ func has_backend() -> bool:
 ## Roda `pbq <args>` (comandos do menu: drive, edit). null se o backend não está instalado
 ## ou desligado (testes).
 func run_pbq(args: Array[String]) -> BackendJob:
-	if not backend_enabled or not has_backend():
+	if not live or not has_backend():
 		return null
 	var job := BackendJob.new()
 	if not job.start(ENV, _pbq_args(args)):

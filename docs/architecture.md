@@ -61,7 +61,16 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
 - `godot/core/`: lógica pura (`RefCounted`). Inclui o parser de chart, o mapa de tempo, o
   relógio da música, o julgamento de acertos, a pontuação, as regras de seleção de
   instrumento e os perfis de entrada. Tudo testado com GdUnit4.
-- `godot/game/`: cenas e nós. Por enquanto, a partida (`godot/game/play.tscn` + `godot/game/play.gd`). A parte
+- **Telas** (`godot/game/`, uma cena por tela, montada com nós no editor; regras em
+  [ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal (`godot/game/main_menu.tscn`), escolha de
+  música (`godot/game/song_select.tscn`), pendrive (`godot/game/drive.tscn`) e a partida. O visual
+  dos menus vem de um tema só (`godot/game/theme.tres`). Linhas de lista (músicas, pendrives) são
+  cópias de um botão-modelo que está na cena.
+- **Autoload `App`** (`godot/game/app.gd`): caminhos de `data/`, a escolha do jogador, a troca de
+  tela, o worker (iniciado pelo menu, pausado durante a partida) e os comandos `pbq`, rodados
+  por `godot/game/backend_job.gd` numa thread. Nos testes ele fica inerte: sem worker, sem
+  comandos e sem trocar de cena.
+- **A partida** (`godot/game/play.tscn` + `godot/game/play.gd`). A parte
   fixa (câmera, luz, pista, lanes, linha de acerto, alvos, placar) são nós da cena, editáveis no editor;
   só as notas nascem em tempo de jogo. Pista 3D
   (`godot/game/highway.gd`), placar (`godot/game/hud.gd`), áudio sincronizado e entrada. Só desenham e
