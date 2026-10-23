@@ -22,6 +22,7 @@ repos:
         name: gdformat
         entry: uv run gdformat
         language: system
+        require_serial: true  # em lotes paralelos o gdformat falha com "File exists"
         files: ^godot/(?!addons/).*\.gd$
       - id: gdlint
         name: gdlint

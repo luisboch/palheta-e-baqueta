@@ -148,6 +148,15 @@ def test_git_listing_ignores_untracked_ignored_dirs(tmp_path):
     assert docs_check.markdown_files(tmp_path) == [tmp_path / "a.md"]
 
 
+def test_cited_ignored_output_is_not_a_broken_path(tmp_path):
+    import subprocess
+
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    write(tmp_path, ".gitignore", "godot/reports/\n")
+    write(tmp_path, "README.md", "`godot/reports/relatorio.json` `godot/sumiu.gd`\n")
+    assert messages(tmp_path) == ["README.md: caminho citado não existe: godot/sumiu.gd"]
+
+
 def test_generated_files_are_checked_and_fixed(root):
     files = {Path("godot/core/gerado.gd"): lambda r: "conteúdo novo\n"}
     assert messages_with(root, files) == [

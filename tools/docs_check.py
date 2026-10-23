@@ -170,8 +170,17 @@ def check_code_paths(root: Path, md: Path, text: str) -> Iterable[Problem]:
             continue
         if any(c in candidate for c in "<>*…{}$"):
             continue
-        if not (root / candidate).exists():
+        if not (root / candidate).exists() and not git_ignored(root, candidate):
             yield Problem(md.relative_to(root), f"caminho citado não existe: {candidate}")
+
+
+def git_ignored(root: Path, path: str) -> bool:
+    """Saída gerada (relatório, cache) que o .gitignore tira do repositório: num clone novo ela
+    ainda não existe, e citá-la na doc não é um caminho quebrado."""
+    try:
+        return subprocess.run(["git", "check-ignore", "-q", path], cwd=root, check=False).returncode == 0
+    except OSError:
+        return False
 
 
 def check_generated(root: Path, md: Path, text: str, fix: bool) -> tuple[str, list[Problem]]:

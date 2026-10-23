@@ -67,3 +67,7 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   terminal. O lançador (`scripts/steamdeck/palheta.sh`) acerta o PATH antes de abrir o jogo (o
   worker herda) e manda a saída para `data/game.log`. O mesmo problema já tinha custado tempo no
   kraoke.
+- **2026-10-23 · CI ≠ Deck:** o pre-commit passava no Deck e falhava no primeiro run da CI. O
+  mypy achava o `torch` no `.venv` local (na CI ele não é instalado), um caminho gerado citado
+  na doc só existia aqui, e o `gdformat` em lotes paralelos falha com "File exists"
+  (`require_serial` no `.pre-commit-config.yaml`).

@@ -104,6 +104,7 @@ files = ["pbq", "tools"]
 strict = true
 
 [[tool.mypy.overrides]]
-# Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/.
-module = ["demucs.*", "mutagen.*", "beat_this.*", "basic_pitch.*", "librosa.*"]
+# Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/. O torch tem tipos, mas
+# é extra (a CI rápida não o instala): sem ele, o import tardio não pode quebrar o mypy.
+module = ["demucs.*", "mutagen.*", "beat_this.*", "basic_pitch.*", "librosa.*", "torch.*"]
 ignore_missing_imports = true
