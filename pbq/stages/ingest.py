@@ -50,6 +50,7 @@ class Ingest(Stage):
                 query=f"{official['artist']} {parsed['title']}",
                 uploader=uploader or None,
             )
+        song.meta.update(song.meta.get("edited") or {})  # corrigido no menu (pbq edit) vence
         song.meta["album"] = str(tags["TALB"]) if "TALB" in tags else None
         song.meta["duration"] = round(audio.info.length, 2)
 

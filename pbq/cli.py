@@ -1,6 +1,6 @@
 """Linha de comando do backend (`pbq`).
 
-Comandos chamados pelo jogo (version, drive ...) respondem só em JSON-lines no stdout
+Comandos chamados pelo jogo (version, drive ..., edit) respondem só em JSON-lines no stdout
 (pbq/protocol.py); logs vão para o stderr. A tabela de comandos de docs/backend-protocol.md
 é gerada deste parser.
 """
@@ -16,6 +16,7 @@ from pathlib import Path
 
 from pbq import __version__, backup, drive, protocol
 from pbq.config import Config, load_config
+from pbq.edit import edit_song
 from pbq.library import write_index
 from pbq.pipeline import process_song
 from pbq.proc import die_with_parent
@@ -58,6 +59,11 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         action = drv_sub.add_parser(name, help=text)
         action.add_argument("--mount", type=Path, required=True, help="montagem do pendrive")
+
+    edit = sub.add_parser("edit", help="corrige título e artista de uma música pronta (JSON-lines)")
+    edit.add_argument("id", help="id da música (pasta em data/library)")
+    edit.add_argument("--title", required=True, help="título")
+    edit.add_argument("--artist", default="", help="artista (vazio = sem artista)")
     return parser
 
 
@@ -151,6 +157,16 @@ def cmd_drive(config: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_edit(config: Config, args: argparse.Namespace) -> int:
+    try:
+        edit_song(config, args.id, args.title, args.artist)
+    except (LookupError, ValueError, OSError) as e:
+        protocol.write("error", message=str(e))
+        return 1
+    protocol.write("done", count=1, errors=[])
+    return 0
+
+
 Command = Callable[[Config, argparse.Namespace], int]
 COMMANDS: dict[str, Command] = {
     "version": cmd_version,
@@ -158,6 +174,7 @@ COMMANDS: dict[str, Command] = {
     "process": cmd_process,
     "status": cmd_status,
     "drive": cmd_drive,
+    "edit": cmd_edit,
 }
 
 

@@ -41,6 +41,7 @@ Uma linha por evento, sempre com `type` e `at` (ISO 8601, UTC), mais os campos:
 | `pbq drive process [--mount MOUNT]` | copia os MP3s novos de palheta/ para data/input |
 | `pbq drive import [--mount MOUNT]` | traz as músicas prontas de palheta/library/ |
 | `pbq drive export [--mount MOUNT]` | salva a biblioteca em palheta/library/ (incremental) |
+| `pbq edit [--title TITLE] [--artist ARTIST]` | corrige título e artista de uma música pronta (JSON-lines) |
 <!-- /gen:cli -->
 
 O jogo inicia o worker com `pbq watch --die-with-parent`: o worker morre junto se o jogo
@@ -70,6 +71,9 @@ Exemplo, `pbq drive process --mount /run/media/deck/PEN`:
 {"type": "done", "count": 3, "errors": []}
 ```
 
+- `pbq edit <id> --title … --artist …` responde `done` (`count` 1) ou `error`. Reescreve o nome em
+  `song.json`, `notes.chart`, `song.ini` e `index.json`, e guarda a correção no estado da música
+  (`meta["edited"]`), que o `ingest` respeita se a música for reprocessada.
 - `reading`: `done`/`total` contam MP3s lidos (hash); `copying`: músicas copiadas, e a fração
   conta bytes.
 - No máximo uma linha de progresso a cada 0,2 s, mais a última.

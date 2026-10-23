@@ -21,22 +21,22 @@ SECTION = re.compile(r"^\[(\w+)\]\s*$")
 LINE = re.compile(r"^\s*(\S+)\s*=\s*(.*?)\s*$")
 
 
-def _quote(text: str) -> str:
+def quote(text: str) -> str:
     return '"' + text.replace('"', "'").replace("\n", " ") + '"'
 
 
 def write_chart(chart: Chart) -> str:
     song = [
-        ("Name", _quote(chart.name)),
-        ("Artist", _quote(chart.artist)),
-        ("Charter", _quote(CHARTER)),
+        ("Name", quote(chart.name)),
+        ("Artist", quote(chart.artist)),
+        ("Charter", quote(CHARTER)),
         ("Offset", "0"),
         ("Resolution", str(chart.resolution)),
         ("Player2", "bass"),
         ("Difficulty", "0"),
-        ("MediaType", _quote("cd")),
+        ("MediaType", quote("cd")),
     ]
-    song += [(key, _quote(value)) for key, value in sorted(chart.streams.items())]
+    song += [(key, quote(value)) for key, value in sorted(chart.streams.items())]
     sync: list[tuple[int, int, str]] = [(ts.tick, 0, f"TS {ts.beats}") for ts in chart.time_signatures]
     sync += [(t.tick, 1, f"B {t.milli_bpm}") for t in chart.tempos]
     out = [
