@@ -15,6 +15,8 @@ fi
 if [[ $what == all || $what == godot ]]; then
     GODOT=$(find_godot)
     cd godot
+    # Classes novas (class_name) só entram no cache global depois de uma importação.
+    "$GODOT" --headless --path . --import >/dev/null 2>&1
     # -a: pasta de testes; --ignoreHeadlessMode: os testes de lógica pura não precisam de janela.
     "$GODOT" --headless --path . -s -d --remote-debug tcp://127.0.0.1:0 \
         res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode -c

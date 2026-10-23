@@ -11,7 +11,8 @@ calada. Aqui o que pode ser conferido é conferido:
    Só valem os que começam por uma pasta do repositório (ROOTS); `data/...` e padrões com
    `<id>`, `*` ou `…` são exemplos, não arquivos.
 3. Trechos gerados: entre `<!-- gen:NOME -->` e `<!-- /gen:NOME -->` o texto é produzido por
-   GENERATORS[NOME] a partir do código (índice dos ADRs; depois etapas, eventos, config...).
+   GENERATORS[NOME] a partir do código (índice dos ADRs aqui; os do backend em
+   tools/generators.py). Arquivos inteiros também podem ser gerados (FILE_GENERATORS).
    Editar à mão é inútil: o check acusa e o --fix regenera.
 4. ADRs (docs/adr/NNNN-titulo.md) têm número único e sequencial, título, Status, Data e as
    seções Contexto / Decisão / Consequências; "Substituída por" aponta para um ADR existente.
@@ -28,6 +29,8 @@ import sys
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+
+from tools.generators import DOC_GENERATORS, FILE_GENERATORS
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -108,6 +111,7 @@ def gen_adr_index(root: Path) -> str:
 Generator = Callable[[Path], str]
 GENERATORS: dict[str, Generator] = {
     "adr-index": gen_adr_index,
+    **DOC_GENERATORS,
 }
 
 
@@ -217,8 +221,26 @@ def check_adrs(root: Path) -> Iterable[Problem]:
         yield Problem(ADR_DIR, f"ADRs devem ser numerados 0001, 0002... sem buracos: {numbers}")
 
 
-def run(root: Path = REPO, fix: bool = False) -> list[Problem]:
+def check_generated_files(root: Path, files: dict[Path, Generator], fix: bool) -> Iterable[Problem]:
+    """Arquivos inteiros gerados (ex.: o contrato do backend em GDScript)."""
+    for rel, gen in files.items():
+        path = root / rel
+        fresh = gen(root)
+        current = path.read_text() if path.exists() else None
+        if current == fresh:
+            continue
+        if fix:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(fresh)
+        else:
+            yield Problem(rel, "arquivo gerado desatualizado (rode: python -m tools.docs_check --fix)")
+
+
+def run(root: Path = REPO, fix: bool = False, files: dict[Path, Generator] | None = None) -> list[Problem]:
+    """`files`: arquivos gerados a conferir (padrão: os do repositório, só quando root é ele)."""
+    checked: dict[Path, Generator] = files if files is not None else (FILE_GENERATORS if root == REPO else {})
     problems: list[Problem] = list(check_adrs(root))
+    problems += check_generated_files(root, checked, fix)
     for md in markdown_files(root):
         original = md.read_text()
         text, gen_problems = check_generated(root, md, original, fix)

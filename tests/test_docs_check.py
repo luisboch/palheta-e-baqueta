@@ -146,3 +146,25 @@ def test_git_listing_ignores_untracked_ignored_dirs(tmp_path):
     write(tmp_path, "ignorado/b.md", "[x](nao.md)\n")
     write(tmp_path, "godot/addons/lib/c.md", "[x](nao.md)\n")
     assert docs_check.markdown_files(tmp_path) == [tmp_path / "a.md"]
+
+
+def test_generated_files_are_checked_and_fixed(root):
+    files = {Path("godot/core/gerado.gd"): lambda r: "conteúdo novo\n"}
+    assert messages_with(root, files) == [
+        "godot/core/gerado.gd: arquivo gerado desatualizado (rode: python -m tools.docs_check --fix)"
+    ]
+    assert [str(p) for p in run(root, fix=True, files=files)] == []
+    assert (root / "godot/core/gerado.gd").read_text() == "conteúdo novo\n"
+    assert messages_with(root, files) == []
+
+
+def messages_with(root, files):
+    return [str(p) for p in run(root, files=files)]
+
+
+def test_repository_generated_contract_is_fresh():
+    """O contrato em GDScript bate com o Python (o mesmo check do pre-commit)."""
+    from tools.generators import FILE_GENERATORS
+
+    for rel, gen in FILE_GENERATORS.items():
+        assert (REPO / rel).read_text() == gen(REPO), rel

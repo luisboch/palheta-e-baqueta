@@ -19,6 +19,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0005 | [Testes e cobertura (Python ≥ 80%; GDScript sem ferramenta confiável)](0005-testes-e-cobertura.md) | Aceita |
 | 0006 | [Modelos de IA do pipeline](0006-modelos-de-ia.md) | Proposta |
 | 0007 | [Formato de chart compatível com o Clone Hero](0007-formato-de-chart.md) | Proposta |
+| 0008 | [Contrato backend ↔ jogo gerado a partir do Python](0008-contrato-gerado-do-python.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

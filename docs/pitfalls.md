@@ -11,3 +11,8 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   `debug>` quando há erro de parse.
 - **2026-10-22 · GPU do Deck:** o ROCm não funciona na gfx1033 (já investigado no kraoke, set/2026);
   ver [ADR 0004](adr/0004-processamento-na-cpu.md).
+- **2026-10-22 · Godot:** classe nova com `class_name` dá "Identifier not declared" nos testes
+  headless até o cache global (`.godot/global_script_class_cache.cfg`) ser refeito. Por isso o
+  `scripts/test.sh` roda `--import` antes do GdUnit4.
+- **2026-10-22 · Godot:** o `JSON` do Godot devolve todo número como `float` (`"pending": 3` →
+  `3.0`). Campos inteiros do backend (`pending`, `done`, `count`...) precisam de `int()` no jogo.
