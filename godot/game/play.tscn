@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://ns5tkll554mu"]
 
-[ext_resource type="Script" path="res://game/play.gd" id="1_l2lu5"]
-[ext_resource type="Script" path="res://game/highway.gd" id="2_ktf2h"]
-[ext_resource type="Script" path="res://game/hud.gd" id="3_fxqnm"]
+[ext_resource type="Script" uid="uid://c6am3w0yoacwi" path="res://game/play.gd" id="1_l2lu5"]
+[ext_resource type="Script" uid="uid://bkwv8wnuv8loy" path="res://game/highway.gd" id="2_ktf2h"]
+[ext_resource type="Script" uid="uid://boo8lqst1ymnv" path="res://game/hud.gd" id="3_fxqnm"]
 
 [sub_resource type="Environment" id="Environment_crsts"]
 background_mode = 1
@@ -213,9 +213,9 @@ offset_left = 24.0
 offset_top = 16.0
 offset_right = 24.0
 offset_bottom = 16.0
-theme_override_font_sizes/font_size = 28
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 28
 text = "Música — Artista
 Cordas · Difícil"
 
@@ -224,9 +224,9 @@ offset_left = 24.0
 offset_top = 100.0
 offset_right = 24.0
 offset_bottom = 100.0
-theme_override_font_sizes/font_size = 28
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 28
 text = "0 pontos   1×   sequência 0"
 
 [node name="Center" type="Label" parent="Hud" unique_id=466246669]
@@ -241,7 +241,7 @@ offset_right = 0.5
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 40
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
