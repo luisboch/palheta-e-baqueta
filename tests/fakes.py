@@ -74,3 +74,48 @@ class FakeSeparator:
             out[name] = np.stack([tone * np.ones(n), tone * np.ones(n)]).astype(np.float32)
         progress(1.0)
         return out
+
+
+class FakeTracker:
+    """BeatTracker falso: batidas regulares (120 BPM) e tempo forte a cada 4."""
+
+    sample_rate = 22050
+
+    def __init__(self, bpm: float = 120.0, start: float = 0.5):
+        self.bpm = bpm
+        self.start = start
+
+    def track(self, signal):
+        seconds = len(signal) / self.sample_rate
+        step = 60 / self.bpm
+        beats = []
+        t = self.start
+        while t < seconds:
+            beats.append(round(t, 4))
+            t += step
+        return beats, beats[::4]
+
+
+class FakeTranscriber:
+    """DrumTranscriber falso: bumbo nas batidas 1 e 3, caixa na 2 e 4, chimbal em colcheias (120 BPM)."""
+
+    sample_rate = 44100
+    classes = ("kick", "snare", "tom", "hihat", "cymbal")
+
+    def __init__(self, start: float = 0.5, beats: int = 8):
+        self.start = start
+        self.beats = beats
+        self.calls = 0
+
+    def transcribe(self, signal):
+        import numpy as np
+
+        self.calls += 1
+        b = self.start + 0.5 * np.arange(self.beats)
+        return {
+            "kick": b[::2] + 0.01,
+            "snare": b[1::2] - 0.005,
+            "tom": np.array([]),
+            "hihat": np.concatenate([b, b + 0.25]),
+            "cymbal": b[:1],
+        }

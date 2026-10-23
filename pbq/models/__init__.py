@@ -11,6 +11,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol
 
+import numpy as np
+import numpy.typing as npt
+
 from pbq.audio import Audio
 
 # O mesmo tipo de pbq.stages.base.Progress, repetido aqui: importar pbq.stages daria ciclo.
@@ -24,3 +27,20 @@ class StemSeparator(Protocol):
     stems: tuple[str, ...]
 
     def separate(self, path: Path, progress: Progress) -> dict[str, Audio]: ...
+
+
+class BeatTracker(Protocol):
+    """Batidas e tempos fortes (s) de uma mixagem mono."""
+
+    sample_rate: int
+
+    def track(self, signal: Audio) -> tuple[list[float], list[float]]: ...
+
+
+class DrumTranscriber(Protocol):
+    """Ataques (s) de cada peça (`classes`: kick, snare, tom, hihat, cymbal) num áudio de bateria mono."""
+
+    sample_rate: int
+    classes: tuple[str, ...]
+
+    def transcribe(self, signal: Audio) -> dict[str, npt.NDArray[np.float64]]: ...
