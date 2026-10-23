@@ -217,28 +217,53 @@ func _unhandled_input(event: InputEvent) -> void:
 	if session == null or _done or paused or event.is_echo():
 		return
 	var now := session.clock.now() if _lead <= 0.0 else -_lead
-	if session.drums:
-		for lane in InputProfile.PADS.size():
-			if event.is_action_pressed(InputProfile.PADS[lane]):
-				highway.on_input(lane, session.pad(now, lane))
+	_handle_player_input(0, event, session, highway, now)
+
+
+func _handle_player_input(
+	player_index: int, event: InputEvent, s: PlaySession, h: Highway, now: float
+) -> void:
+	if s == null or h == null:
 		return
-	for lane in InputProfile.FRETS.size():
-		if event.is_action_pressed(InputProfile.FRETS[lane]):
-			session.press_fret(lane)
-			highway.set_fret(lane, true)
+	var pads := InputProfile.player_pads(player_index)
+	var frets := InputProfile.player_frets(player_index)
+	var strums := InputProfile.player_strum(player_index)
+	if s.drums:
+		for lane in pads.size():
+			if (
+				event.is_action_pressed(pads[lane])
+				or (player_index == 0 and event.is_action_pressed(InputProfile.PADS[lane]))
+			):
+				h.on_input(lane, s.pad(now, lane))
+		return
+	for lane in frets.size():
+		var pressed := (
+			event.is_action_pressed(frets[lane])
+			or (player_index == 0 and event.is_action_pressed(InputProfile.FRETS[lane]))
+		)
+		var released := (
+			event.is_action_released(frets[lane])
+			or (player_index == 0 and event.is_action_released(InputProfile.FRETS[lane]))
+		)
+		if pressed:
+			s.press_fret(lane)
+			h.set_fret(lane, true)
 			if InputProfile.FRET_TAPS:
-				var tapped := session.tap(now)
+				var tapped := s.tap(now)
 				if not tapped.is_empty():
-					highway.on_strum(tapped)
-		elif event.is_action_released(InputProfile.FRETS[lane]):
-			session.release_fret(lane)
-			highway.set_fret(lane, false)
+					h.on_strum(tapped)
+		elif released:
+			s.release_fret(lane)
+			h.set_fret(lane, false)
 	if InputProfile.FRET_TAPS:
 		return  # sem palhetada: depois de um acerto no traste, ela viraria overstrum
-	for action: String in InputProfile.STRUM:
-		if event.is_action_pressed(action):
-			var result := session.strum(now)
-			highway.on_strum(result)
+	for i in strums.size():
+		if (
+			event.is_action_pressed(strums[i])
+			or (player_index == 0 and event.is_action_pressed(InputProfile.STRUM[i]))
+		):
+			var result := s.strum(now)
+			h.on_strum(result)
 			if result.get("grade") == Judge.OVERSTRUM and sfx:
 				sfx.play_error()
 
