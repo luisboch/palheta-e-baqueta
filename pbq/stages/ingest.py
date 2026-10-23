@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +10,8 @@ from pbq.ffmpeg import ffmpeg_to
 from pbq.manifest import Song
 from pbq.stages.base import Progress, Stage, no_progress
 from pbq.titles import parse_title, parse_youtube_music
+
+URL = re.compile(r"^https?://", re.I)
 
 
 class Ingest(Stage):
@@ -33,6 +36,8 @@ class Ingest(Stage):
 
         # Em MP3s vindos de vídeo, TIT2 costuma ser "Artista - Música (...)" e TPE1 o canal.
         raw = str(tags["TIT2"]) if "TIT2" in tags else src.stem
+        if URL.match(raw.strip()):
+            raw = src.stem  # alguns downloaders gravam o link do vídeo no título
         uploader = str(tags["TPE1"]) if "TPE1" in tags else ""
         song.meta.update(parse_title(raw, uploader))
         official = parse_youtube_music(str(tags.get("TXXX:description", "")))

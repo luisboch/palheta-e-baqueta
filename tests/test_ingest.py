@@ -41,3 +41,12 @@ def test_without_tags_uses_file_name(config):
     song = ingest(config, path)
     assert (song.meta["artist"], song.meta["title"]) == ("Artista", "Música")
     assert song.meta["album"] is None
+
+
+def test_url_in_title_falls_back_to_file_name(config):
+    path = make_mp3(
+        config.paths.input / "Extreme - More Than Words.mp3",
+        tags={"title": "https://www.youtube.com/watch?v=abc", "artist": "Canal"},
+    )
+    song = ingest(config, path)
+    assert (song.meta["artist"], song.meta["title"]) == ("Extreme", "More Than Words")

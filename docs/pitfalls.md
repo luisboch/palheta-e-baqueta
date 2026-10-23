@@ -43,3 +43,10 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-22 · .chart e git:** o `.chart` é CRLF (como o Moonscraper escreve). `*.chart -text` no
   `.gitattributes` impede o git de converter, e o docs_check compara os arquivos gerados em bytes
   (o `read_text()` do Python converteria CRLF em LF).
+- **2026-10-22 · Godot, cenas:** malhas e materiais de uma `PackedScene` são compartilhados entre
+  todas as instâncias. Mudar `mesh.size` numa partida muda na próxima. Faça `duplicate()` antes
+  (ver `setup()` em `godot/game/highway.gd`).
+- **2026-10-22 · Godot, editor:** nó criado só em `_ready()` não aparece no editor (o script não roda
+  lá). O que deve ser visto e ajustado no editor tem de ser nó da cena.
+- **2026-10-22 · MP3 baixado da internet:** alguns trazem o link do vídeo na tag de título. O
+  `ingest` ignora título que é URL e usa o nome do arquivo.
