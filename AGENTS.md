@@ -12,6 +12,8 @@ Este arquivo tem só **regras e ponteiros**. Os fatos ficam em `docs/`, cada um 
 |---|---|
 | Como instalar, rodar, testar | [README.md](README.md) |
 | Como as peças se encaixam (processos, arquivos, fluxo) | [docs/architecture.md](docs/architecture.md) |
+| Arquivos e mensagens entre backend e jogo | [docs/backend-protocol.md](docs/backend-protocol.md) |
+| O que a biblioteca contém (contrato versionado) | [docs/library-format.md](docs/library-format.md) |
 | Por que foi decidido assim | [docs/adr/](docs/adr/README.md): um ADR por decisão |
 | O que já foi feito e o que vem | [docs/roadmap.md](docs/roadmap.md) |
 | Testes, cobertura, fixtures | [docs/testing.md](docs/testing.md) |

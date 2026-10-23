@@ -26,7 +26,17 @@ O desenho geral, que vale para todas as fases. O porquê de cada escolha está n
 - **Pendrive** ([ADR 0003](adr/0003-pendrive-pelo-menu.md)): `<pendrive>/palheta/*.mp3` para
   processar e `<pendrive>/palheta/library/<id>/` para músicas prontas (salvar e importar).
 
-## Pipeline (planejado)
+## Pipeline
+
+Etapas implementadas (gerado de `pbq/stages/__init__.py`):
+
+<!-- gen:stages -->
+| # | Etapa | Versão | Requer | Obrigatória | O que faz |
+|---|---|---|---|---|---|
+| 1 | `ingest` | 1 | — | sim | metadados (artista, música, duração) e capa |
+<!-- /gen:stages -->
+
+Planejadas:
 
 | # | Etapa | Saída | Ferramenta (ver [ADR 0006](adr/0006-modelos-de-ia.md)) |
 |---|---|---|---|

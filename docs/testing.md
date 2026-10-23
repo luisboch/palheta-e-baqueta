@@ -8,8 +8,10 @@
   usam fakes determinísticos, sem torch, sem GPU e sem download.
 - **`@pytest.mark.slow`**: o pipeline real numa música curta e sintética. Fica fora do padrão
   (`-m "not slow"`) e da CI rápida. Para rodar: `uv run pytest -m slow --no-cov`.
-- **Fixtures de áudio** são geradas por script (senoides, cliques, ruído filtrado), curtas e
-  sem direito autoral. Nunca use música de verdade em teste.
+- **Fixtures de áudio** são geradas na hora por `tests/audio.py` (senoide via ffmpeg + tags ID3
+  e capa via mutagen), curtas e sem direito autoral. Nunca use música de verdade em teste.
+- **Etapas falsas** para pipeline e worker ficam em `tests/fakes.py`; a config de teste
+  (`tests/conftest.py`) aponta tudo para um `tmp_path`, inclusive as montagens de pendrive.
 - A `data/` real nunca é usada: todo teste monta a sua config num `tmp_path`.
 
 ## GDScript

@@ -39,10 +39,15 @@ O `uv` baixa sozinho o Python de `.python-version` (3.12), sem depender do Pytho
 ## Uso
 
 ```bash
-uv run pbq version   # versão do backend (JSON, lido pelo jogo)
+cp config.example.toml config.toml   # opcional: só para mudar algum ajuste
+uv run pbq process                   # processa agora o que estiver em data/input
+uv run pbq status                    # estado de cada música, por etapa
+uv run pbq watch                     # worker em segundo plano (o jogo inicia sozinho)
+uv run pbq drive list                # pendrives montados (o menu do jogo usa os comandos drive)
 ```
 
-Os comandos de processamento e o jogo chegam nas próximas fases (ver o roadmap).
+Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/backend-protocol.md).
+Por enquanto só a etapa `ingest` existe; o jogo chega na fase 6 (ver o roadmap).
 
 ## Testes
 
