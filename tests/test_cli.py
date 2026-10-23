@@ -11,6 +11,14 @@ from tests.test_backup import packaged
 from tests.test_drive import plug
 
 
+@pytest.fixture(autouse=True)
+def only_ingest(monkeypatch):
+    """`pbq process`/`status` sem modelos de IA: só a etapa ingest (as outras têm testes próprios)."""
+    from pbq.stages.ingest import Ingest
+
+    monkeypatch.setattr(cli, "STAGES", [Ingest])
+
+
 @pytest.fixture
 def cfg_file(config, tmp_path):
     """config.toml apontando para o diretório temporário da fixture `config`."""

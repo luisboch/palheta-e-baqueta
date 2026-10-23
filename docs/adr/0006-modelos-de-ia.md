@@ -3,6 +3,9 @@
 - **Status:** Proposta
 - **Data:** 2026-10-22
 
+> **2026-10-22:** separação e violão × guitarra medidos e aceitos no
+> [ADR 0009](0009-separacao-violao-e-presenca-medidos.md). Batidas, bateria e cordas seguem como proposta.
+
 ## Contexto
 
 Precisamos de stems por instrumento, batidas e transcrição de bateria e de instrumentos com

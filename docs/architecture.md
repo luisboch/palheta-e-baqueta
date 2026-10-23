@@ -34,21 +34,24 @@ Etapas implementadas (gerado de `pbq/stages/__init__.py`):
 | # | Etapa | Versão | Requer | Obrigatória | O que faz |
 |---|---|---|---|---|---|
 | 1 | `ingest` | 1 | — | sim | metadados (artista, música, duração) e capa |
+| 2 | `separate` | 1 | `ingest` | sim | stems por instrumento (Demucs htdemucs_6s) |
+| 3 | `guitar_split` | 1 | `separate` | sim | guitarra elétrica × violão, por trechos (classificador de timbre) |
+| 4 | `presence` | 1 | `separate`, `guitar_split` | sim | quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados |
 <!-- /gen:stages -->
 
-Planejadas:
+Planejadas (fases 4 e 5):
 
-| # | Etapa | Saída | Ferramenta (ver [ADR 0006](adr/0006-modelos-de-ia.md)) |
-|---|---|---|---|
-| 1 | `ingest` | metadados, capa | mutagen, ffmpeg |
-| 2 | `separate` | stems: drums, bass, guitar, vocals, piano, other | Demucs `htdemucs_6s` |
-| 3 | `guitar_split` | guitarra elétrica × violão, por trechos | classificador de timbre |
-| 4 | `presence` | quais instrumentos tocam (os ausentes ficam bloqueados) | RMS, onsets |
-| 5 | `beats` | batidas, compassos, mapa de tempo | beat tracker |
-| 6 | `drums_chart` | notas de bateria (Muito difícil) | transcrição de bateria |
-| 7 | `pitched_chart` | notas de guitarra, violão e baixo (Muito difícil) | transcrição de altura |
-| 8 | `difficulty` | Fácil, Médio e Difícil, por redução | regras puras |
-| 9 | `package` | `data/library/<id>/` | ffmpeg |
+| Etapa | Saída | Ferramenta (ver [ADR 0006](adr/0006-modelos-de-ia.md)) |
+|---|---|---|
+| `beats` | batidas, compassos, mapa de tempo | beat tracker |
+| `drums_chart` | notas de bateria (Muito difícil) | transcrição de bateria |
+| `pitched_chart` | notas de guitarra, violão e baixo (Muito difícil) | transcrição de altura |
+| `difficulty` | Fácil, Médio e Difícil, por redução | regras puras |
+| `package` | `data/library/<id>/` | ffmpeg |
+
+Medidas e limiares das etapas de áudio: [ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md).
+Os modelos ficam atrás das interfaces de `pbq/models/__init__.py`; os adaptadores reais
+(`pbq/models/demucs.py`, `pbq/models/panns.py`) importam torch só ao serem construídos.
 
 O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato-de-chart.md)).
 
