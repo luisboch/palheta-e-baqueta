@@ -106,6 +106,7 @@ def test_process_and_status(config, cfg_file, capsys):
     path = make_mp3(config.paths.input / "Artista - Música.mp3")
     sid = song_id(path)
     assert cli.main(["--config", str(cfg_file), "process", "--song", sid[:4]]) == 0
+    assert (config.paths.library / "index.json").exists()
     capsys.readouterr()
     assert cli.main(["--config", str(cfg_file), "status"]) == 0
     out = capsys.readouterr().out

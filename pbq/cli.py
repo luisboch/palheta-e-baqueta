@@ -16,6 +16,7 @@ from pathlib import Path
 
 from pbq import __version__, backup, drive, protocol
 from pbq.config import Config, load_config
+from pbq.library import write_index
 from pbq.pipeline import process_song
 from pbq.proc import die_with_parent
 from pbq.scan import Scanner
@@ -89,6 +90,7 @@ def cmd_process(config: Config, args: argparse.Namespace) -> int:
     for song in songs:
         log.info("== %s [%s]", song.label, song.id)
         failed += process_song(song, stages, force=args.force) == "failed"
+    write_index(config)  # como o worker: a biblioteca vista pelo jogo inclui as recém-prontas
     return 1 if failed else 0
 
 
