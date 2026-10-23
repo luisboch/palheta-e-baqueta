@@ -44,6 +44,11 @@ static func _under_tests() -> bool:
 	return false
 
 
+## Os menus já precisam do controle (A confirma, B volta), antes de qualquer partida.
+func _ready() -> void:
+	InputProfile.apply()
+
+
 func goto(scene: String) -> void:
 	last_scene = scene
 	if live:

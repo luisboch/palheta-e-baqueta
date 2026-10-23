@@ -37,6 +37,10 @@ const FRET_TAPS := true
 
 ## ação → [["key", keycode] | ["joy", botão, device]]
 const DEFAULTS := {
+	# Menus: o Godot 4 só liga ui_accept/ui_cancel ao teclado (Enter/Espaço, Esc); sem isto o
+	# direcional anda pelos botões mas o A não aperta nada. Device -1: qualquer controle.
+	"ui_accept": [["joy", JOY_BUTTON_A, -1]],
+	"ui_cancel": [["joy", JOY_BUTTON_B, -1]],
 	# Ações gerais / P1
 	"fret_0": [["key", KEY_1], ["key", KEY_A], ["joy", JOY_BUTTON_A, 0]],
 	"fret_1": [["key", KEY_2], ["key", KEY_S], ["joy", JOY_BUTTON_B, 0]],

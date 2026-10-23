@@ -52,3 +52,18 @@ func test_input_profile_p1_and_p2_separation() -> void:
 	key_p2.pressed = true
 	assert_bool(key_p2.is_action("p1_fret_0")).is_false()
 	assert_bool(key_p2.is_action("p2_fret_0")).is_true()
+
+
+func test_menus_accept_and_cancel_from_any_joypad() -> void:
+	InputProfile.apply()
+	for device in [0, 1]:
+		var accept := InputEventJoypadButton.new()
+		accept.button_index = JOY_BUTTON_A
+		accept.device = device
+		accept.pressed = true
+		assert_bool(accept.is_action("ui_accept")).is_true()
+		var cancel := InputEventJoypadButton.new()
+		cancel.button_index = JOY_BUTTON_B
+		cancel.device = device
+		cancel.pressed = true
+		assert_bool(cancel.is_action("ui_cancel")).is_true()

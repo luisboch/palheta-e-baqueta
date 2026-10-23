@@ -71,3 +71,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   mypy achava o `torch` no `.venv` local (na CI ele não é instalado), um caminho gerado citado
   na doc só existia aqui, e o `gdformat` em lotes paralelos falha com "File exists"
   (`require_serial` no `.pre-commit-config.yaml`).
+- **2026-10-23 · Godot 4 não liga os menus ao controle:** `ui_accept` e `ui_cancel` padrão só
+  têm teclas (o `ui_up/down` tem o direcional, então a navegação engana). O A não apertava
+  nenhum botão no Bazzite. `InputProfile.DEFAULTS` acrescenta A/B e o autoload `App` aplica.
