@@ -7,7 +7,13 @@ work = "data/work"        # intermediários + estado por música (<id>/song.json
 library = "data/library"  # saída final, lida pelo jogo (contrato: docs/library-format.md)
 state = "data"            # eventos do worker, lock, ajustes do jogo
 
+[watch]
+interval = 5            # segundos entre verificações de data/input
+nice = 19               # prioridade do worker (19 = mais baixa): o jogo não pode engasgar
+torch_threads = 4       # núcleos físicos do Deck; no kraoke, SMT (6-8) não acelerou e 3 foi ~18% mais lento
+
 [drive]
+# roots = ["/run/media/deck"]  # onde procurar pendrives; padrão: /run/media/<usuário> (SteamOS) e /media/<usuário> (Ubuntu)
 # Pasta na raiz do pendrive: MP3s para processar + library/ (músicas prontas).
 # Separada da "kraoke/" para um pendrive servir aos dois sem um pegar os arquivos do outro.
 folder = "palheta"
