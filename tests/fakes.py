@@ -48,3 +48,47 @@ class Optional(Stage):
 
     def run(self, song: Song, progress: Progress = no_progress) -> None:
         raise RuntimeError("opcional falhou")
+
+
+class FakeSeparator:
+    """StemSeparator falso: cada stem é um tom sintético (ou silêncio, se pedido)."""
+
+    sample_rate = 44100
+    stems = ("drums", "bass", "guitar", "piano", "vocals", "other")
+
+    def __init__(self, seconds: float = 2.0, silent: tuple[str, ...] = ()):
+        self.seconds = seconds
+        self.silent = silent
+        self.calls = 0
+
+    def separate(self, path, progress):
+        import numpy as np
+
+        self.calls += 1
+        progress(0.5)
+        n = int(self.seconds * self.sample_rate)
+        t = np.arange(n) / self.sample_rate
+        out = {}
+        for i, name in enumerate(self.stems):
+            tone = 0.0 if name in self.silent else 0.2 * np.sin(2 * np.pi * (110 * (i + 1)) * t)
+            out[name] = np.stack([tone * np.ones(n), tone * np.ones(n)]).astype(np.float32)
+        progress(1.0)
+        return out
+
+
+class FakeTimbre:
+    """GuitarTimbre falso: violão na primeira metade das janelas, elétrica na segunda."""
+
+    sample_rate = 16000
+
+    def __init__(self, acoustic_first: bool = True):
+        self.acoustic_first = acoustic_first
+        self.seen = 0
+
+    def scores(self, windows):
+        import numpy as np
+
+        n = len(windows)
+        self.seen += n
+        first = np.array([[0.9, 0.1]] * (n // 2) + [[0.1, 0.8]] * (n - n // 2))
+        return first if self.acoustic_first else first[:, ::-1]
