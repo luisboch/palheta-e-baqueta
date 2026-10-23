@@ -1,36 +1,44 @@
-## Partida de um jogador: áudio, entrada e a pista 3D. A lógica toda está em PlaySession.
+## Partida de 1 ou 2 jogadores: áudio, entrada e as pistas 3D. A lógica toda está em PlaySession.
 ##
 ## Vindo do menu, toca a escolha em App.selection. Rodando a cena sozinha (F6 no editor ou
 ## linha de comando):
 ##   godot --path godot res://game/play.tscn -- --song <pasta da música>
 ##         [--instrument strings|bass|drums] [--difficulty Easy|Medium|Hard|Expert] [--autoplay 1]
+##         [--mode solo|coop|versus] [--instrument2 strings|bass|drums] [--difficulty2 Easy|...]
 ## --autoplay: o jogo toca sozinho, acertando cada nota no tempo (depuração e demonstração).
 ## Sem --song, abre a música de data/library com mais instrumentos.
 extends Node3D
 
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
 const MUSIC_BUS := "Music"
+const CAM_1P_POS := Vector3(0.0, 2.4, 2.9)
+const CAM_2P_POS := Vector3(0.0, 2.9, 4.0)
+const HIGHWAY_2P_OFFSET := 1.75
 
-## Falso: quem criou a cena chama `start()` (os testes). Verdadeiro: a partida vem do menu
-## (App.selection) ou da linha de comando.
 var auto_start := true
-var session: PlaySession
-var player: AudioStreamPlayer
+var highway_2: Highway
 var paused := false
+var play_mode := "solo"
+var player: AudioStreamPlayer
+var session: PlaySession
+var session_2: PlaySession
 var sfx: SoundEffects
-var _stem_index := -1  ## índice do stem do jogador no AudioStreamSynchronized
-var _started_audio := false
+
+var _autoplay := false
+var _bands := SpectrumBands.new()
+var _done := false
+var _grid: BeatGrid
 var _lead := LEAD_IN
 var _loaded: Dictionary
-var _done := false
-var _autoplay := false
-var _grid: BeatGrid
-var _bands := SpectrumBands.new()
-var _spectrum: AudioEffectSpectrumAnalyzerInstance  ## null sem o bus Music (testes sem áudio)
+var _spectrum: AudioEffectSpectrumAnalyzerInstance
+var _started_audio := false
+var _stem_index := -1
+var _stem_index_2 := -1
 
+@onready var background: Background = $Background
+@onready var camera: Camera3D = $Camera3D
 @onready var highway: Highway = $Highway
 @onready var hud: Hud = $Hud
-@onready var background: Background = $Background
 
 
 func _ready() -> void:
@@ -43,20 +51,39 @@ func _ready() -> void:
 	if not auto_start:
 		return
 	if not App.selection.is_empty():
-		start(App.selection["dir"], App.selection["instrument"], App.selection["difficulty"])
+		start(
+			App.selection["dir"],
+			App.selection["instrument"],
+			App.selection["difficulty"],
+			false,
+			App.selection.get("mode", "solo"),
+			App.selection.get("instrument_p2", ""),
+			App.selection.get("difficulty_p2", "")
+		)
 	else:
 		var args := _args()
 		start(
 			args.get("song", default_song(App.library_dir)),
 			args.get("instrument", ""),
 			args.get("difficulty", ""),
-			args.has("autoplay")
+			args.has("autoplay"),
+			args.get("mode", "solo"),
+			args.get("instrument2", ""),
+			args.get("difficulty2", "")
 		)
 
 
-## Começa a partida. Instrumento ou dificuldade vazios/indisponíveis: Cordas (senão o primeiro
-## instrumento jogável) no Difícil (senão a dificuldade mais alta que ele tem).
-func start(dir: String, instrument: String, difficulty: String, autoplay := false) -> void:
+## Começa a partida de 1 ou 2 jogadores.
+func start(
+	dir: String,
+	instrument: String,
+	difficulty: String,
+	autoplay := false,
+	mode := "solo",
+	instrument_p2 := "",
+	difficulty_p2 := ""
+) -> void:
+	play_mode = mode
 	_autoplay = autoplay
 	_loaded = SongLoader.load_dir(dir)
 	if not _loaded["ok"]:
@@ -77,9 +104,32 @@ func start(dir: String, instrument: String, difficulty: String, autoplay := fals
 		if not _loaded["beatmap"].get("beats", []).is_empty()
 		else BeatGrid.from_tempo(session.tempo, session.duration)
 	)
+
+	var is_2p := instrument_p2 != "" or play_mode in ["coop", "versus"]
+	if is_2p:
+		var choice_p2 := InstrumentRules.choose(
+			available,
+			instrument_p2 if instrument_p2 != "" else instrument,
+			difficulty_p2 if difficulty_p2 != "" else difficulty
+		)
+		var inst_2: String = choice_p2[0]
+		var diff_2: String = choice_p2[1]
+		session_2 = PlaySession.new(_loaded["chart"], inst_2, diff_2)
+		if camera:
+			camera.position = CAM_2P_POS
+		highway.position.x = -HIGHWAY_2P_OFFSET
+		highway_2 = highway.duplicate()
+		add_child(highway_2)
+		highway_2.position.x = HIGHWAY_2P_OFFSET
+		highway_2.setup(session_2)
+	else:
+		if camera:
+			camera.position = CAM_1P_POS
+		highway.position.x = 0.0
+
 	highway.setup(session)
 	hud.setup(_loaded["song"], instrument, difficulty)
-	_setup_audio(instrument)
+	_setup_audio(instrument, session_2.instrument if session_2 else "")
 
 
 func _exit_tree() -> void:
@@ -95,10 +145,16 @@ func leave() -> void:
 		get_tree().quit()
 
 
-func _setup_audio(instrument: String) -> void:
+func _setup_audio(instrument: String, instrument_2 := "") -> void:
 	var sync := AudioStreamSynchronized.new()
 	var streams: Array[AudioStream] = []
-	for role: String in ["song", instrument]:
+	var roles: Array[String] = ["song"]
+	if instrument != "":
+		roles.append(instrument)
+	if instrument_2 != "" and instrument_2 != instrument:
+		roles.append(instrument_2)
+
+	for role: String in roles:
 		var path := SongLoader.file_path(_loaded, role)
 		if path == "":
 			continue
@@ -106,7 +162,11 @@ func _setup_audio(instrument: String) -> void:
 		if stream:
 			if role == instrument:
 				_stem_index = streams.size()
+			if role == instrument_2:
+				_stem_index_2 = streams.size()
 			streams.append(stream)
+	if instrument_2 != "" and instrument_2 == instrument:
+		_stem_index_2 = _stem_index
 	sync.stream_count = streams.size()
 	for i in streams.size():
 		sync.set_sync_stream(i, streams[i])
@@ -130,15 +190,32 @@ func _process(delta: float) -> void:
 		sfx.play_miss()
 	for note: PlayNote in events["missed"]:
 		highway.on_miss(note)
-	if _stem_index >= 0:
-		player.stream.set_sync_stream_volume(_stem_index, events["volume_db"])
+
+	var vol_1: float = events["volume_db"]
+	if session_2 and highway_2:
+		var events_2 := session_2.update(now, delta)
+		if not events_2["missed"].is_empty() and sfx:
+			sfx.play_miss()
+		for note: PlayNote in events_2["missed"]:
+			highway_2.on_miss(note)
+		var vol_2: float = events_2["volume_db"]
+		if player and player.stream:
+			if _stem_index == _stem_index_2 and _stem_index >= 0:
+				player.stream.set_sync_stream_volume(_stem_index, maxf(vol_1, vol_2))
+			else:
+				if _stem_index >= 0:
+					player.stream.set_sync_stream_volume(_stem_index, vol_1)
+				if _stem_index_2 >= 0:
+					player.stream.set_sync_stream_volume(_stem_index_2, vol_2)
+		highway_2.update_view(now, _grid)
+	elif _stem_index >= 0 and player and player.stream:
+		player.stream.set_sync_stream_volume(_stem_index, vol_1)
+
 	highway.update_view(now, _grid)
 	background.update(now, _grid, _bands.update(_magnitudes(), delta))
 	hud.update_score(session.scoring)
-	if (
-		session.finished(now)
-		and (player == null or not player.playing or now > session.duration + 3.0)
-	):
+	var finished_all := session.finished(now) and (session_2 == null or session_2.finished(now))
+	if finished_all and (player == null or not player.playing or now > session.duration + 3.0):
 		_done = true
 		hud.show_results(session.scoring)
 
@@ -175,16 +252,22 @@ func _magnitudes() -> PackedFloat32Array:
 
 ## Toca as notas que chegaram na linha (modo --autoplay).
 func _play_by_itself(now: float) -> void:
-	for note in session.notes:
+	_autoplay_player(session, highway, now)
+	if session_2 and highway_2:
+		_autoplay_player(session_2, highway_2, now)
+
+
+func _autoplay_player(s: PlaySession, h: Highway, now: float) -> void:
+	for note in s.notes:
 		if note.time > now:
 			break
 		if note.state != PlayNote.State.PENDING or note.time + Judge.WINDOWS["ok"] < now:
 			continue
-		if session.drums:
-			highway.on_input(note.lanes[0], session.pad(note.time, note.lanes[0]))
+		if s.drums:
+			h.on_input(note.lanes[0], s.pad(note.time, note.lanes[0]))
 		else:
-			session.held = note.lanes.duplicate()
-			highway.on_strum(session.strum(note.time))
+			s.held = note.lanes.duplicate()
+			h.on_strum(s.strum(note.time))
 
 
 ## Pausa: para o áudio e o relógio (o _process não anda), solta os trastes (soltar uma tecla
@@ -198,6 +281,10 @@ func set_paused(value: bool) -> void:
 	for lane in session.held.duplicate():
 		session.release_fret(lane)
 		highway.set_fret(lane, false)
+	if session_2 and highway_2:
+		for lane in session_2.held.duplicate():
+			session_2.release_fret(lane)
+			highway_2.set_fret(lane, false)
 	hud.show_pause(value)
 
 
@@ -218,6 +305,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var now := session.clock.now() if _lead <= 0.0 else -_lead
 	_handle_player_input(0, event, session, highway, now)
+	if session_2 and highway_2:
+		_handle_player_input(1, event, session_2, highway_2, now)
 
 
 func _handle_player_input(

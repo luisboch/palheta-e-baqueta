@@ -118,20 +118,20 @@ height = 0.1
 [node name="Play" type="Node3D" unique_id=1359401120]
 script = ExtResource("1_l2lu5")
 
+[node name="Camera3D" type="Camera3D" parent="." unique_id=656154895]
+transform = Transform3D(1, 0, 0, 0, 0.96152395, 0.27472115, 0, -0.27472115, 0.96152395, 0, 2.4, 2.9)
+fov = 60.0
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=906070909]
+transform = Transform3D(0.9396926, 0.28016648, -0.1961747, 0, 0.57357645, 0.81915206, 0.34202012, -0.76975113, 0.53898555, 0, 0, 0)
+
+[node name="Environment" type="WorldEnvironment" parent="." unique_id=1087637707]
+environment = SubResource("Environment_crsts")
+
 [node name="Background" parent="." instance=ExtResource("4_bkgnd")]
 
 [node name="Highway" type="Node3D" parent="." unique_id=1360344792]
 script = ExtResource("2_ktf2h")
-
-[node name="Camera3D" type="Camera3D" parent="Highway" unique_id=656154895]
-transform = Transform3D(1, 0, 0, 0, 0.96152395, 0.27472115, 0, -0.27472115, 0.96152395, 0, 2.4, 2.9)
-fov = 60.0
-
-[node name="Sun" type="DirectionalLight3D" parent="Highway" unique_id=906070909]
-transform = Transform3D(0.9396926, 0.28016648, -0.1961747, 0, 0.57357645, 0.81915206, 0.34202012, -0.76975113, 0.53898555, 0, 0, 0)
-
-[node name="Environment" type="WorldEnvironment" parent="Highway" unique_id=1087637707]
-environment = SubResource("Environment_crsts")
 
 [node name="Board" type="MeshInstance3D" parent="Highway" unique_id=983497017]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -6.3)

@@ -172,3 +172,59 @@ func test_pause_stops_the_clock_and_resumes() -> void:
 	scene.get_node("%Restart").pressed.emit()
 	assert_str(App.last_scene).is_equal(App.PLAY)
 	App.selection = {}
+
+
+func test_two_player_mode_spawns_two_highways_and_runs_both() -> void:
+	var dir := _song_dir('{"strings": true, "drums": true}')
+	var scene: Node = PlayScene.instantiate()
+	scene.auto_start = false
+	add_child(scene)
+	auto_free(scene)
+
+	scene.start(dir, "strings", "Hard", true, "coop", "drums", "Medium")
+	assert_that(scene.session_2).is_not_null()
+	assert_str(scene.session.instrument).is_equal("strings")
+	assert_str(scene.session_2.instrument).is_equal("drums")
+	assert_that(scene.highway_2).is_not_null()
+	assert_float(scene.highway.position.x).is_less(0.0)
+	assert_float(scene.highway_2.position.x).is_greater(0.0)
+
+	_run_to_end(scene)
+	assert_bool(scene._done).is_true()
+	assert_int(scene.session.scoring.hits).is_greater(0)
+	assert_int(scene.session_2.scoring.hits).is_greater(0)
+
+
+func test_two_player_mode_routes_inputs_to_correct_player() -> void:
+	var dir := _song_dir('{"strings": true, "bass": true}')
+	var scene: Node = PlayScene.instantiate()
+	scene.auto_start = false
+	add_child(scene)
+	auto_free(scene)
+
+	scene.start(dir, "strings", "Hard", false, "versus", "bass", "Hard")
+	assert_that(scene.session_2).is_not_null()
+
+	var p1_fret := InputEventAction.new()
+	p1_fret.action = "p1_fret_0"
+	p1_fret.pressed = true
+	scene._unhandled_input(p1_fret)
+
+	assert_array(scene.session.held).is_equal(PackedInt32Array([0]))
+	assert_array(scene.session_2.held).is_empty()
+
+	var p2_fret := InputEventAction.new()
+	p2_fret.action = "p2_fret_2"
+	p2_fret.pressed = true
+	scene._unhandled_input(p2_fret)
+
+	assert_array(scene.session.held).is_equal(PackedInt32Array([0]))
+	assert_array(scene.session_2.held).is_equal(PackedInt32Array([2]))
+
+	p1_fret.pressed = false
+	p2_fret.pressed = false
+	scene._unhandled_input(p1_fret)
+	scene._unhandled_input(p2_fret)
+
+	assert_array(scene.session.held).is_empty()
+	assert_array(scene.session_2.held).is_empty()
