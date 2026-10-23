@@ -3,9 +3,10 @@ class_name SongLoader
 extends RefCounted
 
 
-## {ok, error, dir, song (song.json), chart (ChartParser)}. `ok` falso explica em `error`.
+## {ok, error, dir, song (song.json), chart (ChartParser), beatmap}. `ok` falso explica em
+## `error`. O beatmap é opcional (o fundo usa o mapa de tempo sem ele): {} se faltar.
 static func load_dir(dir: String) -> Dictionary:
-	var result := {"ok": false, "error": "", "dir": dir, "song": {}, "chart": {}}
+	var result := {"ok": false, "error": "", "dir": dir, "song": {}, "chart": {}, "beatmap": {}}
 	var song_path := dir.path_join("song.json")
 	if not FileAccess.file_exists(song_path):
 		result["error"] = "música incompleta (sem song.json): " + dir
@@ -25,6 +26,14 @@ static func load_dir(dir: String) -> Dictionary:
 		return result
 	result["song"] = song
 	result["chart"] = ChartParser.parse(FileAccess.get_file_as_string(chart_path))
+	var beatmap := JSON.new()
+	var beatmap_path := file_path(result, "beatmap")
+	if (
+		beatmap_path != ""
+		and beatmap.parse(FileAccess.get_file_as_string(beatmap_path)) == OK
+		and beatmap.data is Dictionary
+	):
+		result["beatmap"] = beatmap.data
 	result["ok"] = true
 	return result
 

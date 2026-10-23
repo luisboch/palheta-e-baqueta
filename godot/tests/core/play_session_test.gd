@@ -64,6 +64,7 @@ func test_song_loader_and_input_profile() -> void:
 	assert_str(SongLoader.file_path(loaded, "song")).is_equal("")  # o ogg não existe
 	assert_str(SongLoader.file_path(loaded, "chart")).ends_with("notes.chart")
 	assert_str(SongLoader.file_path(loaded, "cover")).is_equal("")
+	assert_dict(loaded["beatmap"]).is_empty()
 
 	var newer := FileAccess.open(dir.path_join("song.json"), FileAccess.WRITE)
 	newer.store_string('{"version": 99}')
