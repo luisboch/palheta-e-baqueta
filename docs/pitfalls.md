@@ -22,3 +22,11 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-22 · ataques:** guitarra distorcida tem ataques de só ~1–2 dB, e um limiar pensado
   para bateria (3 dB) "esconde" a palhetada inteira. Ver
   [ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md).
+- **2026-10-22 · beat_this:** os pesos só existem no servidor da JKU (cloud.cp.jku.at), que
+  ficou fora do ar (HTTP 503) por horas. Os espelhos no Hugging Face são de terceiros e o
+  checkpoint é pickle: não usar ([ADR 0011](adr/0011-batidas-e-bateria.md)).
+- **2026-10-22 · PyTorch × Keras:** `MaxPool2d(ceil_mode=True)` não equivale a
+  `padding="same"` do Keras. O TensorFlow divide a folga entre os dois lados, e o `ceil_mode` põe
+  tudo no fim, o que desloca as bandas (erro de até 0,2 na saída do ADTOF). Ver `pbq/models/adtof.py`.
+- **2026-10-22 · ADTOF:** o Frame_RNN espera 84 bandas (12 por oitava, 20 Hz–20 kHz, janela 2048 a
+  44,1 kHz). Com outra taxa ou janela, o número de bandas muda e os pesos não servem.

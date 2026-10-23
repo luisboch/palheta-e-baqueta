@@ -75,3 +75,18 @@ docs/           arquitetura, ADRs, roadmap, testes, armadilhas
 ```
 
 Para quem vai mexer no código, as regras ficam em [AGENTS.md](AGENTS.md).
+
+## Licenças e créditos
+
+O Palheta & Baqueta é um projeto **não comercial**: a transcrição de bateria usa os pesos do
+ADTOF, sob CC BY-NC-SA 4.0 ([ADR 0011](docs/adr/0011-batidas-e-bateria.md)). A licença do
+código do projeto ainda não foi definida.
+
+| Componente | Uso | Licença |
+|---|---|---|
+| [Demucs](https://github.com/adefossez/demucs) (`htdemucs_6s`) | separação em stems | MIT |
+| [beat_this](https://github.com/CPJKU/beat_this) | batidas e compassos | MIT (código e pesos) |
+| [ADTOF](https://github.com/MZehren/ADTOF), Zehren, Alunno e Bientinesi (ISMIR 2021; *Signals* 2023) | pesos da transcrição de bateria | CC BY-NC-SA 4.0 |
+| [ADTOF-pytorch](https://github.com/xavriley/ADTOF-pytorch) | conversão dos pesos do ADTOF para PyTorch | pesos derivados do ADTOF (CC BY-NC-SA 4.0) |
+
+A rede do ADTOF em `pbq/models/adtof.py` é implementação própria; só os pesos vêm de fora.
