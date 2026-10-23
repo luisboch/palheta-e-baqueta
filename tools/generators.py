@@ -150,8 +150,9 @@ def gen_gd_protocol(root: Path) -> str:
     events = _gd_dict({k: v.fields for k, v in EVENT_TYPES.items()})
     messages = _gd_dict({k: v.fields for k, v in MESSAGE_TYPES.items()})
     instruments = ", ".join(f'"{name}"' for name in INSTRUMENTS)
-    return f"""# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py, pbq/library.py e
-# pbq/stages/presence.py.
+    stage_labels = "{\n" + "\n".join(f'\t"{s.name}": "{s.label}",' for s in STAGES) + "\n}"
+    return f"""# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py, pbq/library.py,
+# pbq/stages/presence.py e do `label` das etapas.
 # Não edite: rode `uv run python -m tools.docs_check --fix`.
 ## Contrato com o backend: tipos e campos de eventos (data/events.jsonl) e de mensagens do CLI.
 class_name BackendProtocol
@@ -165,6 +166,9 @@ const INSTRUMENTS: Array[String] = [{instruments}]
 const EVENTS := {events}
 
 const MESSAGES := {messages}
+
+## Etapa do pipeline (queue.json "stage") → o que a tela mostra.
+const STAGE_LABELS := {stage_labels}
 
 
 ## A linha tem um tipo conhecido em `types` e todos os campos dele?

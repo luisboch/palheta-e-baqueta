@@ -39,6 +39,7 @@ class PitchedChart(Stage):
     """
 
     name = "pitched_chart"
+    label = "escrevendo Cordas e baixo"
     summary = "Cordas e baixo Muito difícil (basic-pitch), na grade de batidas"
     requires = ("separate", "beats", "presence")
 

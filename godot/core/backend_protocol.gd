@@ -1,5 +1,5 @@
-# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py, pbq/library.py e
-# pbq/stages/presence.py.
+# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py, pbq/library.py,
+# pbq/stages/presence.py e do `label` das etapas.
 # Não edite: rode `uv run python -m tools.docs_check --fix`.
 ## Contrato com o backend: tipos e campos de eventos (data/events.jsonl) e de mensagens do CLI.
 class_name BackendProtocol
@@ -24,6 +24,18 @@ const MESSAGES := {
 	"progress": ["phase", "done", "total", "fraction"],
 	"done": ["count", "errors"],
 	"error": ["message"],
+}
+
+## Etapa do pipeline (queue.json "stage") → o que a tela mostra.
+const STAGE_LABELS := {
+	"ingest": "lendo a música",
+	"separate": "separando os instrumentos",
+	"presence": "vendo quem toca",
+	"beats": "achando as batidas",
+	"drums_chart": "escrevendo a bateria",
+	"pitched_chart": "escrevendo Cordas e baixo",
+	"chart": "montando as dificuldades",
+	"package": "guardando na biblioteca",
 }
 
 

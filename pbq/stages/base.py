@@ -28,6 +28,8 @@ class Stage(ABC):
     name: ClassVar[str]
     # Uma linha para a tabela de etapas da documentação (gerada).
     summary: ClassVar[str] = ""
+    # O que a tela mostra durante a etapa ("separando os instrumentos"); gerado para o jogo.
+    label: ClassVar[str] = ""
     version: ClassVar[int] = 1
     # Etapas que precisam estar concluídas antes desta rodar.
     requires: ClassVar[tuple[str, ...]] = ()

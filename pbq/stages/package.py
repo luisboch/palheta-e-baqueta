@@ -58,6 +58,7 @@ class Package(Stage):
     """
 
     name = "package"
+    label = "guardando na biblioteca"
     summary = "pasta da música na biblioteca (stems em OGG, chart, mapa de batidas, song.json)"
     requires = ("presence", "chart")
 

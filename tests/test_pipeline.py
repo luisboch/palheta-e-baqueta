@@ -112,3 +112,9 @@ def test_manifest_reopen_keeps_state_and_updates_source(config):
     assert again.label == "b"
     again.meta.update(title="Música", artist=None)
     assert again.label == "? - Música"
+
+
+def test_every_stage_has_a_screen_label():
+    from pbq.stages import STAGES
+
+    assert all(stage.label for stage in STAGES)

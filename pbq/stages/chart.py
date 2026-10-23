@@ -41,6 +41,7 @@ class ChartFile(Stage):
     """
 
     name = "chart"
+    label = "montando as dificuldades"
     summary = "notes.chart (Clone Hero): mapa de tempo, compassos e as 4 dificuldades"
     version = 2  # 2: Cordas e baixo, e as 4 dificuldades
     requires = ("beats", "drums_chart", "pitched_chart")

@@ -90,6 +90,7 @@ class Presence(Stage):
     """
 
     name = "presence"
+    label = "vendo quem toca"
     summary = "quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados"
     version = 2  # 2: Cordas (violão + guitarra) no lugar de guitarra e violão separados
     requires = ("separate",)

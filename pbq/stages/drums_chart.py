@@ -46,6 +46,7 @@ class DrumsChart(Stage):
     """
 
     name = "drums_chart"
+    label = "escrevendo a bateria"
     summary = "chart de bateria Muito difícil (ADTOF), na grade de batidas"
     requires = ("separate", "beats", "presence")
 

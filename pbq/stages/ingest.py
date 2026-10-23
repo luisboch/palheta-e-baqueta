@@ -27,6 +27,7 @@ class Ingest(Stage):
     """
 
     name = "ingest"
+    label = "lendo a música"
     summary = "metadados (artista, música, duração) e capa"
 
     def run(self, song: Song, progress: Progress = no_progress) -> None:

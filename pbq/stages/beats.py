@@ -69,6 +69,7 @@ class Beats(Stage):
     """
 
     name = "beats"
+    label = "achando as batidas"
     summary = "batidas, tempos fortes e energia por batida (beat_this; reserva: librosa)"
     version = 2  # 2: campo "tracker" e reserva automática
     requires = ("ingest",)

@@ -37,6 +37,7 @@ class Separate(Stage):
     """
 
     name = "separate"
+    label = "separando os instrumentos"
     summary = "stems por instrumento (Demucs htdemucs_6s)"
     requires = ("ingest",)
 
