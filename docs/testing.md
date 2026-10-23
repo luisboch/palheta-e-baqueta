@@ -6,8 +6,7 @@
   aplica o limiar. Mede `pbq/` e `tools/`, com cobertura de ramos.
 - **Modelos de IA atrás de interfaces.** Cada etapa recebe o modelo por um `Protocol`. Os testes
   usam fakes determinísticos, sem torch, sem GPU e sem download.
-- **Adaptadores reais** (`pbq/models/demucs.py`, `pbq/models/panns.py`) só rodam por inteiro nos
-  testes `slow`. Nos rápidos, testa-se a matemática deles (ex.: o progresso do Demucs) sem torch.
+- **Adaptadores reais** (`pbq/models/demucs.py`) só rodam por inteiro nos testes `slow`. Nos rápidos, testa-se a matemática deles (ex.: o progresso do Demucs) sem torch.
 - **`@pytest.mark.slow`**: o pipeline real numa música curta e sintética. Fica fora do padrão
   (`-m "not slow"`) e da CI rápida. Para rodar: `uv run pytest -m slow --no-cov`.
 - **Fixtures de áudio** são geradas na hora por `tests/audio.py` (senoide via ffmpeg + tags ID3

@@ -1,6 +1,6 @@
 # AGENTS.md — regras para quem mexe no Palheta & Baqueta (agentes e pessoas)
 
-Jogo de ritmo para até 2 jogadores (cordas e bateria) em **Godot 4**, alimentado por um backend
+Jogo de ritmo para até 2 jogadores (Cordas, baixo e bateria) em **Godot 4**, alimentado por um backend
 **Python** que transforma MP3s em músicas jogáveis: stems separados por IA, charts em 4
 dificuldades e mapa de batidas. O alvo é o **Steam Deck no modo jogo**.
 

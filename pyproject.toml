@@ -13,9 +13,7 @@ dependencies = [
 # Extras por etapa (como no kraoke): o núcleo e os testes rápidos não precisam de torch.
 # torch 2.8.0: a mesma do kraoke (cache do uv compartilhado no Deck).
 separate = ["demucs==4.1.0", "torch==2.8.0"]
-# librosa < 1.0: o torchlibrosa (2023) do PANNs não acompanha a 1.0 (ago/2026).
-classify = ["panns-inference==0.1.1", "librosa==0.11.0", "torch==2.8.0"]
-ai = ["pbq[separate,classify]"]
+ai = ["pbq[separate]"]
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -95,5 +93,5 @@ strict = true
 
 [[tool.mypy.overrides]]
 # Sem tipos publicados; usados só dentro dos adaptadores de pbq/models/.
-module = ["panns_inference.*", "demucs.*", "mutagen.*"]
+module = ["demucs.*", "mutagen.*"]
 ignore_missing_imports = true

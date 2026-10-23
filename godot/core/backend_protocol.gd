@@ -1,10 +1,14 @@
-# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py e pbq/library.py.
+# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py, pbq/library.py e
+# pbq/stages/presence.py.
 # Não edite: rode `uv run python -m tools.docs_check --fix`.
 ## Contrato com o backend: tipos e campos de eventos (data/events.jsonl) e de mensagens do CLI.
 class_name BackendProtocol
 extends RefCounted
 
 const FORMAT_VERSION := 1
+
+## Instrumentos jogáveis (song.json "instruments": id → presente). Nomes na tela ficam no jogo.
+const INSTRUMENTS: Array[String] = ["drums", "bass", "strings"]
 
 const EVENTS := {
 	"queued": ["id", "label"],

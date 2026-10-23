@@ -74,21 +74,3 @@ class FakeSeparator:
             out[name] = np.stack([tone * np.ones(n), tone * np.ones(n)]).astype(np.float32)
         progress(1.0)
         return out
-
-
-class FakeTimbre:
-    """GuitarTimbre falso: violão na primeira metade das janelas, elétrica na segunda."""
-
-    sample_rate = 16000
-
-    def __init__(self, acoustic_first: bool = True):
-        self.acoustic_first = acoustic_first
-        self.seen = 0
-
-    def scores(self, windows):
-        import numpy as np
-
-        n = len(windows)
-        self.seen += n
-        first = np.array([[0.9, 0.1]] * (n // 2) + [[0.1, 0.8]] * (n - n // 2))
-        return first if self.acoustic_first else first[:, ::-1]

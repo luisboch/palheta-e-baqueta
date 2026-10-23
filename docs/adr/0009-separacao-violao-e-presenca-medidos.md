@@ -3,6 +3,9 @@
 - **Status:** Aceita
 - **Data:** 2026-10-22
 
+> **2026-10-22:** a divisão violão × guitarra foi retirada no [ADR 0010](0010-cordas-um-instrumento.md)
+> (um instrumento Cordas). As medidas de separação e de presença continuam valendo.
+
 ## Contexto
 
 O [ADR 0006](0006-modelos-de-ia.md) propôs o Demucs `htdemucs_6s` e o PANNs CNN14 sem medição.

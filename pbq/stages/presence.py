@@ -11,7 +11,6 @@ from pbq.audio import Audio
 from pbq.fsutil import write_json
 from pbq.manifest import Song
 from pbq.stages.base import Progress, Stage, no_progress
-from pbq.stages.guitar_split import ACOUSTIC, ELECTRIC
 from pbq.stages.separate import STEM_DIR, STEMS
 
 REPORT = "presence.json"
@@ -19,8 +18,10 @@ ANALYSIS_RATE = 22050  # sobra para energia e ataques; metade do trabalho de 44,
 FRAME, HOP = 0.1, 0.05  # s: quadros de energia
 LOUD_RANGE_DB = 40.0  # quadros da mixagem mais de 40 dB abaixo do pico são silêncio (intro, fim)
 
-# Instrumento jogável → stem que ele toca. Guitarra e violão vêm da guitar_split.
-INSTRUMENTS = {"drums": "drums", "bass": "bass", "guitar": ELECTRIC, "acoustic": ACOUSTIC}
+# Instrumento jogável → stem que ele toca. "strings" (Cordas no jogo) é o stem de guitarra
+# inteiro, com violão e guitarra elétrica juntos (ADR 0010). O contrato com o jogo (lista de
+# instrumentos em godot/core/backend_protocol.gd) é gerado daqui.
+INSTRUMENTS = {"drums": "drums", "bass": "bass", "strings": "guitar"}
 
 
 @dataclass(frozen=True)
@@ -83,16 +84,15 @@ def measure(stem: Audio, mix: Audio, rate: int, t: Thresholds) -> Measure:
 class Presence(Stage):
     """Decide quais instrumentos tocam na música: os ausentes não podem ser escolhidos no jogo.
 
-    Violão incerto já chega silencioso da guitar_split (voltou para a guitarra), e cai em "quiet".
-
-    Entrada: stems/*.flac (separate), stems/{electric,acoustic}.flac (guitar_split)
+    Entrada: stems/*.flac (separate)
     Saída:   presence.json (medidas e motivo por instrumento); song.meta["instruments"]
     Config:  relative_db, floor_db, min_active, min_onsets
     """
 
     name = "presence"
     summary = "quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados"
-    requires = ("separate", "guitar_split")
+    version = 2  # 2: Cordas (violão + guitarra) no lugar de guitarra e violão separados
+    requires = ("separate",)
 
     def outputs(self, song: Song) -> list[Path]:
         return [song.path(REPORT)]

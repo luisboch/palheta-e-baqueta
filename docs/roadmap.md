@@ -45,3 +45,5 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 - Detector de ataques próprio em numpy (`pbq/dsp.py`), que a fase 4 vai reaproveitar.
 - Teste `slow` com os modelos reais numa banda sintética (13 s).
 - Cobertura Python ao fechar: 97,7% (rodando sem torch, como na CI). GDScript: sem mudanças.
+- Depois do fechamento: violão e guitarra mesclados num instrumento só, **Cordas**
+  ([ADR 0010](adr/0010-cordas-um-instrumento.md)). Sai a `guitar_split` (PANNs).

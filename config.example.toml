@@ -24,17 +24,6 @@ model = "htdemucs_6s"   # o único Demucs com stem de guitarra; 5 min de música
 device = "cpu"          # "cuda" em PC com GPU NVIDIA; no Deck, só CPU (ADR 0004)
 shifts = 1              # 2+ melhora pouco a separação e multiplica o tempo
 
-[stages.guitar_split]
-classifier = "panns"    # CNN14 do AudioSet (~330 MB em data/models, baixado no primeiro uso)
-window = 2.0            # s ouvidos por decisão
-hop = 1.0               # s entre decisões (resolução da divisão guitarra/violão)
-active_db = -40.0       # janela de guitarra mais baixa que isso (dBFS) não é classificada
-smooth = 5              # mediana de 5 decisões: troca de instrumento dura segundos
-fade = 0.05             # s de transição entre os stems (corte seco estala)
-# Violão com confiança menor que isso volta inteiro para a guitarra. Medido em out/2026:
-# Pais e Filhos (violão real) 0,66; Anna Júlia (só elétrica, falso violão) 0,13.
-min_acoustic_confidence = 0.4
-
 [stages.presence]
 relative_db = -18.0     # stem "audível" num quadro: até 18 dB abaixo da mixagem (vazamento fica a 25-35)
 floor_db = -50.0        # e acima de -50 dBFS

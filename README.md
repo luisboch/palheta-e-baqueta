@@ -1,6 +1,6 @@
 # Palheta & Baqueta
 
-Jogo de ritmo para até 2 jogadores, com guitarra, violão, baixo e bateria, feito para o Steam
+Jogo de ritmo para até 2 jogadores, com Cordas (violão e guitarra), baixo e bateria, feito para o Steam
 Deck. Você traz os seus MP3s num pendrive. O backend separa os instrumentos com IA e gera as
 notas em 4 dificuldades (Fácil, Médio, Difícil e Muito difícil). O jogo, em Godot 4, toca a
 música com uma pista 3D por jogador.
@@ -47,8 +47,8 @@ uv run pbq drive list                # pendrives montados (o menu do jogo usa os
 ```
 
 Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/backend-protocol.md).
-As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU, Demucs,
-PANNs; ~1,5 GB). Os modelos baixam no primeiro uso (~400 MB). O jogo chega na fase 6.
+As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU e Demucs;
+~1,5 GB). O modelo baixa no primeiro uso (~80 MB). O jogo chega na fase 6.
 
 ## Testes
 

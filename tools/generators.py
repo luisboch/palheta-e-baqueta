@@ -16,6 +16,7 @@ from pbq.events import EVENT_TYPES
 from pbq.library import FORMAT_VERSION, INDEX_FIELDS
 from pbq.protocol import MESSAGE_TYPES
 from pbq.stages import STAGES
+from pbq.stages.presence import INSTRUMENTS
 
 
 def gen_stages(root: Path) -> str:
@@ -74,6 +75,12 @@ def gen_cli(root: Path) -> str:
     return "\n".join(rows) + "\n"
 
 
+def gen_instruments(root: Path) -> str:
+    rows = ["| Id | Stem tocado |", "|---|---|"]
+    rows += [f"| `{name}` | `stems/{stem}.flac` |" for name, stem in INSTRUMENTS.items()]
+    return "\n".join(rows) + "\n"
+
+
 def gen_format_version(root: Path) -> str:
     return f"Versão atual do formato: **{FORMAT_VERSION}**.\n"
 
@@ -95,13 +102,18 @@ def gen_gd_protocol(root: Path) -> str:
     """godot/core/backend_protocol.gd: os mesmos tipos e campos do Python, para o jogo validar."""
     events = _gd_dict({k: v.fields for k, v in EVENT_TYPES.items()})
     messages = _gd_dict({k: v.fields for k, v in MESSAGE_TYPES.items()})
-    return f"""# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py e pbq/library.py.
+    instruments = ", ".join(f'"{name}"' for name in INSTRUMENTS)
+    return f"""# GERADO por tools/generators.py a partir de pbq/events.py, pbq/protocol.py, pbq/library.py e
+# pbq/stages/presence.py.
 # Não edite: rode `uv run python -m tools.docs_check --fix`.
 ## Contrato com o backend: tipos e campos de eventos (data/events.jsonl) e de mensagens do CLI.
 class_name BackendProtocol
 extends RefCounted
 
 const FORMAT_VERSION := {FORMAT_VERSION}
+
+## Instrumentos jogáveis (song.json "instruments": id → presente). Nomes na tela ficam no jogo.
+const INSTRUMENTS: Array[String] = [{instruments}]
 
 const EVENTS := {events}
 
@@ -127,6 +139,7 @@ DOC_GENERATORS: dict[str, Generator] = {
     "messages": gen_messages,
     "cli": gen_cli,
     "format-version": gen_format_version,
+    "instruments": gen_instruments,
     "index-example": gen_index_example,
 }
 

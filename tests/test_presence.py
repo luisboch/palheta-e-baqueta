@@ -67,21 +67,19 @@ def test_stage_reports_each_instrument(config, song):
     stems = {
         "drums": playing,
         "bass": notes(seconds, every=1.0),
-        "guitar": playing,
+        "guitar": silent,
         "piano": silent,
         "vocals": notes(seconds, level=0.5),
         "other": silent,
-        "electric": playing,
-        "acoustic": silent,
     }
     for name, x in stems.items():
         audio.write(song.path("stems", f"{name}.flac"), np.stack([x, x]), RATE)
-    assert set(STEMS) <= set(stems)
+    assert set(STEMS) == set(stems)
 
     seen = []
     Presence(config).run(song, seen.append)
-    assert song.meta["instruments"] == {"drums": True, "bass": True, "guitar": True, "acoustic": False}
+    assert song.meta["instruments"] == {"drums": True, "bass": True, "strings": False}
     report = json.loads(song.path("presence.json").read_text())
-    assert report["instruments"]["acoustic"]["reason"] == "quiet"
+    assert report["instruments"]["strings"]["reason"] == "quiet"
     assert report["thresholds"]["min_onsets"] == 30.0
     assert seen[-1] == pytest.approx(1.0)

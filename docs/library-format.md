@@ -54,6 +54,17 @@ charts entram nas fases 3 a 5, cada um documentado aqui quando existir):
 }
 ```
 
+- `instruments` (a partir da fase 4, com o `package`): `{id: true|false}`, se o instrumento toca
+  na música (etapa `presence`). O jogo não deixa escolher um instrumento `false`. Ids:
+
+<!-- gen:instruments -->
+| Id | Stem tocado |
+|---|---|
+| `drums` | `stems/drums.flac` |
+| `bass` | `stems/bass.flac` |
+| `strings` | `stems/guitar.flac` |
+<!-- /gen:instruments -->
+
 - `files.*`: nomes de arquivo relativos à pasta da música; `null` = não existe. "Salvar no
   pendrive" e "Importar" copiam exatamente estes arquivos, mais o `song.json`.
 

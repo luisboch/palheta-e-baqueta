@@ -35,8 +35,7 @@ Etapas implementadas (gerado de `pbq/stages/__init__.py`):
 |---|---|---|---|---|---|
 | 1 | `ingest` | 1 | — | sim | metadados (artista, música, duração) e capa |
 | 2 | `separate` | 1 | `ingest` | sim | stems por instrumento (Demucs htdemucs_6s) |
-| 3 | `guitar_split` | 1 | `separate` | sim | guitarra elétrica × violão, por trechos (classificador de timbre) |
-| 4 | `presence` | 1 | `separate`, `guitar_split` | sim | quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados |
+| 3 | `presence` | 2 | `separate` | sim | quais instrumentos tocam (energia e ataques); ausentes ficam bloqueados |
 <!-- /gen:stages -->
 
 Planejadas (fases 4 e 5):
@@ -45,13 +44,14 @@ Planejadas (fases 4 e 5):
 |---|---|---|
 | `beats` | batidas, compassos, mapa de tempo | beat tracker |
 | `drums_chart` | notas de bateria (Muito difícil) | transcrição de bateria |
-| `pitched_chart` | notas de guitarra, violão e baixo (Muito difícil) | transcrição de altura |
+| `pitched_chart` | notas de Cordas e baixo (Muito difícil) | transcrição de altura |
 | `difficulty` | Fácil, Médio e Difícil, por redução | regras puras |
 | `package` | `data/library/<id>/` | ffmpeg |
 
 Medidas e limiares das etapas de áudio: [ADR 0009](adr/0009-separacao-violao-e-presenca-medidos.md).
-Os modelos ficam atrás das interfaces de `pbq/models/__init__.py`; os adaptadores reais
-(`pbq/models/demucs.py`, `pbq/models/panns.py`) importam torch só ao serem construídos.
+Os modelos ficam atrás das interfaces de `pbq/models/__init__.py`; o adaptador real
+(`pbq/models/demucs.py`) importa torch só ao ser construído. Instrumentos jogáveis: bateria,
+baixo e Cordas (violão + guitarra, [ADR 0010](adr/0010-cordas-um-instrumento.md)).
 
 O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato-de-chart.md)).
 
