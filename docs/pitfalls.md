@@ -63,3 +63,7 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-23 · Testes do GdUnit4:** `create_temp_dir("x")` devolve a mesma pasta em todos os
   testes (sobra lixo do anterior: use um nome único), e `change_scene_to_file` num teste troca a
   cena do executor. Por isso `App.live` é falso nos testes e `goto()` só registra.
+- **2026-10-23 · Modo jogo do Deck:** o PATH não tem o Homebrew nem `~/.local/bin`, e não há
+  terminal. O lançador (`scripts/steamdeck/palheta.sh`) acerta o PATH antes de abrir o jogo (o
+  worker herda) e manda a saída para `data/game.log`. O mesmo problema já tinha custado tempo no
+  kraoke.

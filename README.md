@@ -68,6 +68,18 @@ O jogo abre no menu:
 - A música toca do começo ao fim; o instrumento escolhido baixa 18 dB a cada erro e volta no
   acerto. Numa música só de Cordas (como uma de violão e voz), errar deixa quase só a voz.
 
+### No Steam Deck, modo jogo
+
+```bash
+scripts/steamdeck/install.sh   # confere o que falta e cria o atalho (pode rodar de novo)
+```
+
+Depois, no modo desktop: Steam → Jogos → "Adicionar jogo não-Steam à biblioteca" → marque
+"Palheta & Baqueta". No modo jogo o controle funciona direto (A B Y X LB tocam, Start pausa).
+O lançador (`scripts/steamdeck/palheta.sh`) acerta o PATH, que no modo jogo não tem o Homebrew
+(o worker precisa do ffmpeg dele), e grava a saída em `data/game.log`. O ícone é desenhado por
+`scripts/steamdeck/make_icon.gd`.
+
 Para depurar uma partida sem o menu (F6 em `godot/game/play.tscn`, ou pela linha de comando):
 
 ```bash
