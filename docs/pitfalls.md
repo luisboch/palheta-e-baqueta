@@ -30,3 +30,8 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   tudo no fim, o que desloca as bandas (erro de até 0,2 na saída do ADTOF). Ver `pbq/models/adtof.py`.
 - **2026-10-22 · ADTOF:** o Frame_RNN espera 84 bandas (12 por oitava, 20 Hz–20 kHz, janela 2048 a
   44,1 kHz). Com outra taxa ou janela, o número de bandas muda e os pesos não servem.
+- **2026-10-22 · basic-pitch:** a 0.4.0 pede `tensorflow < 2.15.1`, que não existe para Python 3.12.
+  O `override-dependencies` do `pyproject.toml` impede a instalação do TensorFlow, e o pacote usa o
+  modelo ONNX sozinho.
+- **2026-10-22 · resampy:** a versão que o basic-pitch fixa (< 0.4.3) importa `pkg_resources`,
+  que saiu do setuptools 81. Por isso o setuptools fica fixado em 80.9.0 no extra `pitch`.

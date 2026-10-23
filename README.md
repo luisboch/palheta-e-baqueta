@@ -86,6 +86,7 @@ código do projeto ainda não foi definida.
 |---|---|---|
 | [Demucs](https://github.com/adefossez/demucs) (`htdemucs_6s`) | separação em stems | MIT |
 | [beat_this](https://github.com/CPJKU/beat_this) | batidas e compassos | MIT (código e pesos) |
+| [basic-pitch](https://github.com/spotify/basic-pitch) (modelo ONNX) | notas de Cordas e baixo | Apache-2.0 |
 | [ADTOF](https://github.com/MZehren/ADTOF), Zehren, Alunno e Bientinesi (ISMIR 2021; *Signals* 2023) | pesos da transcrição de bateria | CC BY-NC-SA 4.0 |
 | [ADTOF-pytorch](https://github.com/xavriley/ADTOF-pytorch) | conversão dos pesos do ADTOF para PyTorch | pesos derivados do ADTOF (CC BY-NC-SA 4.0) |
 

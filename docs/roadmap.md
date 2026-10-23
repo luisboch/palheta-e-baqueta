@@ -9,7 +9,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 2 | Importação via pendrive (do kraoke) e cache | ✅ concluída | 99% | sem medição |
 | 3 | Separação de stems e instrumento ausente | ✅ concluída | 97,7% | sem medição |
 | 4 | Mapa de batidas e chart de bateria | 🟡 falta validar batidas reais | 96,4% | sem medição |
-| 5 | Charts de guitarra, violão e baixo; 4 dificuldades | | | |
+| 5 | Charts de Cordas e baixo; 4 dificuldades | ✅ concluída | 96,8% | sem medição |
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | | | |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | | | |
 | 8 | 2 jogadores, controles USB, calibração | | | |
@@ -60,3 +60,16 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
   fase. A etapa `beats` foi testada só com fake, e o teste `slow` do pipeline inteiro é pulado.
   Quando o servidor voltar: rodar `uv run pytest -m slow --no-cov` e as 4 músicas reais.
 - Cobertura Python: 96,4% (sem torch, como na CI). GDScript: sem mudanças.
+
+## Fase 5
+
+- Etapa `pitched_chart` (basic-pitch ONNX): Cordas e baixo Muito difícil, com alturas guardadas e
+  trastes por contorno.
+- As 4 dificuldades dos 3 instrumentos, por redução (etapa `chart`, versão 2).
+- Etapa `package`: a pasta da música na biblioteca (OGG por instrumento presente, `song.ogg` com o
+  resto, `notes.chart`, `song.ini`, `beatmap.json`, `song.json`).
+  ([ADR 0012](adr/0012-charts-de-cordas-baixo-e-dificuldades.md)).
+- Pipeline real nas 5 músicas, com batidas da librosa só no benchmark: 14 a 44 s por música nestas
+  etapas, mais ~2 min da separação.
+- Ainda pendente da fase 4: as batidas reais com beat_this (servidor fora do ar).
+- Cobertura Python ao fechar: 96,8% (sem torch, como na CI). GDScript: sem mudanças.
