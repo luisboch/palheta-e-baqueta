@@ -26,19 +26,19 @@ func test_input_profile_p1_and_p2_separation() -> void:
 
 	# Joypad device 0 aciona P1 mas não P2
 	var joy0 := InputEventJoypadButton.new()
-	joy0.button_index = JOY_BUTTON_LEFT_SHOULDER
+	joy0.button_index = JOY_BUTTON_A
 	joy0.device = 0
 	joy0.pressed = true
-	assert_bool(joy0.is_action("p1_fret_0")).is_true()
-	assert_bool(joy0.is_action("p2_fret_0")).is_false()
+	assert_bool(joy0.is_action("p1_fret_4")).is_true()
+	assert_bool(joy0.is_action("p2_fret_4")).is_false()
 
 	# Joypad device 1 aciona P2 mas não P1
 	var joy1 := InputEventJoypadButton.new()
-	joy1.button_index = JOY_BUTTON_LEFT_SHOULDER
+	joy1.button_index = JOY_BUTTON_A
 	joy1.device = 1
 	joy1.pressed = true
-	assert_bool(joy1.is_action("p1_fret_0")).is_false()
-	assert_bool(joy1.is_action("p2_fret_0")).is_true()
+	assert_bool(joy1.is_action("p1_fret_4")).is_false()
+	assert_bool(joy1.is_action("p2_fret_4")).is_true()
 
 	# Teclado P1 vs P2
 	var key_p1 := InputEventKey.new()
@@ -56,15 +56,15 @@ func test_input_profile_p1_and_p2_separation() -> void:
 
 func test_frets_follow_the_joystick_guitar_layout() -> void:
 	InputProfile.apply()
-	# L2 é eixo: conta como traste a partir da metade do curso, e soltar volta a "solto".
+	# L2 (traste 0) é eixo: conta como traste a partir da metade do curso, e soltar volta a "solto".
 	var half := InputEventJoypadMotion.new()
 	half.axis = JOY_AXIS_TRIGGER_LEFT
 	half.axis_value = 0.3
-	assert_bool(half.is_action_pressed("p1_fret_1")).is_false()
+	assert_bool(half.is_action_pressed("p1_fret_0")).is_false()
 	half.axis_value = 0.8
-	assert_bool(half.is_action_pressed("p1_fret_1")).is_true()
+	assert_bool(half.is_action_pressed("p1_fret_0")).is_true()
 	half.axis_value = 0.0
-	assert_bool(half.is_action_released("p1_fret_1")).is_true()
+	assert_bool(half.is_action_released("p1_fret_0")).is_true()
 
 	var r2 := InputEventJoypadMotion.new()
 	r2.axis = JOY_AXIS_TRIGGER_RIGHT
@@ -73,7 +73,9 @@ func test_frets_follow_the_joystick_guitar_layout() -> void:
 	assert_bool(r2.is_action_pressed("p2_fret_3")).is_true()
 	assert_bool(r2.is_action_pressed("p1_fret_3")).is_false()
 
-	for lane_button: Array in [[2, JOY_BUTTON_RIGHT_SHOULDER], [4, JOY_BUTTON_A]]:
+	for lane_button: Array in [
+		[1, JOY_BUTTON_LEFT_SHOULDER], [2, JOY_BUTTON_RIGHT_SHOULDER], [4, JOY_BUTTON_A]
+	]:
 		var button := InputEventJoypadButton.new()
 		button.button_index = lane_button[1]
 		button.pressed = true
