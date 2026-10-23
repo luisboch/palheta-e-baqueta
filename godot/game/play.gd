@@ -9,6 +9,7 @@ extends Node3D
 
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
 const DEFAULT_LIBRARY := "../data/library"
+const MUSIC_BUS := "Music"
 ## Sem escolha (antes dos menus): Cordas no Difícil, o ponto de partida dos testes de jogo.
 const DEFAULT_INSTRUMENT := "strings"
 const DEFAULT_DIFFICULTY := "Hard"
@@ -24,9 +25,13 @@ var _lead := LEAD_IN
 var _loaded: Dictionary
 var _done := false
 var _autoplay := false
+var _grid: BeatGrid
+var _bands := SpectrumBands.new()
+var _spectrum: AudioEffectSpectrumAnalyzerInstance  ## null sem o bus Music (testes sem áudio)
 
 @onready var highway: Highway = $Highway
 @onready var hud: Hud = $Hud
+@onready var background: Background = $Background
 
 
 func _ready() -> void:
@@ -64,6 +69,11 @@ func start(dir: String, instrument: String, difficulty: String, autoplay := fals
 		)
 
 	session = PlaySession.new(_loaded["chart"], instrument, difficulty)
+	_grid = (
+		BeatGrid.from_beatmap(_loaded["beatmap"])
+		if not _loaded["beatmap"].get("beats", []).is_empty()
+		else BeatGrid.from_tempo(session.tempo, session.duration)
+	)
 	highway.setup(session)
 	hud.setup(_loaded["song"], instrument, difficulty)
 	_setup_audio(instrument)
@@ -86,6 +96,10 @@ func _setup_audio(instrument: String) -> void:
 		sync.set_sync_stream(i, streams[i])
 	player = AudioStreamPlayer.new()
 	player.stream = sync
+	var bus := AudioServer.get_bus_index(MUSIC_BUS)
+	if bus >= 0:  # o analisador de espectro do fundo fica no bus Music (default_bus_layout.tres)
+		player.bus = MUSIC_BUS
+		_spectrum = AudioServer.get_bus_effect_instance(bus, 0)
 	add_child(player)
 
 
@@ -100,7 +114,8 @@ func _process(delta: float) -> void:
 		highway.on_miss(note)
 	if _stem_index >= 0:
 		player.stream.set_sync_stream_volume(_stem_index, events["volume_db"])
-	highway.update_view(now)
+	highway.update_view(now, _grid)
+	background.update(now, _grid, _bands.update(_magnitudes(), delta))
 	hud.update_score(session.scoring)
 	if (
 		session.finished(now)
@@ -127,6 +142,17 @@ func _song_time(delta: float) -> float:
 		AudioServer.get_output_latency(),
 		delta
 	)
+
+
+## Magnitude de cada faixa de SpectrumBands (média dos dois canais); vazio sem analisador.
+func _magnitudes() -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	if _spectrum == null:
+		return out
+	for band: Array in SpectrumBands.BANDS:
+		var m := _spectrum.get_magnitude_for_frequency_range(band[0], band[1])
+		out.append((m.x + m.y) / 2.0)
+	return out
 
 
 ## Toca as notas que chegaram na linha (modo --autoplay).

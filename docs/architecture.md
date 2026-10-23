@@ -67,3 +67,10 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   (`godot/game/highway.gd`), placar (`godot/game/hud.gd`), áudio sincronizado e entrada. Só desenham e
   encaminham entrada para o `core` (`godot/core/play_session.gd` junta juiz, pontuação e relógio).
   Regras de jogo: [ADR 0014](adr/0014-regras-de-jogo.md).
+- **Fundo no ritmo** (`godot/game/background.gd` + `godot/game/background.gdshader`): uma
+  `CanvasLayer` atrás da pista (o `Environment` usa o fundo "Canvas"). Recebe as batidas do
+  `beatmap.json` (`godot/core/beat_grid.gd`: pulso, fase da batida, compasso) e os níveis de
+  graves, médios e agudos (`godot/core/spectrum_bands.gd`), lidos de um
+  `AudioEffectSpectrumAnalyzer` no bus `Music` (`godot/default_bus_layout.tres`). Cada faixa é
+  medida contra o próprio pico recente, porque o volume muda muito entre músicas. As mesmas
+  batidas desenham linhas na pista (compasso mais forte) e fazem a linha de acerto pulsar.

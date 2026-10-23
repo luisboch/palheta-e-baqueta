@@ -4,16 +4,23 @@ const SAMPLE := "res://tests/fixtures/pipeline_sample.chart"
 const PlayScene := preload("res://game/play.tscn")
 
 
-func _song_dir(instruments: String) -> String:
+func _song_dir(instruments: String, beatmap := "") -> String:
 	var dir := create_temp_dir("play_song")
+	if beatmap != "":
+		var beats := FileAccess.open(dir.path_join("beatmap.json"), FileAccess.WRITE)
+		beats.store_string(beatmap)
+		beats.close()
 	var song := FileAccess.open(dir.path_join("song.json"), FileAccess.WRITE)
-	song.store_string(
-		(
+	(
+		song
+		. store_string(
 			(
-				'{"version": 1, "title": "Exemplo", "artist": null, "instruments": %s,'
-				+ ' "files": {"chart": "notes.chart", "song": "song.ogg"}}'
+				(
+					'{"version": 1, "title": "Exemplo", "artist": null, "instruments": %s,'
+					+ ' "files": {"chart": "notes.chart", "song": "song.ogg", "beatmap": "beatmap.json"}}'
+				)
+				% instruments
 			)
-			% instruments
 		)
 	)
 	song.close()
@@ -41,7 +48,9 @@ func _run_to_end(scene: Node) -> void:
 
 
 func test_autoplay_plays_the_whole_song_without_audio() -> void:
-	var scene := _play(_song_dir('{"strings": true, "drums": true}'), "strings", "Expert")
+	var beatmap := '{"beats": [0.5, 1.0, 1.5, 2.0, 2.5], "downbeats": [0.5, 2.5]}'
+	var scene := _play(_song_dir('{"strings": true, "drums": true}', beatmap), "strings", "Expert")
+	assert_array(scene._grid.beats).is_equal(PackedFloat64Array([0.5, 1.0, 1.5, 2.0, 2.5]))
 	assert_str(scene.session.instrument).is_equal("strings")
 	_run_to_end(scene)
 	assert_bool(scene._done).is_true()
@@ -54,6 +63,7 @@ func test_drums_and_defaults() -> void:
 	var scene := _play(_song_dir('{"strings": false, "drums": true}'), "strings", "Impossível")
 	assert_str(scene.session.instrument).is_equal("drums")  # Cordas ausente: cai na bateria
 	assert_str(scene.session.difficulty).is_equal("Hard")
+	assert_bool(scene._grid.beats.is_empty()).is_false()  # sem beatmap: batidas do mapa de tempo
 	_run_to_end(scene)
 	assert_int(scene.session.scoring.misses).is_equal(0)
 

@@ -19,18 +19,24 @@ const COLORS := [
 ]
 const KICK_COLOR := Color("ff9f1c")
 const MISS_COLOR := Color(0.25, 0.25, 0.28)
+const BEAT_LINE_POOL := 24  ## linhas de batida visíveis de uma vez (LOOKAHEAD cobre ~6 a 200 BPM)
+const BEAT_LINE_COLOR := Color(0.55, 0.55, 0.75)
+const HIT_POP := 1.35  ## escala do alvo no acerto, voltando a 1 em HIT_POP_TIME
+const HIT_POP_TIME := 0.12
 
 var session: PlaySession
 var lanes := 5
 var _views := {}  ## PlayNote → Node3D
 var _next := 0  ## próxima nota que ainda não ganhou desenho
 var _flash := 0.0
+var _beat_lines: Array[MeshInstance3D] = []
 
 @onready var _board: MeshInstance3D = $Board
 @onready var _strikeline: MeshInstance3D = $Strikeline
 @onready var _lines: Node3D = $Lines
 @onready var _targets: Node3D = $Targets
 @onready var _notes: Node3D = $Notes
+@onready var _beat_root: Node3D = $BeatLines
 
 
 ## Prepara a pista para a partida: 5 lanes (Cordas, baixo) ou 4 pads (bateria).
@@ -60,6 +66,20 @@ func setup(play_session: PlaySession) -> void:
 		target.mesh = fresh.mesh
 		target.material_override = fresh.material_override
 		fresh.free()
+	_make_beat_lines(board.size.x)
+
+
+## Linhas de batida que correm pela pista com as notas (downbeat mais forte): mostram o tempo
+## mesmo nos trechos sem nota. Um conjunto fixo, reaproveitado a cada quadro.
+func _make_beat_lines(width: float) -> void:
+	for line in _beat_lines:
+		line.free()
+	_beat_lines.clear()
+	for i in BEAT_LINE_POOL:
+		var line := _box(Vector3(width, 0.005, 0.03), BEAT_LINE_COLOR, 0.3)
+		line.visible = false
+		_beat_root.add_child(line)
+		_beat_lines.append(line)
 
 
 func _x(lane: int) -> float:
@@ -75,7 +95,8 @@ func _screen_lane(note: PlayNote) -> int:
 	return note.lanes[0] - 1 if session.drums else note.lanes[0]
 
 
-func update_view(now: float) -> void:
+## `grid`: as batidas da música (null: sem linhas nem pulso).
+func update_view(now: float, grid: BeatGrid = null) -> void:
 	while _next < session.notes.size() and session.notes[_next].time < now + LOOKAHEAD:
 		var note := session.notes[_next]
 		if note.state == PlayNote.State.PENDING:
@@ -89,8 +110,24 @@ func update_view(now: float) -> void:
 			view.queue_free()
 			_views.erase(note)
 	_flash = maxf(_flash - get_process_delta_time() * 4.0, 0.0)
+	var pulse := grid.pulse(now) if grid else 0.0
 	var mat: StandardMaterial3D = _strikeline.material_override
-	mat.emission_energy_multiplier = 1.5 + _flash * 4.0
+	mat.emission_energy_multiplier = 1.5 + _flash * 4.0 + pulse * 0.6
+	if grid:
+		_update_beat_lines(now, grid)
+
+
+func _update_beat_lines(now: float, grid: BeatGrid) -> void:
+	var visible_beats := grid.between(now - BEHIND, now + LOOKAHEAD)
+	for i in _beat_lines.size():
+		var line := _beat_lines[i]
+		line.visible = i < visible_beats.size()
+		if not line.visible:
+			continue
+		var beat: Array = visible_beats[i]
+		line.position = Vector3(0, -0.035, -(beat[0] - now) * SPEED)
+		line.scale = Vector3(1, 1, 2.5 if beat[1] else 1.0)
+		line.transparency = 0.2 if beat[1] else 0.6
 
 
 func _make_view(note: PlayNote) -> Node3D:
@@ -166,6 +203,18 @@ func _target(lane: int) -> MeshInstance3D:
 
 func on_strum(result: Dictionary) -> void:
 	_flash = 1.0 if result.has("note") else 0.3
+	if result.has("note"):
+		for lane: int in result["note"].lanes:
+			_pop(lane)
+
+
+## O alvo da lane cresce e volta: o "estouro" de um acerto.
+func _pop(screen: int) -> void:
+	if screen < 0 or screen >= lanes:
+		return
+	var target := _target(screen)
+	target.scale = Vector3(HIT_POP, 0.4 * HIT_POP, HIT_POP)
+	create_tween().tween_property(target, "scale", Vector3(1, 0.4, 1), HIT_POP_TIME)
 
 
 func on_input(lane: int, result: Dictionary) -> void:
@@ -175,6 +224,7 @@ func on_input(lane: int, result: Dictionary) -> void:
 		create_tween().tween_property(_target(screen), "transparency", 0.6, 0.15)
 	if result.has("note"):
 		_flash = 1.0
+		_pop(screen)
 
 
 func on_miss(note: PlayNote) -> void:
