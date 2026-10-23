@@ -27,7 +27,9 @@ shifts = 1              # 2+ melhora pouco a separação e multiplica o tempo
 [stages.presence]
 relative_db = -18.0     # stem "audível" num quadro: até 18 dB abaixo da mixagem (vazamento fica a 25-35)
 floor_db = -50.0        # e acima de -50 dBFS
-min_active = 0.15       # tocando em pelo menos 15% da música (sem os silêncios)
+# Tocando em pelo menos 15% da música (sem os silêncios). Casos reais: ausente 12% (bateria de
+# More Than Words, o percussivo do violão) e presente 16% (guitarra de Black Magic): pouca folga.
+min_active = 0.15
 min_onsets = 30.0       # ataques por minuto: menos que isso não dá um chart jogável
 # Guitarra distorcida é comprimida: em Anna Júlia, 3 dB achava 12 ataques/min numa palhetada de
 # ~216/min e 1 dB achava 141. Bateria dá quase o mesmo com 1 ou 3 dB.

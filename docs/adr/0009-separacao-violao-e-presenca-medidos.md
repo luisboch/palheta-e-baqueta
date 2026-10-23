@@ -5,6 +5,11 @@
 
 > **2026-10-22:** a divisão violão × guitarra foi retirada no [ADR 0010](0010-cordas-um-instrumento.md)
 > (um instrumento Cordas). As medidas de separação e de presença continuam valendo.
+>
+> **2026-10-22:** dois casos reais conferidos pelo dono do projeto. "Black Magic" tem guitarra:
+> Cordas presente, ativa em 16% da música, a -22 dB. "More Than Words" (violão e vozes, sem bateria
+> e sem baixo): bateria ausente (12%, 29 ataques/min, provavelmente o percussivo do violão) e baixo
+> ausente (3%). O limiar de 15% acerta os seis casos, **com pouca folga dos dois lados** (12% × 16%).
 
 ## Contexto
 
