@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://game/song_select.gd" id="1_select"]
 [ext_resource type="Theme" path="res://game/theme.tres" id="2_theme"]
@@ -7,6 +7,12 @@
 [sub_resource type="ButtonGroup" id="ButtonGroup_instruments"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_difficulties"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_instruments_2"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_difficulties_2"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_modes"]
 
 [node name="SongSelect" type="Control"]
 layout_mode = 3
@@ -85,7 +91,7 @@ size_flags_stretch_ratio = 1.2
 
 [node name="Box" type="VBoxContainer" parent="Margin/Columns/Details"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Top" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
 layout_mode = 2
@@ -93,7 +99,7 @@ theme_override_constants/separation = 20
 
 [node name="Cover" type="TextureRect" parent="Margin/Columns/Details/Box/Top"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 170)
+custom_minimum_size = Vector2(130, 130)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 6
@@ -124,7 +130,40 @@ theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 20
 text = "4:08 · 92 BPM"
 
+[node name="Modes" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Solo" type="Button" parent="Margin/Columns/Details/Box/Modes"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_modes")
+text = "Solo"
+
+[node name="Coop" type="Button" parent="Margin/Columns/Details/Box/Modes"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_group = SubResource("ButtonGroup_modes")
+text = "Banda (2)"
+
+[node name="Versus" type="Button" parent="Margin/Columns/Details/Box/Modes"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_group = SubResource("ButtonGroup_modes")
+text = "Duelo (2)"
+
 [node name="InstrumentLabel" type="Label" parent="Margin/Columns/Details/Box"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 20
@@ -159,19 +198,6 @@ disabled = true
 toggle_mode = true
 button_group = SubResource("ButtonGroup_instruments")
 text = "Bateria"
-
-[node name="Absent" type="Label" parent="Margin/Columns/Details/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.55, 0.62, 1)
-theme_override_font_sizes/font_size = 18
-text = "Bateria não toca nesta música"
-
-[node name="DifficultyLabel" type="Label" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 20
-text = "Dificuldade"
 
 [node name="Difficulties" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
 layout_mode = 2
@@ -213,6 +239,95 @@ theme_override_font_sizes/font_size = 20
 toggle_mode = true
 button_group = SubResource("ButtonGroup_difficulties")
 text = "Muito difícil"
+
+[node name="Player2" type="VBoxContainer" parent="Margin/Columns/Details/Box"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="P2Label" type="Label" parent="Margin/Columns/Details/Box/Player2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "Jogador 2"
+
+[node name="Instruments2" type="HBoxContainer" parent="Margin/Columns/Details/Box/Player2"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Strings2" type="Button" parent="Margin/Columns/Details/Box/Player2/Instruments2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_instruments_2")
+text = "Cordas"
+
+[node name="Bass2" type="Button" parent="Margin/Columns/Details/Box/Player2/Instruments2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_instruments_2")
+text = "Baixo"
+
+[node name="Drums2" type="Button" parent="Margin/Columns/Details/Box/Player2/Instruments2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_instruments_2")
+text = "Bateria"
+
+[node name="Difficulties2" type="HBoxContainer" parent="Margin/Columns/Details/Box/Player2"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Easy2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_group = SubResource("ButtonGroup_difficulties_2")
+text = "Fácil"
+
+[node name="Medium2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_group = SubResource("ButtonGroup_difficulties_2")
+text = "Médio"
+
+[node name="Hard2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_difficulties_2")
+text = "Difícil"
+
+[node name="Expert2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+toggle_mode = true
+button_group = SubResource("ButtonGroup_difficulties_2")
+text = "Muito difícil"
+
+[node name="Absent" type="Label" parent="Margin/Columns/Details/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.62, 1)
+theme_override_font_sizes/font_size = 18
+text = "Bateria não toca nesta música"
 
 [node name="Spacer" type="Control" parent="Margin/Columns/Details/Box"]
 layout_mode = 2

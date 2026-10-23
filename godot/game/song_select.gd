@@ -1,18 +1,22 @@
-## Escolha de música, instrumento e dificuldade. Instrumento que não toca na música fica
-## desabilitado (ADR 0009); dificuldade sem notas também.
+## Escolha de música, modo (Solo, Banda, Duelo), instrumento e dificuldade de cada jogador.
+## Instrumento que não toca na música fica desabilitado (ADR 0009); dificuldade sem notas também.
 ##
 ## A lista vem do data/library/index.json e se atualiza quando uma música fica pronta. O botão
 ## "Example" da cena é o modelo de cada linha: mude o visual dele no editor.
 extends Control
 
 const INDEX_REFRESH := 1.0  ## s entre conferências do index.json (músicas novas ficando prontas)
+const MODES := ["solo", "coop", "versus"]  ## Solo, Banda e Duelo (ADR 0017)
 
 var songs: Array[Dictionary] = []
 var current := {}  ## a entrada do índice em foco
 var loaded := {}  ## SongLoader.load_dir da música em foco
 var available := {}  ## InstrumentRules.available
+var mode := "solo"
 var instrument := ""
 var difficulty := ""
+var instrument_2 := ""  ## do segundo jogador; "" até escolher (sugere outro instrumento)
+var difficulty_2 := ""
 var _template: Button
 var _index_time := -1
 var _since_refresh := 0.0
@@ -32,18 +36,28 @@ var _edit_job: BackendJob
 @onready var _title_edit: LineEdit = %TitleEdit
 @onready var _artist_edit: LineEdit = %ArtistEdit
 @onready var _edit_error: Label = %EditError
-@onready var _instrument_buttons := {"strings": %Strings, "bass": %Bass, "drums": %Drums}
-@onready
-var _difficulty_buttons := {"Easy": %Easy, "Medium": %Medium, "Hard": %Hard, "Expert": %Expert}
+@onready var _mode_buttons := {"solo": %Solo, "coop": %Coop, "versus": %Versus}
+## Botões de cada jogador: [P1, P2].
+@onready var _instrument_buttons: Array[Dictionary] = [
+	{"strings": %Strings, "bass": %Bass, "drums": %Drums},
+	{"strings": %Strings2, "bass": %Bass2, "drums": %Drums2},
+]
+@onready var _difficulty_buttons: Array[Dictionary] = [
+	{"Easy": %Easy, "Medium": %Medium, "Hard": %Hard, "Expert": %Expert},
+	{"Easy": %Easy2, "Medium": %Medium2, "Hard": %Hard2, "Expert": %Expert2},
+]
 
 
 func _ready() -> void:
 	_template = _list.get_child(0)
 	_list.remove_child(_template)
-	for id: String in _instrument_buttons:
-		_instrument_buttons[id].pressed.connect(_choose_instrument.bind(id))
-	for id: String in _difficulty_buttons:
-		_difficulty_buttons[id].pressed.connect(_choose_difficulty.bind(id))
+	for id: String in _mode_buttons:
+		_mode_buttons[id].pressed.connect(choose_mode.bind(id))
+	for player in 2:
+		for id: String in _instrument_buttons[player]:
+			_instrument_buttons[player][id].pressed.connect(_choose_instrument.bind(player, id))
+		for id: String in _difficulty_buttons[player]:
+			_difficulty_buttons[player][id].pressed.connect(_choose_difficulty.bind(player, id))
 	_start.pressed.connect(play)
 	%Edit.pressed.connect(open_edit)
 	%Back.pressed.connect(App.goto.bind(App.MAIN_MENU))
@@ -52,6 +66,9 @@ func _ready() -> void:
 	_status.text = ""
 	instrument = App.selection.get("instrument", "")
 	difficulty = App.selection.get("difficulty", "")
+	instrument_2 = App.selection.get("instrument_p2", "")
+	difficulty_2 = App.selection.get("difficulty_p2", "")
+	choose_mode(App.selection.get("mode", "solo"))
 	reload(App.selection.get("id", ""))
 
 
@@ -123,13 +140,24 @@ func select(entry: Dictionary) -> void:
 	_info.text = SongCatalog.duration(entry) + (" · %d BPM" % roundi(bpm) if bpm else "")
 	_cover.texture = _load_cover()
 	var absent: Array[String] = []
-	for id: String in _instrument_buttons:
-		_instrument_buttons[id].disabled = not available.has(id)
+	for id: String in _instrument_buttons[0]:  # a ordem da tela
+		for buttons in _instrument_buttons:
+			buttons[id].disabled = not available.has(id)
 		if not available.has(id):
 			absent.append(SongCatalog.INSTRUMENT_NAMES[id])
 	_absent.text = absent_text(absent)
 	_start.disabled = available.is_empty()
-	_apply_choice(instrument, difficulty)
+	_apply_choice(0, instrument, difficulty)
+	_apply_choice(1, instrument_2, difficulty_2)
+
+
+## Solo, Banda ("coop") ou Duelo ("versus"); com 2 jogadores, mostra as escolhas do segundo.
+func choose_mode(id: String) -> void:
+	mode = id if id in MODES else "solo"
+	_mode_buttons[mode].button_pressed = true
+	var two := mode != "solo"
+	%Player2.visible = two
+	%InstrumentLabel.text = "Jogador 1" if two else "Instrumento e dificuldade"
 
 
 ## "Baixo e Bateria não tocam nesta música"; "" se todos tocam.
@@ -146,25 +174,32 @@ func _load_cover() -> Texture2D:
 	return ImageTexture.create_from_image(image) if image else null
 
 
-func _choose_instrument(id: String) -> void:
-	_apply_choice(id, difficulty)
+func _choose_instrument(player: int, id: String) -> void:
+	_apply_choice(player, id, difficulty if player == 0 else difficulty_2)
 
 
-func _choose_difficulty(id: String) -> void:
-	_apply_choice(instrument, id)
+func _choose_difficulty(player: int, id: String) -> void:
+	_apply_choice(player, instrument if player == 0 else instrument_2, id)
 
 
-## Ajusta o pedido ao que a música tem (InstrumentRules.choose) e marca os botões.
-func _apply_choice(wanted_instrument: String, wanted_difficulty: String) -> void:
+## Ajusta o pedido do jogador (0 ou 1) ao que a música tem (InstrumentRules.choose) e marca os
+## botões. Sem pedido do segundo, ele começa num instrumento diferente do primeiro.
+func _apply_choice(player: int, wanted_instrument: String, wanted_difficulty: String) -> void:
+	if player == 1 and wanted_instrument == "":
+		wanted_instrument = InstrumentRules.partner(available, instrument)
 	var choice := InstrumentRules.choose(available, wanted_instrument, wanted_difficulty)
 	if choice.is_empty():
 		return
-	instrument = choice[0]
-	difficulty = choice[1]
-	_instrument_buttons[instrument].button_pressed = true
-	for id: String in _difficulty_buttons:
-		_difficulty_buttons[id].disabled = id not in available[instrument]
-	_difficulty_buttons[difficulty].button_pressed = true
+	if player == 0:
+		instrument = choice[0]
+		difficulty = choice[1]
+	else:
+		instrument_2 = choice[0]
+		difficulty_2 = choice[1]
+	_instrument_buttons[player][choice[0]].button_pressed = true
+	for id: String in _difficulty_buttons[player]:
+		_difficulty_buttons[player][id].disabled = id not in available[choice[0]]
+	_difficulty_buttons[player][choice[1]].button_pressed = true
 
 
 func play() -> void:
@@ -175,7 +210,11 @@ func play() -> void:
 		"dir": App.library_dir.path_join(current["id"]),
 		"instrument": instrument,
 		"difficulty": difficulty,
+		"mode": mode,
 	}
+	if mode != "solo":
+		App.selection["instrument_p2"] = instrument_2
+		App.selection["difficulty_p2"] = difficulty_2
 	App.goto(App.PLAY)
 
 

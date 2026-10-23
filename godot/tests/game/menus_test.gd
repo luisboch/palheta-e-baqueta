@@ -102,6 +102,41 @@ func test_song_select_keeps_choice_and_edits_without_backend() -> void:
 	assert_str(scene.absent_text(names)).is_equal("Baixo e Bateria não tocam nesta música")
 
 
+func test_song_select_modes_and_second_player() -> void:
+	_library()
+	var scene := _scene(SongSelectScene)  # foco em "a": Cordas e bateria
+	assert_str(scene.mode).is_equal("solo")
+	assert_bool(scene.get_node("%Player2").visible).is_false()
+	scene.play()
+	assert_str(App.selection["mode"]).is_equal("solo")
+	assert_bool(App.selection.has("instrument_p2")).is_false()  # solo não leva o P2 à partida
+
+	scene.get_node("%Coop").pressed.emit()
+	assert_bool(scene.get_node("%Player2").visible).is_true()
+	assert_str(scene.get_node("%InstrumentLabel").text).is_equal("Jogador 1")
+	assert_str(scene.instrument_2).is_equal("drums")  # sugere o outro instrumento
+	assert_bool(scene.get_node("%Bass2").disabled).is_true()
+	scene.get_node("%Strings2").pressed.emit()
+	scene.get_node("%Easy2").pressed.emit()
+	scene.get_node("%Expert").pressed.emit()
+	assert_array([scene.instrument, scene.difficulty]).is_equal(["strings", "Expert"])
+	assert_array([scene.instrument_2, scene.difficulty_2]).is_equal(["strings", "Easy"])
+
+	scene.get_node("%Versus").pressed.emit()
+	scene.get_node("%Drums2").pressed.emit()
+	scene.play()
+	assert_dict(App.selection).contains_key_value("mode", "versus")
+	assert_dict(App.selection).contains_key_value("instrument_p2", "drums")
+	assert_dict(App.selection).contains_key_value("difficulty", "Expert")
+	assert_str(App.last_scene).is_equal(App.PLAY)
+
+	# Voltando à escolha, o modo e o P2 continuam lá.
+	var again := _scene(SongSelectScene)
+	assert_str(again.mode).is_equal("versus")
+	assert_bool(again.get_node("%Versus").button_pressed).is_true()
+	assert_str(again.instrument_2).is_equal("drums")
+
+
 func test_song_select_empty_library() -> void:
 	var scene := _scene(SongSelectScene)
 	assert_bool(scene.get_node("%Empty").visible).is_true()

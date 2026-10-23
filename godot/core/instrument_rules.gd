@@ -53,3 +53,12 @@ static func choose(available: Dictionary, instrument: String, difficulty: String
 	if difficulty not in levels:
 		difficulty = DEFAULT_DIFFICULTY if DEFAULT_DIFFICULTY in levels else levels[-1]
 	return [instrument, difficulty]
+
+
+## Instrumento sugerido para o segundo jogador: o primeiro jogável diferente de `taken`, para a
+## Banda soar mais completa; se só há um, o mesmo. "" se nada é jogável.
+static func partner(available: Dictionary, taken: String) -> String:
+	for instrument: String in available:
+		if instrument != taken:
+			return instrument
+	return taken if available.has(taken) else ""

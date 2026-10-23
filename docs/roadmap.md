@@ -135,4 +135,6 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
 - Modos Banda e Duelo ([ADR 0017](adr/0017-modos-banda-e-duelo.md)): placar da Banda (pontos e
   multiplicador) ou de P1 × P2 com quem está na frente; sequência de cada um sobre a pista;
   resultado com estrelas e a parte de cada um (Banda) ou o vencedor e a comparação (Duelo).
-- A seguir: escolher o modo e o instrumento do P2 no menu, controles USB, calibração.
+- Na escolha de música: modo (Solo, Banda, Duelo) e instrumento e dificuldade de cada jogador;
+  o segundo começa num instrumento diferente do primeiro.
+- A seguir: controles USB, calibração, tela de controles.

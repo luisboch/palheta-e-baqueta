@@ -5,6 +5,11 @@
 
 > **2026-10-23:** a partida ganhou pausa (`Esc`/Start, e sozinha quando o jogo perde o foco, como
 > no botão Steam): Continuar, Recomeçar ou Sair da música.
+>
+> **2026-10-23:** a escolha de música ganhou o modo (Solo, Banda ou Duelo,
+> [ADR 0017](0017-modos-banda-e-duelo.md)) e, com 2 jogadores, instrumento e dificuldade do
+> segundo, que começa num instrumento diferente do primeiro (`InstrumentRules.partner`). O modo e
+> a escolha do segundo ficam lembrados entre partidas.
 
 ## Contexto
 

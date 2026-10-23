@@ -40,3 +40,11 @@ func test_choose_falls_back_to_strings_on_hard() -> void:
 	assert_array(InstrumentRules.choose(all, "bass", "Easy")).is_equal(["strings", "Easy"])
 	assert_array(InstrumentRules.choose({"bass": ["Medium"]}, "", "")).is_equal(["bass", "Medium"])
 	assert_array(InstrumentRules.choose({}, "", "")).is_empty()
+
+
+func test_partner_prefers_another_instrument() -> void:
+	var both := {"strings": ["Hard"], "drums": ["Easy"]}
+	assert_str(InstrumentRules.partner(both, "strings")).is_equal("drums")
+	assert_str(InstrumentRules.partner(both, "drums")).is_equal("strings")
+	assert_str(InstrumentRules.partner({"strings": ["Hard"]}, "strings")).is_equal("strings")
+	assert_str(InstrumentRules.partner({}, "strings")).is_equal("")
