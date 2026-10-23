@@ -35,3 +35,11 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   modelo ONNX sozinho.
 - **2026-10-22 · resampy:** a versão que o basic-pitch fixa (< 0.4.3) importa `pkg_resources`,
   que saiu do setuptools 81. Por isso o setuptools fica fixado em 80.9.0 no extra `pitch`.
+- **2026-10-22 · gdlint:** variáveis de classe têm de vir antes das funções
+  (`class-definitions-order`), inclusive as públicas que você queira pôr perto da função que as usa.
+- **2026-10-22 · Godot headless:** `--headless` não renderiza. Para ver o jogo sem estar na frente
+  da tela, use o Movie Maker (`--write-movie f.png --fixed-fps 30 --quit-after N`): ele grava os
+  quadros em PNG, mas precisa de GPU e abre uma janela.
+- **2026-10-22 · .chart e git:** o `.chart` é CRLF (como o Moonscraper escreve). `*.chart -text` no
+  `.gitattributes` impede o git de converter, e o docs_check compara os arquivos gerados em bytes
+  (o `read_text()` do Python converteria CRLF em LF).

@@ -25,6 +25,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0011 | [Batidas com beat_this e bateria com ADTOF (projeto não comercial)](0011-batidas-e-bateria.md) | Aceita |
 | 0012 | [Charts de Cordas e baixo, e as 4 dificuldades](0012-charts-de-cordas-baixo-e-dificuldades.md) | Aceita |
 | 0013 | [librosa como reserva das batidas, com refazer automático](0013-reserva-de-batidas-librosa.md) | Aceita |
+| 0014 | [Regras de jogo: janela de acerto, palhetada, pontuação e stem](0014-regras-de-jogo.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

@@ -39,3 +39,6 @@ jobs:
 
       - name: Testes GDScript (GdUnit4)
         run: scripts/test.sh godot
+
+      - name: Cobertura GDScript (≥ 80%)
+        run: scripts/test.sh coverage

@@ -3,6 +3,11 @@
 - **Status:** Aceita
 - **Data:** 2026-10-22
 
+> **2026-10-22:** o instrumentador existe (`tools/gd_coverage.py`, com testes) e mede `core/` e
+> `game/`: 91% na fase 6. O limiar de 80% passou a valer para GDScript também (`scripts/test.sh
+> coverage`, na CI). Limitações: funções de uma linha e corpos de lambdas de várias linhas dentro de
+> parênteses não são medidos.
+
 ## Contexto
 
 O pedido exige no mínimo 80% de cobertura. Do lado Python, `pytest-cov` resolve. Do lado

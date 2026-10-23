@@ -47,6 +47,19 @@ uv run pbq drive list                # pendrives montados (o menu do jogo usa os
 ```
 
 Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/backend-protocol.md).
+
+### Jogar (fase 6: antes dos menus)
+
+```bash
+GODOT=$(scripts/godot.sh)
+$GODOT --path godot -- --song data/library/<id> --instrument strings --difficulty Hard
+```
+
+- `--instrument`: `strings` (Cordas), `bass` ou `drums`; `--difficulty`: `Easy`, `Medium`, `Hard`
+  ou `Expert`. Sem `--song`, abre a primeira música de `data/library/`.
+- Teclado: trastes `1`–`5` (ou `A S D F G`), palhetada `↑`/`↓`/`Enter`; bateria: bumbo `Espaço`,
+  pads `H J K L`. Controle: trastes A B Y X LB, palhetada no direcional. `Esc` sai.
+- `--autoplay 1`: o jogo toca sozinho (para ver um chart sem tocar).
 As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU e Demucs;
 ~1,5 GB). O modelo baixa no primeiro uso (~80 MB). O jogo chega na fase 6.
 
@@ -56,6 +69,7 @@ As etapas de IA precisam dos extras: `uv sync --extra dev --extra ai` (torch CPU
 scripts/test.sh                     # tudo que é rápido: Python (cobertura ≥ 80%) + GDScript
 scripts/test.sh python -k config    # só Python, com argumentos do pytest
 scripts/test.sh godot               # só GDScript (GdUnit4, headless)
+scripts/test.sh coverage            # cobertura do GDScript (≥ 80%)
 uv run pytest -m slow --no-cov      # modelos de IA reais (minutos)
 uv run pre-commit run --all-files   # ruff, mypy, gdformat, gdlint, documentação viva
 ```

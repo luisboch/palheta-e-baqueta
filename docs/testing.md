@@ -21,4 +21,11 @@
   `scripts/test.sh godot`.
 - Só `godot/core/` (lógica pura) é testado em unidade. Cenas, só quando houver lógica que não
   dê para tirar delas.
-- **Cobertura**: não há ferramenta confiável para Godot 4 ([ADR 0005](adr/0005-testes-e-cobertura.md)).
+- **Cobertura**: `scripts/test.sh coverage`, com o instrumentador próprio (`tools/gd_coverage.py`):
+  copia o projeto, insere um contador antes de cada instrução de `core/` e `game/`, roda o GdUnit4
+  e cruza as linhas. Limiar de 80%, também na CI ([ADR 0005](adr/0005-testes-e-cobertura.md)).
+  O relatório fica em `godot/reports/gd_coverage.json`.
+- **Cenas**: `godot/tests/game/` monta a cena da partida com o chart de exemplo, sem áudio, e joga
+  em autoplay até o fim.
+- **Ver o jogo sem tela**: `--write-movie quadros.png --fixed-fps 30 --quit-after N` com
+  `-- --song <pasta> --autoplay 1` grava quadros em PNG (precisa de GPU, não roda headless).

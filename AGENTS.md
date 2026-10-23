@@ -53,7 +53,7 @@ As regras de [ADR 0001](docs/adr/0001-documentacao-viva-verificada.md):
 - **Modelos de IA atrás de interfaces** (`Protocol`), importados só dentro de `run()`. Testes
   usam fakes; o modelo real só nos testes `slow`.
 - **Godot: lógica pura em `godot/core/`** (`RefCounted`, sem nós), testada com GdUnit4. Nós e
-  cenas (godot/game, a partir da fase 6) só desenham e encaminham entrada.
+  cenas (`godot/game/`) só desenham e encaminham entrada.
 - **Pendrive só pelo menu** ([ADR 0003](docs/adr/0003-pendrive-pelo-menu.md)): conectar não faz nada.
 - **Nada de música no git**: MP3s, stems e charts gerados ficam em `data/`. Fixtures de áudio
   são sintéticas, geradas por script.

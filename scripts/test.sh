@@ -3,6 +3,7 @@
 #   scripts/test.sh            os dois
 #   scripts/test.sh python     só Python      (argumentos extras vão para o pytest)
 #   scripts/test.sh godot      só GDScript
+#   scripts/test.sh coverage   cobertura do GDScript (tools/gd_coverage.py), limiar de 80%
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source scripts/godot.sh
@@ -11,6 +12,9 @@ what=${1:-all}
 
 if [[ $what == all || $what == python ]]; then
     uv run pytest "$@"
+fi
+if [[ $what == coverage ]]; then
+    exec uv run python -m tools.gd_coverage --fail-under 80
 fi
 if [[ $what == all || $what == godot ]]; then
     GODOT=$(find_godot)

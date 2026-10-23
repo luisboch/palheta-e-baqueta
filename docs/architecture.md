@@ -61,5 +61,7 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
 - `godot/core/`: lógica pura (`RefCounted`). Inclui o parser de chart, o mapa de tempo, o
   relógio da música, o julgamento de acertos, a pontuação, as regras de seleção de
   instrumento e os perfis de entrada. Tudo testado com GdUnit4.
-- godot/game (a partir da fase 6): cenas e nós (pista 3D, notas, fundo, menus). Só desenham e encaminham entrada
-  para o `core`.
+- `godot/game/`: cenas e nós. Por enquanto, a partida (`godot/game/play.gd`): pista 3D
+  (`godot/game/highway.gd`), placar (`godot/game/hud.gd`), áudio sincronizado e entrada. Só desenham e
+  encaminham entrada para o `core` (`godot/core/play_session.gd` junta juiz, pontuação e relógio).
+  Regras de jogo: [ADR 0014](adr/0014-regras-de-jogo.md).

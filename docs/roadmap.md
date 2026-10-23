@@ -5,12 +5,12 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 
 | # | Fase | Status | Cobertura Python | GDScript |
 |---|---|---|---|---|
-| 1 | Estrutura, tooling, CI, testes "hello" | ✅ concluída | ver abaixo | sem medição ([ADR 0005](adr/0005-testes-e-cobertura.md)) |
+| 1 | Estrutura, tooling, CI, testes "hello" | ✅ concluída | ver abaixo | sem medição na época ([ADR 0005](adr/0005-testes-e-cobertura.md)) |
 | 2 | Importação via pendrive (do kraoke) e cache | ✅ concluída | 99% | sem medição |
 | 3 | Separação de stems e instrumento ausente | ✅ concluída | 97,7% | sem medição |
 | 4 | Mapa de batidas e chart de bateria | 🟡 falta validar batidas reais | 96,4% | sem medição |
 | 5 | Charts de Cordas e baixo; 4 dificuldades | ✅ concluída | 96,8% | sem medição |
-| 6 | Godot: parser de chart, pista de 1 jogador, julgamento | | | |
+| 6 | Godot: parser de chart, pista de 1 jogador, julgamento | ✅ concluída | ver abaixo | 91,2% |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | | | |
 | 8 | 2 jogadores, controles USB, calibração | | | |
 | 9 | Menus, seleção (bloqueando ausentes), resultados | | | |
@@ -75,3 +75,16 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 - Cobertura Python ao fechar: 96,8% (sem torch, como na CI). GDScript: sem mudanças.
 - Depois do fechamento: librosa como reserva das batidas, com refazer automático quando o
   beat_this voltar ([ADR 0013](adr/0013-reserva-de-batidas-librosa.md)).
+
+## Fase 6
+
+- Lógica de jogo em classes puras (`godot/core/`), testadas com GdUnit4: parser do `.chart` (contra um
+  chart gerado pelo pipeline), mapa de tempo, notas jogáveis, relógio sincronizado com o áudio,
+  julgamento, pontuação, regras de seleção de instrumento, volume do stem, carregamento da música e
+  perfil de entrada ([ADR 0014](adr/0014-regras-de-jogo.md)).
+- Partida de 1 jogador (`godot/game/`): pista 3D com notas redondas (Cordas, baixo) e quadradas (bateria),
+  placar, stems sincronizados, teclado e controle; `--autoplay` para depuração. Conferida em quadros
+  renderizados com músicas reais.
+- **Cobertura de GDScript medida pela primeira vez**: instrumentador próprio (`tools/gd_coverage.py`),
+  91,2%, com o limiar de 80% na CI.
+- Cobertura Python: 95,4%; GDScript: 43 testes, 91,2%.
