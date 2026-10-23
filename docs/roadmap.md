@@ -13,7 +13,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 6 | Godot: parser de chart, pista de 1 jogador, julgamento | ✅ concluída | ver abaixo | 91,2% |
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | ✅ concluída | 95,5% | 93,2% |
 | 8 | 2 jogadores, controles USB, calibração | | | |
-| 9 | Menus, seleção (bloqueando ausentes), resultados | | | |
+| 9 | Menus, seleção (bloqueando ausentes), resultados | ✅ concluída (MVP) | 95,5% | 90,9% |
 
 ## Fase 1
 
@@ -105,3 +105,20 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
   pulsando no tempo e o alvo "estourando" no acerto.
 - 60 FPS estáveis no Deck (modo desktop, partida real com áudio).
 - Cobertura Python: 95,5%; GDScript: 50 testes, 93,2%.
+
+## Fase 9
+
+Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem linha de comando.
+
+- Telas montadas com nós no editor ([ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal
+  com o andamento da fila, escolha de música (instrumento ausente desabilitado, dificuldade sem
+  notas desabilitada, capa, editar nome), pendrive (listar, trazer MP3s, importar, salvar) e
+  resultado ao fim da partida. Tema único (`godot/game/theme.tres`) e o fundo animado também nos menus.
+- `pbq edit` corrige título e artista em todos os arquivos da música e sobrevive a reprocessamento.
+- Autoload `App`: inicia o worker com o menu, pausa durante a partida, roda comandos `pbq` numa
+  thread. Nos testes fica inerte (sem worker, comandos ou troca de cena).
+- Conferido: as três telas renderizadas com a biblioteca real; o worker sobe com o menu e morre
+  com o jogo; `pbq drive list` de verdade pela ponte.
+- **Falta para o uso diário no Deck:** atalho para o modo jogo (Steam), pausa na partida. A fase 8
+  (2 jogadores, controles USB, calibração, tela de controles com a palhetada) vem a seguir.
+- Cobertura Python: 95,5%; GDScript: 64 testes, 90,9%.
