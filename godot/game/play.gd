@@ -347,14 +347,15 @@ func _handle_player_input(
 			event.is_action_released(frets[lane])
 			or (player_index == 0 and event.is_action_released(InputProfile.FRETS[lane]))
 		)
-		if pressed:
+		# O gatilho (L2/R2) repete "apertado" a cada movimento: só a primeira descida toca.
+		if pressed and lane not in s.held:
 			s.press_fret(lane)
 			h.set_fret(lane, true)
 			if InputProfile.FRET_TAPS:
 				var tapped := s.tap(now)
 				if not tapped.is_empty():
 					h.on_strum(tapped)
-		elif released:
+		elif released and lane in s.held:
 			s.release_fret(lane)
 			h.set_fret(lane, false)
 	if InputProfile.FRET_TAPS:

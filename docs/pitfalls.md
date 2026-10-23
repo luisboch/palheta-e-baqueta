@@ -74,3 +74,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-23 · Godot 4 não liga os menus ao controle:** `ui_accept` e `ui_cancel` padrão só
   têm teclas (o `ui_up/down` tem o direcional, então a navegação engana). O A não apertava
   nenhum botão no Bazzite. `InputProfile.DEFAULTS` acrescenta A/B e o autoload `App` aplica.
+- **2026-10-23 · L2/R2 são eixos no Godot:** `JOY_BUTTON_*` não tem os gatilhos; é
+  `JOY_AXIS_TRIGGER_*` (`["axis", …]` no `InputProfile`). E cada movimento do gatilho acima da
+  zona morta chega como outro "apertado": a partida só toca se o traste ainda não estava preso.

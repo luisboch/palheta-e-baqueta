@@ -70,7 +70,8 @@ O jogo abre no menu:
 - Menus: setas/direcional e `Enter`/A; `Esc`/B volta.
 - Partida: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
   ([ADR 0015](docs/adr/0015-tocar-no-traste-sem-palhetada.md)). Bateria: bumbo `Espaço`, pads
-  `H J K L`. Controle: trastes A B Y X LB. `Esc`/Start pausa (Continuar, Recomeçar, Sair da
+  `H J K L`. Controle: trastes L1 L2 R1 R2 e X (A no layout Xbox), como
+  no Guitar Hero de joystick. `Esc`/Start pausa (Continuar, Recomeçar, Sair da
   música); apertar o botão Steam também pausa.
 - No modo desktop do Deck, o Steam converte os controles em teclado e mouse e o jogo não vê o
   controle: use um teclado ou rode pelo Steam.
@@ -84,7 +85,7 @@ scripts/steamdeck/install.sh   # confere o que falta e cria o atalho (pode rodar
 ```
 
 Depois, no modo desktop: Steam → Jogos → "Adicionar jogo não-Steam à biblioteca" → marque
-"Palheta & Baqueta". No modo jogo o controle funciona direto (A B Y X LB tocam, Start pausa).
+"Palheta & Baqueta". No modo jogo o controle funciona direto (L1 L2 R1 R2 e X tocam, Start pausa).
 O lançador (`scripts/steamdeck/palheta.sh`) acerta o PATH, que no modo jogo não tem o Homebrew
 (o worker precisa do ffmpeg dele), e grava a saída em `data/game.log`. O ícone é desenhado por
 `scripts/steamdeck/make_icon.gd`.

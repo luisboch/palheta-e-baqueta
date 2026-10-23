@@ -4,8 +4,8 @@
 ## - Jogador 1: Teclado (1..5 / A..G / Espaço / H..L) ou Controle 1 (device 0).
 ## - Jogador 2: Teclado numérico (KP 1..5 / KP 0 / KP 7..+) ou Controle 2 (device 1).
 ##
-## No controle (layout Xbox do Steam Input): trastes nos botões A B Y X LB e palhetada no
-## direcional; bateria com pads em B Y X A e bumbo no LB.
+## No controle, trastes como no Guitar Hero de joystick: L1 L2 R1 R2 e X (o botão de baixo, A no
+## layout Xbox do Steam Input), palhetada no direcional; bateria com pads em B Y X A e bumbo no LB.
 class_name InputProfile
 extends RefCounted
 
@@ -35,18 +35,23 @@ const P2_PAUSE := "p2_pause"
 ## comum; a guitarra USB (fase 8) desliga, porque lá a palhetada é o gesto do instrumento.
 const FRET_TAPS := true
 
-## ação → [["key", keycode] | ["joy", botão, device]]
+## Quanto o gatilho analógico (L2/R2) precisa descer para contar como traste apertado. Metade do
+## curso: não dispara com o dedo só encostado e não exige apertar até o fim.
+const TRIGGER_DEADZONE := 0.5
+
+## ação → [["key", keycode] | ["joy", botão, device] | ["axis", eixo, device]]
+## L2/R2 são eixos no Godot, não botões: um gatilho manda um evento a cada mudança de posição.
 const DEFAULTS := {
 	# Menus: o Godot 4 só liga ui_accept/ui_cancel ao teclado (Enter/Espaço, Esc); sem isto o
 	# direcional anda pelos botões mas o A não aperta nada. Device -1: qualquer controle.
 	"ui_accept": [["joy", JOY_BUTTON_A, -1]],
 	"ui_cancel": [["joy", JOY_BUTTON_B, -1]],
 	# Ações gerais / P1
-	"fret_0": [["key", KEY_1], ["key", KEY_A], ["joy", JOY_BUTTON_A, 0]],
-	"fret_1": [["key", KEY_2], ["key", KEY_S], ["joy", JOY_BUTTON_B, 0]],
-	"fret_2": [["key", KEY_3], ["key", KEY_D], ["joy", JOY_BUTTON_Y, 0]],
-	"fret_3": [["key", KEY_4], ["key", KEY_F], ["joy", JOY_BUTTON_X, 0]],
-	"fret_4": [["key", KEY_5], ["key", KEY_G], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
+	"fret_0": [["key", KEY_1], ["key", KEY_A], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
+	"fret_1": [["key", KEY_2], ["key", KEY_S], ["axis", JOY_AXIS_TRIGGER_LEFT, 0]],
+	"fret_2": [["key", KEY_3], ["key", KEY_D], ["joy", JOY_BUTTON_RIGHT_SHOULDER, 0]],
+	"fret_3": [["key", KEY_4], ["key", KEY_F], ["axis", JOY_AXIS_TRIGGER_RIGHT, 0]],
+	"fret_4": [["key", KEY_5], ["key", KEY_G], ["joy", JOY_BUTTON_A, 0]],
 	"strum_up": [["key", KEY_UP], ["joy", JOY_BUTTON_DPAD_UP, 0]],
 	"strum_down": [["key", KEY_DOWN], ["key", KEY_ENTER], ["joy", JOY_BUTTON_DPAD_DOWN, 0]],
 	"kick": [["key", KEY_SPACE], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
@@ -56,11 +61,11 @@ const DEFAULTS := {
 	"pad_green": [["key", KEY_L], ["joy", JOY_BUTTON_A, 0]],
 	"pause": [["key", KEY_ESCAPE], ["joy", JOY_BUTTON_START, -1]],
 	# Jogador 1 (específico)
-	"p1_fret_0": [["key", KEY_1], ["key", KEY_A], ["joy", JOY_BUTTON_A, 0]],
-	"p1_fret_1": [["key", KEY_2], ["key", KEY_S], ["joy", JOY_BUTTON_B, 0]],
-	"p1_fret_2": [["key", KEY_3], ["key", KEY_D], ["joy", JOY_BUTTON_Y, 0]],
-	"p1_fret_3": [["key", KEY_4], ["key", KEY_F], ["joy", JOY_BUTTON_X, 0]],
-	"p1_fret_4": [["key", KEY_5], ["key", KEY_G], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
+	"p1_fret_0": [["key", KEY_1], ["key", KEY_A], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
+	"p1_fret_1": [["key", KEY_2], ["key", KEY_S], ["axis", JOY_AXIS_TRIGGER_LEFT, 0]],
+	"p1_fret_2": [["key", KEY_3], ["key", KEY_D], ["joy", JOY_BUTTON_RIGHT_SHOULDER, 0]],
+	"p1_fret_3": [["key", KEY_4], ["key", KEY_F], ["axis", JOY_AXIS_TRIGGER_RIGHT, 0]],
+	"p1_fret_4": [["key", KEY_5], ["key", KEY_G], ["joy", JOY_BUTTON_A, 0]],
 	"p1_strum_up": [["key", KEY_UP], ["joy", JOY_BUTTON_DPAD_UP, 0]],
 	"p1_strum_down": [["key", KEY_DOWN], ["key", KEY_ENTER], ["joy", JOY_BUTTON_DPAD_DOWN, 0]],
 	"p1_kick": [["key", KEY_SPACE], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
@@ -70,11 +75,11 @@ const DEFAULTS := {
 	"p1_pad_green": [["key", KEY_L], ["joy", JOY_BUTTON_A, 0]],
 	"p1_pause": [["key", KEY_ESCAPE], ["joy", JOY_BUTTON_START, 0]],
 	# Jogador 2 (específico: Device 1 ou teclado numérico)
-	"p2_fret_0": [["key", KEY_KP_1], ["joy", JOY_BUTTON_A, 1]],
-	"p2_fret_1": [["key", KEY_KP_2], ["joy", JOY_BUTTON_B, 1]],
-	"p2_fret_2": [["key", KEY_KP_3], ["joy", JOY_BUTTON_Y, 1]],
-	"p2_fret_3": [["key", KEY_KP_4], ["joy", JOY_BUTTON_X, 1]],
-	"p2_fret_4": [["key", KEY_KP_5], ["joy", JOY_BUTTON_LEFT_SHOULDER, 1]],
+	"p2_fret_0": [["key", KEY_KP_1], ["joy", JOY_BUTTON_LEFT_SHOULDER, 1]],
+	"p2_fret_1": [["key", KEY_KP_2], ["axis", JOY_AXIS_TRIGGER_LEFT, 1]],
+	"p2_fret_2": [["key", KEY_KP_3], ["joy", JOY_BUTTON_RIGHT_SHOULDER, 1]],
+	"p2_fret_3": [["key", KEY_KP_4], ["axis", JOY_AXIS_TRIGGER_RIGHT, 1]],
+	"p2_fret_4": [["key", KEY_KP_5], ["joy", JOY_BUTTON_A, 1]],
 	"p2_strum_up": [["key", KEY_KP_8], ["joy", JOY_BUTTON_DPAD_UP, 1]],
 	"p2_strum_down": [["key", KEY_KP_2], ["key", KEY_KP_ENTER], ["joy", JOY_BUTTON_DPAD_DOWN, 1]],
 	"p2_kick": [["key", KEY_KP_0], ["joy", JOY_BUTTON_LEFT_SHOULDER, 1]],
@@ -106,7 +111,7 @@ static func player_pause(player_index: int) -> String:
 static func apply(bindings: Dictionary = DEFAULTS) -> void:
 	for action: String in bindings:
 		if not InputMap.has_action(action):
-			InputMap.add_action(action)
+			InputMap.add_action(action, TRIGGER_DEADZONE)
 		for binding: Array in bindings[action]:
 			var event := event_for(binding)
 			if not InputMap.action_has_event(action, event):  # cada partida chama de novo
@@ -118,6 +123,12 @@ static func event_for(binding: Array) -> InputEvent:
 		var key := InputEventKey.new()
 		key.physical_keycode = binding[1]
 		return key
+	if binding[0] == "axis":
+		var trigger := InputEventJoypadMotion.new()
+		trigger.axis = binding[1]
+		trigger.axis_value = 1.0
+		trigger.device = binding[2] if binding.size() > 2 else 0
+		return trigger
 	var button := InputEventJoypadButton.new()
 	button.button_index = binding[1]
 	button.device = binding[2] if binding.size() > 2 else 0
