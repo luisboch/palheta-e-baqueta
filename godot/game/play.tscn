@@ -1,6 +1,247 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
-[ext_resource type="Script" path="res://game/play.gd" id="1"]
+[ext_resource type="Script" path="res://game/play.gd" id="1_l2lu5"]
+[ext_resource type="Script" path="res://game/highway.gd" id="2_ktf2h"]
+[ext_resource type="Script" path="res://game/hud.gd" id="3_fxqnm"]
 
-[node name="Play" type="Node3D"]
-script = ExtResource("1")
+[sub_resource type="Environment" id="Environment_crsts"]
+background_mode = 1
+background_color = Color(0.0627451, 0.0627451, 0.09411765, 1)
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5x2mm"]
+albedo_color = Color(0.10980392, 0.10980392, 0.16470589, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n8gf3"]
+size = Vector3(2.95, 0.02, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bypti"]
+albedo_color = Color(0.22745098, 0.22745098, 0.33333334, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_uf1qs"]
+size = Vector3(0.015, 0.03, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sihfe"]
+albedo_color = Color(0.22745098, 0.22745098, 0.33333334, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w0mhh"]
+size = Vector3(0.015, 0.03, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b285c"]
+albedo_color = Color(0.22745098, 0.22745098, 0.33333334, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_koyhg"]
+size = Vector3(0.015, 0.03, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q0y2x"]
+albedo_color = Color(0.22745098, 0.22745098, 0.33333334, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ia8qj"]
+size = Vector3(0.015, 0.03, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_77fhy"]
+albedo_color = Color(0.22745098, 0.22745098, 0.33333334, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i5hf6"]
+size = Vector3(0.015, 0.03, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m8dgv"]
+albedo_color = Color(0.22745098, 0.22745098, 0.33333334, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hp85v"]
+size = Vector3(0.015, 0.03, 18.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_66ksw"]
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_ohy62"]
+size = Vector3(2.95, 0.03, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x6cd0"]
+albedo_color = Color(0.18039216, 0.76862746, 0.7137255, 1)
+emission_enabled = true
+emission = Color(0.18039216, 0.76862746, 0.7137255, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_i7jyl"]
+top_radius = 0.2
+bottom_radius = 0.22
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wy2e8"]
+albedo_color = Color(1, 0.41960785, 0.41960785, 1)
+emission_enabled = true
+emission = Color(1, 0.41960785, 0.41960785, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_e88q4"]
+top_radius = 0.2
+bottom_radius = 0.22
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bc7oj"]
+albedo_color = Color(1, 0.81960785, 0.4, 1)
+emission_enabled = true
+emission = Color(1, 0.81960785, 0.4, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_rm4x7"]
+top_radius = 0.2
+bottom_radius = 0.22
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jy474"]
+albedo_color = Color(0.3019608, 0.5882353, 1, 1)
+emission_enabled = true
+emission = Color(0.3019608, 0.5882353, 1, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_i12ep"]
+top_radius = 0.2
+bottom_radius = 0.22
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fwmjg"]
+albedo_color = Color(0.78039217, 0.49019608, 1, 1)
+emission_enabled = true
+emission = Color(0.78039217, 0.49019608, 1, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ylo47"]
+top_radius = 0.2
+bottom_radius = 0.22
+height = 0.1
+
+[node name="Play" type="Node3D" unique_id=1359401120]
+script = ExtResource("1_l2lu5")
+
+[node name="Highway" type="Node3D" parent="." unique_id=1360344792]
+script = ExtResource("2_ktf2h")
+
+[node name="Camera3D" type="Camera3D" parent="Highway" unique_id=656154895]
+transform = Transform3D(1, 0, 0, 0, 0.96152395, 0.27472115, 0, -0.27472115, 0.96152395, 0, 2.4, 2.9)
+fov = 60.0
+
+[node name="Sun" type="DirectionalLight3D" parent="Highway" unique_id=906070909]
+transform = Transform3D(0.9396926, 0.28016648, -0.1961747, 0, 0.57357645, 0.81915206, 0.34202012, -0.76975113, 0.53898555, 0, 0, 0)
+
+[node name="Environment" type="WorldEnvironment" parent="Highway" unique_id=1087637707]
+environment = SubResource("Environment_crsts")
+
+[node name="Board" type="MeshInstance3D" parent="Highway" unique_id=983497017]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -6.3)
+material_override = SubResource("StandardMaterial3D_5x2mm")
+mesh = SubResource("BoxMesh_n8gf3")
+
+[node name="Lines" type="Node3D" parent="Highway" unique_id=357961299]
+
+[node name="Line0" type="MeshInstance3D" parent="Highway/Lines" unique_id=1729730663]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, -0.03, -6.3)
+material_override = SubResource("StandardMaterial3D_bypti")
+mesh = SubResource("BoxMesh_uf1qs")
+
+[node name="Line1" type="MeshInstance3D" parent="Highway/Lines" unique_id=108351445]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.825, -0.03, -6.3)
+material_override = SubResource("StandardMaterial3D_sihfe")
+mesh = SubResource("BoxMesh_w0mhh")
+
+[node name="Line2" type="MeshInstance3D" parent="Highway/Lines" unique_id=1950360418]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.275, -0.03, -6.3)
+material_override = SubResource("StandardMaterial3D_b285c")
+mesh = SubResource("BoxMesh_koyhg")
+
+[node name="Line3" type="MeshInstance3D" parent="Highway/Lines" unique_id=229520976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.275, -0.03, -6.3)
+material_override = SubResource("StandardMaterial3D_q0y2x")
+mesh = SubResource("BoxMesh_ia8qj")
+
+[node name="Line4" type="MeshInstance3D" parent="Highway/Lines" unique_id=596079765]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.825, -0.03, -6.3)
+material_override = SubResource("StandardMaterial3D_77fhy")
+mesh = SubResource("BoxMesh_i5hf6")
+
+[node name="Line5" type="MeshInstance3D" parent="Highway/Lines" unique_id=2815006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.375, -0.03, -6.3)
+material_override = SubResource("StandardMaterial3D_m8dgv")
+mesh = SubResource("BoxMesh_hp85v")
+
+[node name="Strikeline" type="MeshInstance3D" parent="Highway" unique_id=278349961]
+material_override = SubResource("StandardMaterial3D_66ksw")
+mesh = SubResource("BoxMesh_ohy62")
+
+[node name="Targets" type="Node3D" parent="Highway" unique_id=81666398]
+
+[node name="Target0" type="MeshInstance3D" parent="Highway/Targets" unique_id=1707277437]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, -1.1, 0, 0)
+material_override = SubResource("StandardMaterial3D_x6cd0")
+transparency = 0.6
+mesh = SubResource("CylinderMesh_i7jyl")
+
+[node name="Target1" type="MeshInstance3D" parent="Highway/Targets" unique_id=1467258150]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, -0.55, 0, 0)
+material_override = SubResource("StandardMaterial3D_wy2e8")
+transparency = 0.6
+mesh = SubResource("CylinderMesh_e88q4")
+
+[node name="Target2" type="MeshInstance3D" parent="Highway/Targets" unique_id=421355426]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_bc7oj")
+transparency = 0.6
+mesh = SubResource("CylinderMesh_rm4x7")
+
+[node name="Target3" type="MeshInstance3D" parent="Highway/Targets" unique_id=2804746]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 0.55, 0, 0)
+material_override = SubResource("StandardMaterial3D_jy474")
+transparency = 0.6
+mesh = SubResource("CylinderMesh_i12ep")
+
+[node name="Target4" type="MeshInstance3D" parent="Highway/Targets" unique_id=795237052]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 1.1, 0, 0)
+material_override = SubResource("StandardMaterial3D_fwmjg")
+transparency = 0.6
+mesh = SubResource("CylinderMesh_ylo47")
+
+[node name="Notes" type="Node3D" parent="Highway" unique_id=1274922452]
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=1045330237]
+script = ExtResource("3_fxqnm")
+
+[node name="Title" type="Label" parent="Hud" unique_id=594418351]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 24.0
+offset_bottom = 16.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+text = "Música — Artista
+Cordas · Difícil"
+
+[node name="Score" type="Label" parent="Hud" unique_id=1017330632]
+offset_left = 24.0
+offset_top = 100.0
+offset_right = 24.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+text = "0 pontos   1×   sequência 0"
+
+[node name="Center" type="Label" parent="Hud" unique_id=466246669]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -0.5
+offset_top = -11.5
+offset_right = 0.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+horizontal_alignment = 1

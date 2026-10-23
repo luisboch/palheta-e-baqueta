@@ -7,22 +7,9 @@ const DIFFICULTY_NAMES := {
 	"Easy": "Fácil", "Medium": "Médio", "Hard": "Difícil", "Expert": "Muito difícil"
 }
 
-var _title := Label.new()
-var _score := Label.new()
-var _center := Label.new()
-
-
-func _ready() -> void:
-	for label: Label in [_title, _score, _center]:
-		label.add_theme_font_size_override("font_size", 28)
-		label.add_theme_color_override("font_outline_color", Color.BLACK)
-		label.add_theme_constant_override("outline_size", 6)
-		add_child(label)
-	_title.position = Vector2(24, 16)
-	_score.position = Vector2(24, 64)
-	_center.set_anchors_preset(Control.PRESET_CENTER)
-	_center.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_center.add_theme_font_size_override("font_size", 40)
+@onready var _title: Label = $Title
+@onready var _score: Label = $Score
+@onready var _center: Label = $Center
 
 
 func setup(song: Dictionary, instrument: String, difficulty: String) -> void:
@@ -45,6 +32,8 @@ func update_score(scoring: Scoring) -> void:
 
 
 func show_message(text: String) -> void:
+	_title.text = ""  # tira o texto de exemplo da cena (o que o editor mostra)
+	_score.text = ""
 	_center.text = text
 
 

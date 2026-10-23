@@ -14,8 +14,6 @@ const DEFAULT_LIBRARY := "../data/library"
 ## partida vem da linha de comando.
 var auto_start := true
 var session: PlaySession
-var highway: Highway
-var hud: Hud
 var player: AudioStreamPlayer
 var _stem_index := -1  ## índice do stem do jogador no AudioStreamSynchronized
 var _started_audio := false
@@ -24,11 +22,12 @@ var _loaded: Dictionary
 var _done := false
 var _autoplay := false
 
+@onready var highway: Highway = $Highway
+@onready var hud: Hud = $Hud
+
 
 func _ready() -> void:
 	InputProfile.apply()
-	hud = Hud.new()
-	add_child(hud)
 	if auto_start:
 		var args := _args()
 		start(
@@ -58,8 +57,7 @@ func start(dir: String, instrument: String, difficulty: String, autoplay := fals
 		difficulty = levels[levels.size() - 1]
 
 	session = PlaySession.new(_loaded["chart"], instrument, difficulty)
-	highway = Highway.new(session)
-	add_child(highway)
+	highway.setup(session)
 	hud.setup(_loaded["song"], instrument, difficulty)
 	_setup_audio(instrument)
 

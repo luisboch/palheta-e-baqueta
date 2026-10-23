@@ -21,52 +21,45 @@ const KICK_COLOR := Color("ff9f1c")
 const MISS_COLOR := Color(0.25, 0.25, 0.28)
 
 var session: PlaySession
-var lanes: int
+var lanes := 5
 var _views := {}  ## PlayNote → Node3D
 var _next := 0  ## próxima nota que ainda não ganhou desenho
-var _targets: Array[MeshInstance3D] = []
-var _strikeline: MeshInstance3D
 var _flash := 0.0
 
+@onready var _board: MeshInstance3D = $Board
+@onready var _strikeline: MeshInstance3D = $Strikeline
+@onready var _lines: Node3D = $Lines
+@onready var _targets: Node3D = $Targets
+@onready var _notes: Node3D = $Notes
 
-func _init(play_session: PlaySession) -> void:
+
+## Prepara a pista para a partida: 5 lanes (Cordas, baixo) ou 4 pads (bateria).
+## A cena (play.tscn) vem montada com 5 lanes, que é o que o editor mostra.
+func setup(play_session: PlaySession) -> void:
 	session = play_session
+	_strikeline.material_override = _strikeline.material_override.duplicate()  # brilho por partida
 	lanes = 4 if session.drums else 5
-
-
-func _ready() -> void:
-	var camera := Camera3D.new()
-	camera.position = Vector3(0, 2.4, 2.9)
-	camera.fov = 60
-	add_child(camera)
-	camera.look_at(Vector3(0, 0, -5.5))
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-55, -20, 0)
-	add_child(light)
-	var env := WorldEnvironment.new()
-	env.environment = Environment.new()
-	env.environment.background_mode = Environment.BG_COLOR
-	env.environment.background_color = Color("101018")
-	env.environment.glow_enabled = true
-	add_child(env)
-
-	var length := SPEED * (LOOKAHEAD + BEHIND)
-	var board := _box(Vector3(lanes * LANE_WIDTH + 0.2, 0.02, length), Color("1c1c2a"))
-	board.position = Vector3(0, -0.05, -length / 2 + SPEED * BEHIND)
-	add_child(board)
-	for lane in lanes + 1:
-		var line := _box(Vector3(0.015, 0.03, length), Color("3a3a55"))
-		line.position = Vector3(_x(lane) - LANE_WIDTH / 2, -0.03, board.position.z)
-		add_child(line)
-	_strikeline = _box(Vector3(lanes * LANE_WIDTH + 0.2, 0.03, 0.04), Color.WHITE, 1.5)
-	add_child(_strikeline)
-	for lane in lanes:
-		var target := _note_mesh(_lane_color(lane), false)
-		target.scale = Vector3(1.0, 0.4, 1.0)
-		target.position = Vector3(_x(lane), 0.0, 0.0)
-		target.transparency = 0.6
-		add_child(target)
-		_targets.append(target)
+	# As malhas da cena são compartilhadas entre instâncias: copia antes de mudar a largura.
+	var board: BoxMesh = _board.mesh.duplicate()
+	board.size.x = lanes * LANE_WIDTH + 0.2
+	_board.mesh = board
+	var line_mesh: BoxMesh = _strikeline.mesh.duplicate()
+	line_mesh.size.x = board.size.x
+	_strikeline.mesh = line_mesh
+	for i in _lines.get_child_count():
+		var line: Node3D = _lines.get_child(i)
+		line.visible = i <= lanes
+		line.position.x = _x(i) - LANE_WIDTH / 2
+	for i in _targets.get_child_count():
+		var target: MeshInstance3D = _targets.get_child(i)
+		target.visible = i < lanes
+		if i >= lanes:
+			continue
+		target.position.x = _x(i)
+		var fresh := _note_mesh(_lane_color(i), false)
+		target.mesh = fresh.mesh
+		target.material_override = fresh.material_override
+		fresh.free()
 
 
 func _x(lane: int) -> float:
@@ -74,7 +67,7 @@ func _x(lane: int) -> float:
 
 
 func _lane_color(lane: int) -> Color:
-	return COLORS[lane + (1 if session.drums else 0)]
+	return COLORS[lane + (1 if session and session.drums else 0)]
 
 
 ## Lane na tela de uma nota: na bateria, lane 0 é o bumbo e os pads 1-4 viram as lanes 0-3.
@@ -87,7 +80,7 @@ func update_view(now: float) -> void:
 		var note := session.notes[_next]
 		if note.state == PlayNote.State.PENDING:
 			_views[note] = _make_view(note)
-			add_child(_views[note])
+			_notes.add_child(_views[note])
 		_next += 1
 	for note: PlayNote in _views.keys():
 		var view: Node3D = _views[note]
@@ -122,7 +115,7 @@ func _make_view(note: PlayNote) -> Node3D:
 ## Nota redonda (disco) para Cordas e baixo, quadrada para a bateria (prato: metálico).
 func _note_mesh(color: Color, cymbal: bool) -> MeshInstance3D:
 	var mesh := MeshInstance3D.new()
-	if session.drums:
+	if session and session.drums:
 		var box := BoxMesh.new()
 		box.size = Vector3(0.42, 0.1, 0.24)
 		mesh.mesh = box
@@ -163,8 +156,12 @@ func _box(size: Vector3, color: Color, glow: float = 0.0) -> MeshInstance3D:
 
 
 func set_fret(lane: int, pressed: bool) -> void:
-	if lane < _targets.size():
-		_targets[lane].transparency = 0.0 if pressed else 0.6
+	if lane < lanes:
+		_target(lane).transparency = 0.0 if pressed else 0.6
+
+
+func _target(lane: int) -> MeshInstance3D:
+	return _targets.get_child(lane)
 
 
 func on_strum(result: Dictionary) -> void:
@@ -173,9 +170,9 @@ func on_strum(result: Dictionary) -> void:
 
 func on_input(lane: int, result: Dictionary) -> void:
 	var screen := lane - 1 if session.drums else lane
-	if screen >= 0 and screen < _targets.size():
-		_targets[screen].transparency = 0.0
-		create_tween().tween_property(_targets[screen], "transparency", 0.6, 0.15)
+	if screen >= 0 and screen < lanes:
+		_target(screen).transparency = 0.0
+		create_tween().tween_property(_target(screen), "transparency", 0.6, 0.15)
 	if result.has("note"):
 		_flash = 1.0
 
