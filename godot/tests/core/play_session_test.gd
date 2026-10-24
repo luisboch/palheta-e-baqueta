@@ -20,6 +20,54 @@ func test_perfect_run_of_the_sample_song() -> void:
 	assert_float(s.mix.volume_db).is_equal(StemMix.NORMAL_DB)
 
 
+func _last_sustain(s: PlaySession) -> PlayNote:
+	var note := s.notes[s.notes.size() - 1]
+	assert_bool(note.is_sustain()).is_true()
+	return note
+
+
+func test_holding_a_sustain_to_the_end_scores_each_beat() -> void:
+	var s := _session("strings", "Expert")
+	var note := _last_sustain(s)
+	s.held = note.lanes.duplicate()
+	s.strum(note.time)
+	assert_object(s.sustain).is_same(note)
+	var mid := (note.time + note.end_time) / 2.0
+	var events := s.update(mid, 0.016)
+	assert_float(events["bend"]).is_equal(0.0)
+	s.whammy = 1.0
+	assert_float(s.update(mid, 0.016)["bend"]).is_equal(1.0)  # o som só dobra segurando
+	assert_bool(note.holding).is_true()
+	events = s.update(note.end_time + 1.0, 0.016)
+	assert_object(events["dropped"]).is_null()
+	assert_object(s.sustain).is_null()
+	assert_bool(note.dropped()).is_false()
+	# 480 ticks = 2,5 batidas × 25 pontos; a segunda metade com o whammy no máximo (+50%)
+	assert_int(s.scoring.sustain_score).is_equal(int(1.25 * 25 + 1.25 * 25 * 1.5))
+	assert_float(s.update(note.end_time + 2.0, 0.016)["bend"]).is_equal(0.0)
+
+
+func test_releasing_a_sustain_early_stops_the_points_without_a_miss() -> void:
+	var s := _session("strings", "Expert")
+	var note := _last_sustain(s)
+	s.held = note.lanes.duplicate()
+	s.strum(note.time)
+	s.update(note.time + 0.25, 0.016)
+	var points := s.scoring.sustain_score
+	assert_int(points).is_greater(0)
+	s.release_fret(note.lanes[1])
+	var events := s.update(note.time + 0.5, 0.016)
+	assert_object(events["dropped"]).is_same(note)
+	assert_bool(note.dropped()).is_true()
+	assert_float(note.held_until).is_equal_approx(note.time + 0.25, 1e-6)
+	s.held = note.lanes.duplicate()  # apertar de novo não volta a segurar
+	s.update(note.end_time, 0.016)
+	assert_int(s.scoring.sustain_score).is_equal(points)
+	# soltar não é erro: só as notas anteriores, que o teste pulou, contam como perdidas
+	assert_int(s.scoring.misses).is_equal(s.notes.size() - 1)
+	assert_int(note.state).is_equal(PlayNote.State.HIT)
+
+
 func test_missing_everything_ducks_the_stem() -> void:
 	var s := _session("drums", "Easy")
 	var events := s.update(s.duration + 1.0, 1.0)

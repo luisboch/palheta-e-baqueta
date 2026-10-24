@@ -15,6 +15,8 @@ var scoring := Scoring.new()
 var mix := StemMix.new()
 var clock := SongClock.new()
 var held := PackedInt32Array()  ## trastes pressionados agora
+var whammy := 0.0  ## alavanca agora (0-1), vinda de Whammy na cena
+var sustain: PlayNote  ## sustentada sendo segurada agora (null se nenhuma)
 var duration: float  ## s: até a última nota (com sustentação)
 
 
@@ -65,13 +67,44 @@ func pad(now: float, lane: int) -> Dictionary:
 	return result
 
 
-## A cada frame: notas perdidas (já pontuadas como erro) e o volume do stem (dB).
+## A cada frame: notas perdidas (já pontuadas como erro), a sustentada que o jogador soltou
+## antes do fim (`dropped`, null se nenhuma), o volume do stem (dB) e o whammy que vale para o
+## som (`bend`: só enquanto segura uma sustentada).
 func update(now: float, delta: float) -> Dictionary:
 	var missed := judge.update(now)
 	for note in missed:
 		scoring.on_miss()
 		mix.on_miss()
-	return {"missed": missed, "volume_db": mix.update(delta)}
+	var dropped := _hold(now)
+	return {
+		"missed": missed,
+		"dropped": dropped,
+		"volume_db": mix.update(delta),
+		"bend": whammy if sustain else 0.0,
+	}
+
+
+## Segura a sustentada até `now`: pontua as batidas desde o último quadro e acaba no fim dela
+## ou quando os trastes deixam de bater (aí devolve a nota, que foi solta).
+func _hold(now: float) -> PlayNote:
+	if sustain == null:
+		return null
+	var note := sustain
+	if not Judge.frets_match(note.lanes, held):
+		_end_sustain()
+		return note
+	var until := clampf(now, note.held_until, note.end_time)
+	var beats := (tempo.tick(until) - tempo.tick(note.held_until)) / tempo.resolution
+	scoring.on_sustain(beats, whammy)
+	note.held_until = until
+	if until >= note.end_time:
+		_end_sustain()
+	return null
+
+
+func _end_sustain() -> void:
+	sustain.holding = false
+	sustain = null
 
 
 func finished(now: float) -> bool:
@@ -85,3 +118,10 @@ func _score(result: Dictionary) -> void:
 	elif result.has("note"):
 		scoring.on_hit(result["grade"])
 		mix.on_hit()
+		var note: PlayNote = result["note"]
+		if note.is_sustain():
+			if sustain:
+				_end_sustain()  # a nova começa antes do fim da outra: fica a nova
+			# Os pontos contam do tempo da nota, mesmo se o ataque veio um pouco antes ou depois.
+			sustain = note
+			note.holding = true

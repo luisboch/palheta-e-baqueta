@@ -11,6 +11,9 @@ var lanes: PackedInt32Array  ## trastes do acorde (Cordas/baixo) ou a peça (bat
 var cymbal := false  ## bateria: prato (desenha prato, não pad)
 var state := State.PENDING
 var grade := ""  ## perfect, good, ok (se acertou)
+## Sustentada: segurando os trastes agora, e até que instante (s) ela foi segurada e pontuada.
+var holding := false
+var held_until: float
 
 
 func _init(
@@ -20,7 +23,13 @@ func _init(
 	time = note_time
 	lanes = note_lanes
 	end_time = end if end >= note_time else note_time
+	held_until = note_time
 
 
 func is_sustain() -> bool:
 	return end_time > time
+
+
+## Acertou o ataque e soltou os trastes antes do fim: o resto da cauda fica apagado na pista.
+func dropped() -> bool:
+	return state == State.HIT and is_sustain() and not holding and held_until < end_time

@@ -24,6 +24,7 @@ const P1_PADS: Array[String] = [
 	"p1_kick", "p1_pad_red", "p1_pad_yellow", "p1_pad_blue", "p1_pad_green"
 ]
 const P1_PAUSE := "p1_pause"
+const P1_WHAMMY := "p1_whammy"
 
 ## Jogador 2
 const P2_FRETS: Array[String] = ["p2_fret_0", "p2_fret_1", "p2_fret_2", "p2_fret_3", "p2_fret_4"]
@@ -32,6 +33,7 @@ const P2_PADS: Array[String] = [
 	"p2_kick", "p2_pad_red", "p2_pad_yellow", "p2_pad_blue", "p2_pad_green"
 ]
 const P2_PAUSE := "p2_pause"
+const P2_WHAMMY := "p2_whammy"
 
 ## Cordas/baixo sem palhetada: a nota toca ao apertar o traste (ADR 0015). Teclado e controle
 ## comum; a guitarra USB (fase 8) desliga, porque lá a palhetada é o gesto do instrumento.
@@ -76,6 +78,8 @@ const DEFAULTS := {
 	"p1_pad_blue": [["key", KEY_K]],
 	"p1_pad_green": [["key", KEY_L]],
 	"p1_pause": [["key", KEY_ESCAPE], ["joy", JOY_BUTTON_START, 0]],
+	# Whammy: no controle são os analógicos (lidos direto, ver Whammy); no teclado, uma tecla.
+	"p1_whammy": [["key", KEY_SHIFT]],
 	# Jogador 2 (específico: Device 1 ou teclado numérico)
 	"p2_fret_0": [["key", KEY_KP_1], ["axis", JOY_AXIS_TRIGGER_LEFT, 1]],
 	"p2_fret_1": [["key", KEY_KP_2], ["joy", JOY_BUTTON_LEFT_SHOULDER, 1]],
@@ -90,6 +94,7 @@ const DEFAULTS := {
 	"p2_pad_blue": [["key", KEY_KP_9]],
 	"p2_pad_green": [["key", KEY_KP_ADD]],
 	"p2_pause": [["key", KEY_PAUSE], ["joy", JOY_BUTTON_START, 1]],
+	"p2_whammy": [["key", KEY_KP_6]],
 }
 
 
@@ -112,6 +117,10 @@ static func player_pads(player_index: int) -> Array[String]:
 
 static func player_pause(player_index: int) -> String:
 	return P1_PAUSE if player_index == 0 else P2_PAUSE
+
+
+static func player_whammy(player_index: int) -> String:
+	return P1_WHAMMY if player_index == 0 else P2_WHAMMY
 
 
 ## Cria as ações no InputMap (sem apagar as que já existem com outros eventos nem repetir).

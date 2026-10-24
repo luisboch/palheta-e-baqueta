@@ -11,6 +11,11 @@ extends Node3D
 
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
 const MUSIC_BUS := "Music"
+## Bus do instrumento de cada jogador, com o pitch shift do whammy (default_bus_layout.tres).
+## Mandam para o Music, para o fundo continuar reagindo ao som do jogador.
+const PLAYER_BUSES: Array[String] = ["Player1", "Player2"]
+## Abaixo disso o pitch shift fica desligado: mesmo em 1,0 ele colore um pouco o som.
+const BEND_EPSILON := 0.01
 const OTHERS_DB := -3.0  ## instrumentos que ninguém toca: um pouco abaixo de quem joga
 const CAM_1P_POS := Vector3(0.0, 2.4, 2.9)
 const CAM_2P_POS := Vector3(0.0, 2.9, 4.0)  ## x vem da pista de cada jogador
@@ -23,7 +28,10 @@ var camera_2: Camera3D
 var highway_2: Highway
 var paused := false
 var play_mode := "solo"
-var player: AudioStreamPlayer
+var player: AudioStreamPlayer  ## o fundo e os outros instrumentos; o relógio vem dele
+## Instrumento de cada jogador, num player e num bus próprios para o whammy mudar só o som dele
+## (ADR 0021). Com os 2 no mesmo instrumento, o mesmo player nas duas posições.
+var stems: Array[AudioStreamPlayer] = [null, null]
 var session: PlaySession
 var session_2: PlaySession
 var sfx: SoundEffects
@@ -37,8 +45,8 @@ var _lead := LEAD_IN
 var _loaded: Dictionary
 var _spectrum: AudioEffectSpectrumAnalyzerInstance
 var _started_audio := false
-var _stem_index := -1
-var _stem_index_2 := -1
+var _whammies: Array[Whammy] = [Whammy.new(), Whammy.new()]
+var _bends: Array[float] = [0.0, 0.0]
 var _drum_down: Array[Dictionary] = [{}, {}]  ## botões da bateria apertados, por jogador
 var _others: Array[int] = []  ## stems dos instrumentos que ninguém está tocando
 
@@ -214,22 +222,23 @@ func _setup_audio(instrument: String, instrument_2 := "") -> void:
 	var roles: Array[String] = ["song"]
 	for role: String in BackendProtocol.INSTRUMENTS:
 		roles.append(role)
+	var played: Array[String] = [instrument, instrument_2]
 
 	for role: String in roles:
 		var path := SongLoader.file_path(_loaded, role)
 		if path == "":
 			continue
 		var stream := AudioStreamOggVorbis.load_from_file(path)
-		if stream:
-			if role == instrument:
-				_stem_index = streams.size()
-			if role == instrument_2:
-				_stem_index_2 = streams.size()
-			if role != "song" and role != instrument and role != instrument_2:
+		if stream == null:
+			continue
+		if role in played and role != "":
+			_add_stem(played.find(role), stream)
+			if instrument_2 == instrument:
+				stems[1] = stems[0]
+		else:
+			if role != "song":
 				_others.append(streams.size())
 			streams.append(stream)
-	if instrument_2 != "" and instrument_2 == instrument:
-		_stem_index_2 = _stem_index
 	sync.stream_count = streams.size()
 	for i in streams.size():
 		sync.set_sync_stream(i, streams[i])
@@ -244,39 +253,44 @@ func _setup_audio(instrument: String, instrument_2 := "") -> void:
 	add_child(player)
 
 
+func _add_stem(index: int, stream: AudioStream) -> void:
+	var stem := AudioStreamPlayer.new()
+	stem.stream = stream
+	if AudioServer.get_bus_index(PLAYER_BUSES[index]) >= 0:
+		stem.bus = PLAYER_BUSES[index]
+	add_child(stem)
+	stems[index] = stem
+
+
+## Volume (dB) e whammy (`bend`, 0-1) do instrumento de um jogador. Com os 2 no mesmo
+## instrumento, vale o maior dos dois.
+func _set_stem(index: int, volume_db: float, bend: float) -> void:
+	var stem := stems[index]
+	if stem == null:
+		return
+	if index == 1 and stem == stems[0]:
+		volume_db = maxf(volume_db, stem.volume_db)
+		bend = maxf(bend, _bends[0])
+	stem.volume_db = volume_db
+	_bends[index] = bend
+	var bus := AudioServer.get_bus_index(stem.bus)
+	if bus < 0 or stem.bus == MUSIC_BUS or AudioServer.get_bus_effect_count(bus) == 0:
+		return
+	var shift := AudioServer.get_bus_effect(bus, 0) as AudioEffectPitchShift
+	if shift:
+		shift.pitch_scale = Whammy.pitch_scale(bend)
+		AudioServer.set_bus_effect_enabled(bus, 0, bend > BEND_EPSILON)
+
+
 func _process(delta: float) -> void:
 	if session == null or _done or paused:
 		return
 	var now := _song_time(delta)
 	if _autoplay:
 		_play_by_itself(now)
-	var events := session.update(now, delta)
-	if not events["missed"].is_empty() and sfx:
-		sfx.play_miss()
-	for note: PlayNote in events["missed"]:
-		highway.on_miss(note)
-
-	var vol_1: float = events["volume_db"]
+	_update_player(0, session, highway, now, delta)
 	if session_2 and highway_2:
-		var events_2 := session_2.update(now, delta)
-		if not events_2["missed"].is_empty() and sfx:
-			sfx.play_miss()
-		for note: PlayNote in events_2["missed"]:
-			highway_2.on_miss(note)
-		var vol_2: float = events_2["volume_db"]
-		if player and player.stream:
-			if _stem_index == _stem_index_2 and _stem_index >= 0:
-				player.stream.set_sync_stream_volume(_stem_index, maxf(vol_1, vol_2))
-			else:
-				if _stem_index >= 0:
-					player.stream.set_sync_stream_volume(_stem_index, vol_1)
-				if _stem_index_2 >= 0:
-					player.stream.set_sync_stream_volume(_stem_index_2, vol_2)
-		highway_2.update_view(now, _grid)
-	elif _stem_index >= 0 and player and player.stream:
-		player.stream.set_sync_stream_volume(_stem_index, vol_1)
-
-	highway.update_view(now, _grid)
+		_update_player(1, session_2, highway_2, now, delta)
 	background.update(now, _grid, _bands.update(_magnitudes(), delta))
 	hud.update_score(session.scoring, session_2.scoring if session_2 else null)
 	var finished_all := session.finished(now) and (session_2 == null or session_2.finished(now))
@@ -285,13 +299,40 @@ func _process(delta: float) -> void:
 		hud.show_results(session.scoring, session_2.scoring if session_2 else null)
 
 
+## Um quadro da partida de um jogador: whammy, notas perdidas e soltas, som e pista.
+func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: float) -> void:
+	var sticks: Array[Vector2] = [_stick(index, true), _stick(index, false)]
+	var key := Input.is_action_pressed(InputProfile.player_whammy(index))
+	s.whammy = _whammies[index].update(sticks, key, delta)
+	var events := s.update(now, delta)
+	if not events["missed"].is_empty() and sfx:
+		sfx.play_miss()
+	for note: PlayNote in events["missed"]:
+		h.on_miss(note)
+	if events["dropped"]:
+		h.on_drop(events["dropped"])
+	_set_stem(index, events["volume_db"], events["bend"])
+	h.update_view(now, _grid, events["bend"])
+
+
+## Posição de um analógico (o esquerdo ou o direito) do controle do jogador.
+static func _stick(device: int, left: bool) -> Vector2:
+	var x := JOY_AXIS_LEFT_X if left else JOY_AXIS_RIGHT_X
+	var y := JOY_AXIS_LEFT_Y if left else JOY_AXIS_RIGHT_Y
+	return Vector2(Input.get_joy_axis(device, x), Input.get_joy_axis(device, y))
+
+
 ## Tempo da música: contagem regressiva no começo, depois o relógio sincronizado com o áudio.
 ## Sem áudio (testes, música sem OGG), o relógio do frame.
 func _song_time(delta: float) -> float:
 	if _lead > 0.0:
 		_lead -= delta
 		if _lead <= 0.0 and player and player.stream.stream_count > 0:
+			# No mesmo quadro: entram no mesmo bloco do mixer e seguem juntos (mesma taxa).
 			player.play()
+			for stem in stems:
+				if stem and not stem.playing:
+					stem.play()
 			_started_audio = true
 		return -maxf(_lead, 0.0)
 	if not _started_audio:
@@ -345,6 +386,9 @@ func set_paused(value: bool) -> void:
 	paused = value
 	if player:
 		player.stream_paused = value
+	for stem in stems:
+		if stem:
+			stem.stream_paused = value
 	for lane in session.held.duplicate():
 		session.release_fret(lane)
 		highway.set_fret(lane, false)

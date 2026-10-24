@@ -59,6 +59,35 @@ func test_autoplay_plays_the_whole_song_without_audio() -> void:
 	assert_int(scoring.misses).is_equal(0)
 
 
+func test_sustain_is_held_on_the_line_and_dims_when_released() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	var s: PlaySession = scene.session
+	var road: Highway = scene.highway
+	for i in 600:
+		scene._process(1.0 / 60.0)
+		if s.sustain and s.clock.now() > s.sustain.time + 0.1:
+			break
+	var note := s.sustain
+	assert_object(note).is_not_null()
+	var hold: ImmediateMesh = road._hold.mesh
+	assert_int(hold.get_surface_count()).is_equal(1)  # a cauda segurada, acesa na linha
+	assert_bool(road._views[note].visible).is_false()
+	assert_int(s.scoring.sustain_score).is_greater(0)
+	scene._autoplay = false
+	s.held = PackedInt32Array()  # soltou os trastes
+	scene._process(1.0 / 60.0)
+	assert_bool(note.dropped()).is_true()
+	assert_int(hold.get_surface_count()).is_equal(0)
+	var view: Node3D = road._views[note]
+	assert_bool(view.visible).is_true()
+	for child: MeshInstance3D in view.get_children():
+		if child.name.begins_with("Tail"):
+			var mat: StandardMaterial3D = child.material_override
+			assert_object(mat.albedo_color).is_equal(Highway.MISS_COLOR)
+		else:
+			assert_bool(child.visible).is_false()
+
+
 func test_drums_and_defaults() -> void:
 	var scene := _play(_song_dir('{"strings": false, "drums": true}'), "strings", "Impossível")
 	assert_str(scene.session.instrument).is_equal("drums")  # Cordas ausente: cai na bateria

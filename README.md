@@ -72,7 +72,10 @@ O jogo abre no menu:
 - Partida: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
   ([ADR 0015](docs/adr/0015-tocar-no-traste-sem-palhetada.md)). Bateria: bumbo `Espaço`, pads
   `H J K L`. Controle: trastes L2 L1 R1 R2 e X (A no layout Xbox), como
-  no Guitar Hero de joystick. `Esc`/Start pausa (Continuar, Recomeçar, Sair da
+  no Guitar Hero de joystick. Nota sustentada: segure os trastes até o fim da cauda para ganhar
+  pontos extras; mexer um dos analógicos (ou segurar `Shift`) é o whammy: a cauda ondula, o
+  instrumento desafina e a sustentação rende mais ([ADR 0021](docs/adr/0021-sustentacao-e-whammy.md)).
+  `Esc`/Start pausa (Continuar, Recomeçar, Sair da
   música); apertar o botão Steam também pausa.
 - No modo desktop do Deck, o Steam converte os controles em teclado e mouse e o jogo não vê o
   controle: use um teclado ou rode pelo Steam.

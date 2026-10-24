@@ -1,6 +1,8 @@
 ## A pista 3D: lanes, linha de acerto e as notas vindo na direção do jogador.
 ##
-## Cordas e baixo: 5 lanes, notas redondas (discos), sustentação como cauda.
+## Cordas e baixo: 5 lanes, notas redondas (discos), sustentação como cauda. Segurando uma
+## sustentada, a cauda vai sendo "consumida" na linha de acerto, acesa, e ondula com o whammy;
+## solta antes do fim, o resto da cauda apaga.
 ## Bateria: 4 pads, notas quadradas (pratos metálicos), bumbo como uma barra atravessando a pista.
 ## Identidade própria: a paleta das lanes não é a de outros jogos do gênero.
 class_name Highway
@@ -23,6 +25,12 @@ const BEAT_LINE_POOL := 24  ## linhas de batida visíveis de uma vez (LOOKAHEAD 
 const BEAT_LINE_COLOR := Color(0.55, 0.55, 0.75)
 const HIT_POP := 1.35  ## escala do alvo no acerto, voltando a 1 em HIT_POP_TIME
 const HIT_POP_TIME := 0.12
+const TAIL_WIDTH := 0.07
+const HOLD_WIDTH := 0.1  ## cauda segurada: um pouco mais larga, para se ver que está valendo
+const HOLD_STEP := 0.08  ## distância entre os pontos da cauda segurada (a onda precisa deles)
+const WOBBLE_AMPLITUDE := 0.09  ## deslocamento lateral da onda com o whammy no máximo
+const WOBBLE_HZ := 9.0
+const WOBBLE_WAVES := 1.6  ## ondas por unidade de pista: a cauda serpenteia, não só balança
 
 var session: PlaySession
 var lanes := 5
@@ -30,6 +38,8 @@ var _views := {}  ## PlayNote → Node3D
 var _next := 0  ## próxima nota que ainda não ganhou desenho
 var _flash := 0.0
 var _beat_lines: Array[MeshInstance3D] = []
+var _hold: MeshInstance3D  ## caudas sendo seguradas, refeitas a cada quadro
+var _time := 0.0
 
 ## Sequência do jogador sobre a pista, com 2 jogadores (o texto vem do Hud).
 @onready var combo: Label3D = $Combo
@@ -69,6 +79,15 @@ func setup(play_session: PlaySession) -> void:
 		target.material_override = fresh.material_override
 		fresh.free()
 	_make_beat_lines(board.size.x)
+	if _hold == null:
+		_hold = MeshInstance3D.new()
+		_hold.mesh = ImmediateMesh.new()
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.vertex_color_use_as_albedo = true
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_hold.material_override = mat
+		_notes.add_child(_hold)
 
 
 ## Linhas de batida que correm pela pista com as notas (downbeat mais forte): mostram o tempo
@@ -97,20 +116,30 @@ func _screen_lane(note: PlayNote) -> int:
 	return note.lanes[0] - 1 if session.drums else note.lanes[0]
 
 
-## `grid`: as batidas da música (null: sem linhas nem pulso).
-func update_view(now: float, grid: BeatGrid = null) -> void:
+## `grid`: as batidas da música (null: sem linhas nem pulso). `whammy`: a alavanca (0-1), que
+## faz ondular a cauda segurada.
+func update_view(now: float, grid: BeatGrid = null, whammy := 0.0) -> void:
 	while _next < session.notes.size() and session.notes[_next].time < now + LOOKAHEAD:
 		var note := session.notes[_next]
 		if note.state == PlayNote.State.PENDING:
 			_views[note] = _make_view(note)
 			_notes.add_child(_views[note])
 		_next += 1
+	var holding: Array[PlayNote] = []
 	for note: PlayNote in _views.keys():
 		var view: Node3D = _views[note]
 		view.position.z = -(note.time - now) * SPEED
-		if note.end_time + BEHIND < now or note.state == PlayNote.State.HIT:
+		view.visible = not note.holding
+		if note.holding:
+			holding.append(note)
+		var done := note.state == PlayNote.State.HIT and not note.holding and not note.dropped()
+		if note.end_time + BEHIND < now or done:
 			view.queue_free()
 			_views.erase(note)
+	_time += get_process_delta_time()
+	_draw_holds(holding, now, whammy)
+	if not holding.is_empty():
+		_flash = maxf(_flash, 0.4)  # a linha de acerto continua acesa enquanto segura
 	_flash = maxf(_flash - get_process_delta_time() * 4.0, 0.0)
 	var pulse := grid.pulse(now) if grid else 0.0
 	var mat: StandardMaterial3D = _strikeline.material_override
@@ -132,6 +161,48 @@ func _update_beat_lines(now: float, grid: BeatGrid) -> void:
 		line.transparency = 0.2 if beat[1] else 0.6
 
 
+## As caudas seguradas: da linha de acerto até o fim da nota (ou do que se vê da pista), como
+## uma fita que ondula para os lados com o whammy. Só estas mudam a cada quadro.
+func _draw_holds(holding: Array[PlayNote], now: float, whammy: float) -> void:
+	var mesh: ImmediateMesh = _hold.mesh
+	mesh.clear_surfaces()
+	if holding.is_empty():
+		return
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for note in holding:
+		var length := minf(note.end_time - now, LOOKAHEAD) * SPEED
+		for lane in note.lanes:
+			var color := _lane_color(lane).lightened(0.3)
+			var steps := maxi(ceili(length / HOLD_STEP), 1)
+			for i in steps:
+				var z0 := -i * HOLD_STEP
+				var z1 := -minf((i + 1) * HOLD_STEP, length)
+				_ribbon_quad(mesh, color, _x(lane), z0, z1, whammy)
+	mesh.surface_end()
+
+
+func _ribbon_quad(
+	mesh: ImmediateMesh, color: Color, x: float, z0: float, z1: float, whammy: float
+) -> void:
+	var a := x + _wobble(z0, whammy)
+	var b := x + _wobble(z1, whammy)
+	var half := HOLD_WIDTH / 2
+	var corners := [
+		Vector3(a - half, 0.0, z0),
+		Vector3(a + half, 0.0, z0),
+		Vector3(b + half, 0.0, z1),
+		Vector3(b - half, 0.0, z1),
+	]
+	for i: int in [0, 1, 2, 0, 2, 3]:
+		mesh.surface_set_color(color)
+		mesh.surface_add_vertex(corners[i])
+
+
+## Deslocamento lateral da cauda no ponto `z`: parada sem whammy; a onda corre pela cauda.
+func _wobble(z: float, whammy: float) -> float:
+	return WOBBLE_AMPLITUDE * whammy * sin(TAU * (WOBBLE_HZ * _time + WOBBLE_WAVES * z))
+
+
 func _make_view(note: PlayNote) -> Node3D:
 	var root := Node3D.new()
 	if session.drums and note.lanes[0] == 0:
@@ -145,8 +216,9 @@ func _make_view(note: PlayNote) -> Node3D:
 		root.add_child(mesh)
 		if note.is_sustain():
 			var tail_len := (note.end_time - note.time) * SPEED
-			var tail := _box(Vector3(0.07, 0.03, tail_len), _lane_color(screen), 0.8)
+			var tail := _box(Vector3(TAIL_WIDTH, 0.03, tail_len), _lane_color(screen), 0.8)
 			tail.position = Vector3(_x(screen), -0.01, -tail_len / 2)
+			tail.name = "Tail%d" % screen
 			root.add_child(tail)
 	return root
 
@@ -235,6 +307,29 @@ func on_miss(note: PlayNote) -> void:
 		return
 	for child in view.get_children():
 		if child is MeshInstance3D:
-			var mat: StandardMaterial3D = child.material_override
-			mat.albedo_color = MISS_COLOR
-			mat.emission_enabled = false
+			_gray(child)
+
+
+## Sustentada solta antes do fim: fica só o resto da cauda (de onde soltou até o fim), apagado,
+## seguindo com a pista.
+func on_drop(note: PlayNote) -> void:
+	var view: Node3D = _views.get(note)
+	if view == null:
+		return
+	var start := (note.held_until - note.time) * SPEED
+	var rest := maxf((note.end_time - note.held_until) * SPEED, 0.001)
+	for child in view.get_children():
+		if not child.name.begins_with("Tail"):
+			child.visible = false  # a cabeça da nota já foi tocada
+			continue
+		var tail: MeshInstance3D = child
+		var box: BoxMesh = tail.mesh
+		box.size.z = rest
+		tail.position.z = -start - rest / 2
+		_gray(tail)
+
+
+func _gray(mesh: MeshInstance3D) -> void:
+	var mat: StandardMaterial3D = mesh.material_override
+	mat.albedo_color = MISS_COLOR
+	mat.emission_enabled = false

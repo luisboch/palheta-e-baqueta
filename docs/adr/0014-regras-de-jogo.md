@@ -3,6 +3,9 @@
 - **Status:** Aceita
 - **Data:** 2026-10-22
 
+> **2026-10-24:** a sustentação pontua, com whammy, e o instrumento de quem joga saiu do
+> `AudioStreamSynchronized` para um player próprio ([ADR 0021](0021-sustentacao-e-whammy.md)).
+>
 > **2026-10-23:** no teclado e no controle comum, a nota toca no traste, sem palhetada
 > ([ADR 0015](0015-tocar-no-traste-sem-palhetada.md)). A palhetada fica para a guitarra USB.
 
