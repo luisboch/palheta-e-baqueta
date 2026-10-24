@@ -2,8 +2,8 @@
 
 Regras (só tiram notas, nunca as deslocam: o que sobra continua no tempo da música):
 
-    Cordas/baixo   Muito difícil  tudo, 5 trastes, acordes até 3
-                   Difícil        colcheias e tercinas, 5 trastes, acordes até 2
+    Cordas/baixo   Muito difícil  colcheias e tercinas (sem semicolcheias), 5 trastes, acordes até 3
+                   Difícil        só colcheias, 5 trastes, acordes até 2
                    Médio          batidas + contratempo quando a batida está vazia, 4 trastes, sem acordes
                    Fácil          tempos fortes (1 e 3 no 4/4; 1 nos outros), 3 trastes, sem acordes
     Bateria        Muito difícil  tudo
@@ -63,12 +63,12 @@ def strong_beats(time_signatures: Sequence[TimeSignature], end_tick: int, resolu
 def select_ticks(
     ticks: Sequence[int], difficulty: str, resolution: int, time_signatures: Sequence[TimeSignature]
 ) -> set[int]:
-    """Quais ataques (ticks) do Muito difícil ficam na dificuldade pedida."""
+    """Quais ataques (ticks) transcritos ficam na dificuldade pedida (ADR 0020)."""
     present = set(ticks)
     if difficulty == EXPERT:
-        return present
-    if difficulty == HARD:
         return {t for t in present if on_eighths(t, resolution)}
+    if difficulty == HARD:
+        return {t for t in present if t % (resolution // 2) == 0}
     if difficulty == MEDIUM:
         half = resolution // 2
         return {

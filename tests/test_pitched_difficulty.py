@@ -95,8 +95,9 @@ def test_strong_beats():
 
 def test_select_ticks_per_difficulty():
     ticks = [0, R // 4, R // 2, R + R // 2, 2 * R + R // 3, 3 * R]
-    assert select_ticks(ticks, EXPERT, R, FOUR_FOUR) == set(ticks)
-    assert select_ticks(ticks, HARD, R, FOUR_FOUR) == {0, R // 2, R + R // 2, 2 * R + R // 3, 3 * R}
+    # Muito difícil: sem semicolcheias (R // 4); Difícil: nem tercinas
+    assert select_ticks(ticks, EXPERT, R, FOUR_FOUR) == {0, R // 2, R + R // 2, 2 * R + R // 3, 3 * R}
+    assert select_ticks(ticks, HARD, R, FOUR_FOUR) == {0, R // 2, R + R // 2, 3 * R}
     # Médio: batidas + contratempo só quando a batida está vazia (a da batida 1 estava)
     assert select_ticks(ticks, MEDIUM, R, FOUR_FOUR) == {0, R + R // 2, 3 * R}
     assert select_ticks(ticks, EASY, R, FOUR_FOUR) == {0}

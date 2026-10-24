@@ -11,6 +11,7 @@ extends Node3D
 
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
 const MUSIC_BUS := "Music"
+const OTHERS_DB := -3.0  ## instrumentos que ninguém toca: um pouco abaixo de quem joga
 const CAM_1P_POS := Vector3(0.0, 2.4, 2.9)
 const CAM_2P_POS := Vector3(0.0, 2.9, 4.0)  ## x vem da pista de cada jogador
 ## Com 2 jogadores, cada pista tem a sua câmera e a sua metade da tela (ADR 0019). As pistas
@@ -38,6 +39,7 @@ var _spectrum: AudioEffectSpectrumAnalyzerInstance
 var _started_audio := false
 var _stem_index := -1
 var _stem_index_2 := -1
+var _others: Array[int] = []  ## stems dos instrumentos que ninguém está tocando
 
 @onready var background: Background = $Background
 @onready var camera: Camera3D = $Camera3D
@@ -206,11 +208,11 @@ func leave() -> void:
 func _setup_audio(instrument: String, instrument_2 := "") -> void:
 	var sync := AudioStreamSynchronized.new()
 	var streams: Array[AudioStream] = []
+	# O fundo (song.ogg) não tem nenhum instrumento presente; os outros instrumentos continuam
+	# tocando por baixo do jogador, só um pouco mais baixos, para destacar o que ele toca.
 	var roles: Array[String] = ["song"]
-	if instrument != "":
-		roles.append(instrument)
-	if instrument_2 != "" and instrument_2 != instrument:
-		roles.append(instrument_2)
+	for role: String in BackendProtocol.INSTRUMENTS:
+		roles.append(role)
 
 	for role: String in roles:
 		var path := SongLoader.file_path(_loaded, role)
@@ -222,12 +224,16 @@ func _setup_audio(instrument: String, instrument_2 := "") -> void:
 				_stem_index = streams.size()
 			if role == instrument_2:
 				_stem_index_2 = streams.size()
+			if role != "song" and role != instrument and role != instrument_2:
+				_others.append(streams.size())
 			streams.append(stream)
 	if instrument_2 != "" and instrument_2 == instrument:
 		_stem_index_2 = _stem_index
 	sync.stream_count = streams.size()
 	for i in streams.size():
 		sync.set_sync_stream(i, streams[i])
+	for i: int in _others:
+		sync.set_sync_stream_volume(i, OTHERS_DB)
 	player = AudioStreamPlayer.new()
 	player.stream = sync
 	var bus := AudioServer.get_bus_index(MUSIC_BUS)

@@ -31,6 +31,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0017 | [Dois jogadores: Banda e Duelo](0017-modos-banda-e-duelo.md) | Aceita |
 | 0018 | [Distribuição em .deb, só Linux, com o backend instalado pelo uv](0018-pacote-deb.md) | Aceita |
 | 0019 | [Tela dividida para 2 jogadores](0019-tela-dividida-2-jogadores.md) | Aceita |
+| 0020 | [Cordas e baixo menos densos no Difícil e no Muito difícil; os outros instrumentos continuam tocando](0020-dificuldade-cordas-e-som-dos-outros-instrumentos.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo
