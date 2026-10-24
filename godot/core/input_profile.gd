@@ -5,8 +5,9 @@
 ## - Jogador 2: Teclado numérico (KP 1..5 / KP 0 / KP 7..+) ou Controle 2 (device 1).
 ##
 ## No controle, trastes como no Guitar Hero de joystick: L2 L1 R1 R2 e X (o botão de baixo, A no
-## layout Xbox do Steam Input), palhetada no direcional. A bateria usa os mesmos botões: a ordem das
-## peças (bumbo, caixa, amarelo, azul, verde) é a dos trastes, então L2 é o bumbo e X o prato verde.
+## layout Xbox do Steam Input), palhetada no direcional.
+## A bateria usa os mesmos botões: os 4 pads, na ordem da pista, em L2 L1 R1 R2 e o bumbo em X
+## (ver `drum_fret`).
 class_name InputProfile
 extends RefCounted
 
@@ -90,6 +91,11 @@ const DEFAULTS := {
 	"p2_pad_green": [["key", KEY_KP_ADD]],
 	"p2_pause": [["key", KEY_PAUSE], ["joy", JOY_BUTTON_START, 1]],
 }
+
+
+## Traste (botão) que toca a lane da bateria: o bumbo (0) no último, os pads 1-4 nos trastes 0-3.
+static func drum_fret(lane: int) -> int:
+	return FRETS.size() - 1 if lane == 0 else lane - 1
 
 
 static func player_frets(player_index: int) -> Array[String]:

@@ -321,13 +321,13 @@ func test_drums_use_the_fret_buttons() -> void:
 	var press := InputEventAction.new()
 	press.pressed = true
 	for lane in note.lanes:
-		press.action = InputProfile.FRETS[lane]
+		press.action = InputProfile.FRETS[InputProfile.drum_fret(lane)]
 		scene._unhandled_input(press)
 		scene._unhandled_input(press)  # o gatilho repete: só a primeira descida bate
 	assert_int(note.state).is_equal(PlayNote.State.HIT)
 	assert_int(scene._drum_down[0].size()).is_equal(note.lanes.size())
 	press.pressed = false
 	for lane in note.lanes:
-		press.action = InputProfile.FRETS[lane]
+		press.action = InputProfile.FRETS[InputProfile.drum_fret(lane)]
 		scene._unhandled_input(press)
 	assert_bool(scene._drum_down[0].is_empty()).is_true()

@@ -389,17 +389,19 @@ func _handle_player_input(
 	var frets := InputProfile.player_frets(player_index)
 	var strums := InputProfile.player_strum(player_index)
 	if s.drums:
-		# Os botões das Cordas também tocam a bateria (lane i = traste i); o gatilho repete
-		# "apertado" a cada movimento, então só a primeira descida bate.
+		# Os botões das Cordas também tocam a bateria: os 4 pads, na ordem da pista, nos trastes
+		# 0-3 (L2 L1 R1 R2) e o bumbo no último (X). O gatilho repete "apertado" a cada
+		# movimento, então só a primeira descida bate.
 		var down: Dictionary = _drum_down[player_index]
 		for lane in pads.size():
+			var fret := InputProfile.drum_fret(lane)
 			var fret_pressed := (
-				event.is_action_pressed(frets[lane])
-				or (player_index == 0 and event.is_action_pressed(InputProfile.FRETS[lane]))
+				event.is_action_pressed(frets[fret])
+				or (player_index == 0 and event.is_action_pressed(InputProfile.FRETS[fret]))
 			)
 			var fret_released := (
-				event.is_action_released(frets[lane])
-				or (player_index == 0 and event.is_action_released(InputProfile.FRETS[lane]))
+				event.is_action_released(frets[fret])
+				or (player_index == 0 and event.is_action_released(InputProfile.FRETS[fret]))
 			)
 			var hit := (
 				event.is_action_pressed(pads[lane])

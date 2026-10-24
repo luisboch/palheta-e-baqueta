@@ -102,3 +102,9 @@ func test_menus_accept_and_cancel_from_any_joypad() -> void:
 		cancel.device = device
 		cancel.pressed = true
 		assert_bool(cancel.is_action("ui_cancel")).is_true()
+
+
+func test_drum_pads_follow_the_lane_order_and_kick_takes_the_last_fret() -> void:
+	assert_int(InputProfile.drum_fret(1)).is_equal(0)  # 1º pad: L2
+	assert_int(InputProfile.drum_fret(4)).is_equal(3)  # 4º pad: R2
+	assert_int(InputProfile.drum_fret(0)).is_equal(4)  # bumbo: X

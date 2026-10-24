@@ -33,7 +33,7 @@ Jogando bateria, o Difícil e o Muito difícil também pesavam: o Muito difícil
 Difícil quase igual a ele (≈ 97% dos ataques). A bateria passou a seguir a regra das Cordas:
 Muito difícil = colcheias e tercinas; Difícil = só colcheias, com chimbal e pratos só nas
 batidas. `version` da etapa `chart` foi para 4. No controle, a bateria usa os botões das
-Cordas (L2 bumbo, L1 caixa, R1, R2, X), e os pads antigos (B Y X A, LB) saíram.
+Cordas (os 4 pads em L2 L1 R1 R2, o bumbo em X), e os pads antigos (B Y X A, LB) saíram.
 
 ## Nota (2026-10-23): escala por parcela, igual para todos os instrumentos
 
