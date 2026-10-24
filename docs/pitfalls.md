@@ -82,4 +82,4 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   evento de controle cujo `device` não é o do jogador (`_joypad_device`).
 - **2026-10-23 · Quase nenhuma nota sustentada em Free Bird:** o limite de 1 batida (ADR 0012) era
   alto demais, o Basic Pitch corta as notas cedo. `PitchedOptions.sustain_beats` caiu para 0,5.
-  Músicas já processadas precisam refazer a etapa de charts para ganhar as sustentações.
+  A `version` de `PitchedChart` subiu para 2, então o worker refaz a etapa nas músicas já prontas.

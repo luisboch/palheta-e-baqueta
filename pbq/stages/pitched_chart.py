@@ -41,6 +41,7 @@ class PitchedChart(Stage):
     name = "pitched_chart"
     label = "escrevendo Cordas e baixo"
     summary = "Cordas e baixo Muito difícil (basic-pitch), na grade de batidas"
+    version = 2  # 2: sustentação a partir de meia batida (antes 1)
     requires = ("separate", "beats", "presence")
 
     def __init__(self, config: Config, transcriber: PitchTranscriber | None = None):
