@@ -59,8 +59,8 @@ def test_pitched_chart_writes_events_with_pitches(config, song):
     assert pitch.calls == ["guitar.flac", "bass.flac"]
     strings = json.loads(song.path("charts", "strings.json").read_text())
     bass = json.loads(song.path("charts", "bass.json").read_text())
-    assert strings["present"] and strings["events"][0] == [192, [52, 59], 0]  # 0,5 s = 1ª batida
-    assert bass["events"][0] == [192, [52], 0]  # baixo: só a mais grave
+    assert strings["present"] and strings["events"][0] == [192, [52, 59], 115]  # 0,5 s = 1ª batida
+    assert bass["events"][0] == [192, [52], 115]  # baixo: só a mais grave
     assert len(json.loads(song.path("charts", "strings_notes.json").read_text())) == 16
 
 

@@ -43,13 +43,13 @@ def test_events_merge_same_tick_and_bass_keeps_root():
 
 
 def test_events_sustain_only_long_notes_and_stops_before_next():
-    raw = [RawNote(0.0, 1.5, 50, 0.9), RawNote(2.0, 2.5, 52, 0.9), RawNote(3.0, 6.0, 54, 0.9)]
+    raw = [RawNote(0.0, 1.5, 50, 0.9), RawNote(2.0, 2.3, 52, 0.9), RawNote(3.0, 6.0, 54, 0.9)]
     evts = events(raw, TM, STRINGS)
     assert [e.length for e in evts] == [round(1.5 * R), 0, 3 * R]
     capped = events([RawNote(0.0, 3.0, 50, 0.9), RawNote(2.0, 2.2, 52, 0.9)], TM, STRINGS)
     assert capped[0].length == 2 * R - R // 4  # acaba 1/16 antes da próxima
-    short = events([RawNote(0.0, 3.0, 50, 0.9), RawNote(1.0, 1.2, 52, 0.9)], TM, STRINGS)
-    assert short[0].length == 0  # cortada para 3/4 de batida: vira nota curta
+    short = events([RawNote(0.0, 3.0, 50, 0.9), RawNote(0.6, 0.8, 52, 0.9)], TM, STRINGS)
+    assert short[0].length == 0  # cortada para 0,35 batida: vira nota curta
 
 
 # --- contorno -----------------------------------------------------------------------

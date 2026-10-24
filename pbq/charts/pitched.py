@@ -49,7 +49,9 @@ class PitchedOptions:
     min_amplitude: float = 0.3
     min_duration: float = 0.06  # s: mais curto que isso é ruído de ataque
     chord_window: float = 0.04  # s: notas que começam juntas assim são um acorde
-    sustain_beats: float = 1.0  # nota a partir de 1 batida vira sustentada
+    sustain_beats: float = (
+        0.5  # nota a partir de meia batida vira sustentada (1 batida quase nunca acontecia em rock)
+    )
 
 
 STRINGS = PitchedOptions(min_pitch=40, max_pitch=88, max_notes=3)  # E2 a E6 (violão e guitarra)

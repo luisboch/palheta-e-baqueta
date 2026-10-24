@@ -115,7 +115,7 @@ def gen_sample_chart(root: Path) -> str:
         "tom": [beats[-1]],
         "cymbal": [beats[0]],
     }
-    melody = [RawNote(b, b + 0.3, 52 + 2 * i, 0.8) for i, b in enumerate(beats[:6])]
+    melody = [RawNote(b, b + 0.2, 52 + 2 * i, 0.8) for i, b in enumerate(beats[:6])]
     melody += [RawNote(beats[6], beats[6] + 1.2, 55, 0.8), RawNote(beats[6] + 0.01, beats[6] + 1.2, 59, 0.8)]
     evts = events(melody, tempo_map, STRINGS)
     expert_drums = drum_notes(hits, tempo_map)

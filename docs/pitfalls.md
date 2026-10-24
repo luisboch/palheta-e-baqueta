@@ -80,3 +80,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-23 · O InputMap ignora o device dos botões de controle:** `p1_*` e `p2_*` casam
   com qualquer controle, então o controle 2 tocava no jogador 1 também. `play.gd` descarta o
   evento de controle cujo `device` não é o do jogador (`_joypad_device`).
+- **2026-10-23 · Quase nenhuma nota sustentada em Free Bird:** o limite de 1 batida (ADR 0012) era
+  alto demais, o Basic Pitch corta as notas cedo. `PitchedOptions.sustain_beats` caiu para 0,5.
+  Músicas já processadas precisam refazer a etapa de charts para ganhar as sustentações.
