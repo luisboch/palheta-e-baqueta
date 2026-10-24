@@ -88,3 +88,7 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   `SongClock` pulava para o começo, redesenhando a pista em loop em vez de mostrar o resultado.
   `play.gd` usa `SongClock.advance(delta)` quando `player.playing` é falso. Explicaria acontecer só
   em algumas músicas; confirmar jogando.
+- **2026-10-23 · Bateria no controle tinha botões diferentes das Cordas:** os pads ficavam em
+  B Y X A e LB. Agora as peças seguem a ordem dos trastes (L2 bumbo, L1 caixa, R1, R2 e X nos
+  pratos/toms); `kick`/`pad_*` ficaram só com o teclado. O gatilho repete "apertado" a cada
+  movimento, por isso `play.gd` guarda os botões da bateria já apertados (`_drum_down`).

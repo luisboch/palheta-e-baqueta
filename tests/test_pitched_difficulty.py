@@ -132,9 +132,15 @@ def test_drum_track_reductions():
         Note(R, r),
         Note(R, k),
     ]
-    assert drum_track(expert, EXPERT, R) == expert
+    top = drum_track(expert, EXPERT, R)
+    assert top == sorted(n for n in expert if n.tick != R // 4)  # só a semicolcheia sai
     hard = drum_track(expert, HARD, R)
     assert Note(R // 4, y) not in hard and Note(0, 68) in hard and Note(0, 66) in hard
+    assert [n for n in hard if n.tick == R // 2] == [Note(R // 2, k), Note(R // 2, r)]
+    hat_hard = drum_track([Note(R // 2, y), Note(R // 2, 66), Note(R, y), Note(R, 66)], HARD, R)
+    assert hat_hard == [Note(R, y), Note(R, 66)]  # chimbal só na batida, como no Médio
+    assert drum_track([Note(R // 3, r)], HARD, R) == []  # tercina só no Muito difícil
+    assert drum_track([Note(R // 3, r)], EXPERT, R) == [Note(R // 3, r)]
     medium = drum_track(expert, MEDIUM, R)
     assert [n for n in medium if n.tick == 0] == [Note(0, k), Note(0, g), Note(0, 68)]  # 1 pad: o prato
     assert [n for n in medium if n.tick == R // 2] == [Note(R // 2, r)]  # bumbo fora da batida sai

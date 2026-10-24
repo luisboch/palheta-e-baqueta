@@ -26,3 +26,11 @@ instrumento de quem joga continua abaixando no erro (ADR 0014); os que ninguém 
 
 - A velocidade de rolagem da pista é a mesma em todas as dificuldades; o que muda é a densidade.
 - Os 3 dB dos outros instrumentos são palpite: ajustar jogando.
+
+## Nota (2026-10-23): a bateria entra na mesma escala
+
+Jogando bateria, o Difícil e o Muito difícil também pesavam: o Muito difícil era "tudo" e o
+Difícil quase igual a ele (≈ 97% dos ataques). A bateria passou a seguir a regra das Cordas:
+Muito difícil = colcheias e tercinas; Difícil = só colcheias, com chimbal e pratos só nas
+batidas. `version` da etapa `chart` foi para 4. No controle, a bateria usa os botões das
+Cordas (L2 bumbo, L1 caixa, R1, R2, X), e os pads antigos (B Y X A, LB) saíram.

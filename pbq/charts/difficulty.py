@@ -6,8 +6,8 @@ Regras (só tiram notas, nunca as deslocam: o que sobra continua no tempo da mú
                    Difícil        só colcheias, 5 trastes, acordes até 2
                    Médio          batidas + contratempo quando a batida está vazia, 4 trastes, sem acordes
                    Fácil          tempos fortes (1 e 3 no 4/4; 1 nos outros), 3 trastes, sem acordes
-    Bateria        Muito difícil  tudo
-                   Difícil        colcheias e tercinas, até 2 pads + bumbo
+    Bateria        Muito difícil  colcheias e tercinas (sem semicolcheias), até 2 pads + bumbo
+                   Difícil        só colcheias; pratos e chimbal só nas batidas, até 2 pads + bumbo
                    Médio          colcheias, mas pratos e chimbal só nas batidas; 1 pad + bumbo nas batidas
                    Fácil          batidas, uma peça por vez
 
@@ -92,8 +92,6 @@ FLAGS = set(drums.CYMBAL_FLAG.values())
 
 
 def drum_track(notes: Sequence[Note], difficulty: str, resolution: int) -> list[Note]:
-    if difficulty == EXPERT:
-        return list(notes)
     by_tick: dict[int, set[int]] = defaultdict(set)
     flags: set[tuple[int, int]] = set()
     for n in notes:
@@ -103,10 +101,19 @@ def drum_track(notes: Sequence[Note], difficulty: str, resolution: int) -> list[
             by_tick[n.tick].add(n.lane)
 
     rule: Callable[[int, set[int]], list[int]]
-    if difficulty == HARD:
+    if difficulty == EXPERT:
 
         def rule(tick: int, lanes: set[int]) -> list[int]:
             return sorted(lanes) if on_eighths(tick, resolution) else []
+    elif difficulty == HARD:
+        # Chimbal e pratos em toda colcheia são o que mais enche a bateria: só nas batidas.
+        def rule(tick: int, lanes: set[int]) -> list[int]:
+            if tick % (resolution // 2):
+                return []
+            on_beat = tick % resolution == 0
+            return sorted(
+                lane for lane in lanes if on_beat or lane not in drums.CYMBAL_FLAG or lane == drums.BLUE
+            )
     elif difficulty == MEDIUM:
         # Pratos e chimbal só nas batidas: com o chimbal em colcheias, o Médio saía quase igual ao
         # Difícil (164 × 167 ataques/min em Pais e Filhos).

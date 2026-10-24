@@ -5,7 +5,8 @@
 ## - Jogador 2: Teclado numérico (KP 1..5 / KP 0 / KP 7..+) ou Controle 2 (device 1).
 ##
 ## No controle, trastes como no Guitar Hero de joystick: L2 L1 R1 R2 e X (o botão de baixo, A no
-## layout Xbox do Steam Input), palhetada no direcional; bateria com pads em B Y X A e bumbo no LB.
+## layout Xbox do Steam Input), palhetada no direcional. A bateria usa os mesmos botões: a ordem das
+## peças (bumbo, caixa, amarelo, azul, verde) é a dos trastes, então L2 é o bumbo e X o prato verde.
 class_name InputProfile
 extends RefCounted
 
@@ -54,11 +55,11 @@ const DEFAULTS := {
 	"fret_4": [["key", KEY_5], ["key", KEY_G], ["joy", JOY_BUTTON_A, 0]],
 	"strum_up": [["key", KEY_UP], ["joy", JOY_BUTTON_DPAD_UP, 0]],
 	"strum_down": [["key", KEY_DOWN], ["key", KEY_ENTER], ["joy", JOY_BUTTON_DPAD_DOWN, 0]],
-	"kick": [["key", KEY_SPACE], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
-	"pad_red": [["key", KEY_H], ["joy", JOY_BUTTON_B, 0]],
-	"pad_yellow": [["key", KEY_J], ["joy", JOY_BUTTON_Y, 0]],
-	"pad_blue": [["key", KEY_K], ["joy", JOY_BUTTON_X, 0]],
-	"pad_green": [["key", KEY_L], ["joy", JOY_BUTTON_A, 0]],
+	"kick": [["key", KEY_SPACE]],
+	"pad_red": [["key", KEY_H]],
+	"pad_yellow": [["key", KEY_J]],
+	"pad_blue": [["key", KEY_K]],
+	"pad_green": [["key", KEY_L]],
 	"pause": [["key", KEY_ESCAPE], ["joy", JOY_BUTTON_START, -1]],
 	# Jogador 1 (específico)
 	"p1_fret_0": [["key", KEY_1], ["key", KEY_A], ["axis", JOY_AXIS_TRIGGER_LEFT, 0]],
@@ -68,11 +69,11 @@ const DEFAULTS := {
 	"p1_fret_4": [["key", KEY_5], ["key", KEY_G], ["joy", JOY_BUTTON_A, 0]],
 	"p1_strum_up": [["key", KEY_UP], ["joy", JOY_BUTTON_DPAD_UP, 0]],
 	"p1_strum_down": [["key", KEY_DOWN], ["key", KEY_ENTER], ["joy", JOY_BUTTON_DPAD_DOWN, 0]],
-	"p1_kick": [["key", KEY_SPACE], ["joy", JOY_BUTTON_LEFT_SHOULDER, 0]],
-	"p1_pad_red": [["key", KEY_H], ["joy", JOY_BUTTON_B, 0]],
-	"p1_pad_yellow": [["key", KEY_J], ["joy", JOY_BUTTON_Y, 0]],
-	"p1_pad_blue": [["key", KEY_K], ["joy", JOY_BUTTON_X, 0]],
-	"p1_pad_green": [["key", KEY_L], ["joy", JOY_BUTTON_A, 0]],
+	"p1_kick": [["key", KEY_SPACE]],
+	"p1_pad_red": [["key", KEY_H]],
+	"p1_pad_yellow": [["key", KEY_J]],
+	"p1_pad_blue": [["key", KEY_K]],
+	"p1_pad_green": [["key", KEY_L]],
 	"p1_pause": [["key", KEY_ESCAPE], ["joy", JOY_BUTTON_START, 0]],
 	# Jogador 2 (específico: Device 1 ou teclado numérico)
 	"p2_fret_0": [["key", KEY_KP_1], ["axis", JOY_AXIS_TRIGGER_LEFT, 1]],
@@ -82,11 +83,11 @@ const DEFAULTS := {
 	"p2_fret_4": [["key", KEY_KP_5], ["joy", JOY_BUTTON_A, 1]],
 	"p2_strum_up": [["key", KEY_KP_8], ["joy", JOY_BUTTON_DPAD_UP, 1]],
 	"p2_strum_down": [["key", KEY_KP_2], ["key", KEY_KP_ENTER], ["joy", JOY_BUTTON_DPAD_DOWN, 1]],
-	"p2_kick": [["key", KEY_KP_0], ["joy", JOY_BUTTON_LEFT_SHOULDER, 1]],
-	"p2_pad_red": [["key", KEY_KP_7], ["joy", JOY_BUTTON_B, 1]],
-	"p2_pad_yellow": [["key", KEY_KP_8], ["joy", JOY_BUTTON_Y, 1]],
-	"p2_pad_blue": [["key", KEY_KP_9], ["joy", JOY_BUTTON_X, 1]],
-	"p2_pad_green": [["key", KEY_KP_ADD], ["joy", JOY_BUTTON_A, 1]],
+	"p2_kick": [["key", KEY_KP_0]],
+	"p2_pad_red": [["key", KEY_KP_7]],
+	"p2_pad_yellow": [["key", KEY_KP_8]],
+	"p2_pad_blue": [["key", KEY_KP_9]],
+	"p2_pad_green": [["key", KEY_KP_ADD]],
 	"p2_pause": [["key", KEY_PAUSE], ["joy", JOY_BUTTON_START, 1]],
 }
 

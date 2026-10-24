@@ -39,6 +39,7 @@ var _spectrum: AudioEffectSpectrumAnalyzerInstance
 var _started_audio := false
 var _stem_index := -1
 var _stem_index_2 := -1
+var _drum_down: Array[Dictionary] = [{}, {}]  ## botões da bateria apertados, por jogador
 var _others: Array[int] = []  ## stems dos instrumentos que ninguém está tocando
 
 @onready var background: Background = $Background
@@ -388,11 +389,28 @@ func _handle_player_input(
 	var frets := InputProfile.player_frets(player_index)
 	var strums := InputProfile.player_strum(player_index)
 	if s.drums:
+		# Os botões das Cordas também tocam a bateria (lane i = traste i); o gatilho repete
+		# "apertado" a cada movimento, então só a primeira descida bate.
+		var down: Dictionary = _drum_down[player_index]
 		for lane in pads.size():
-			if (
+			var fret_pressed := (
+				event.is_action_pressed(frets[lane])
+				or (player_index == 0 and event.is_action_pressed(InputProfile.FRETS[lane]))
+			)
+			var fret_released := (
+				event.is_action_released(frets[lane])
+				or (player_index == 0 and event.is_action_released(InputProfile.FRETS[lane]))
+			)
+			var hit := (
 				event.is_action_pressed(pads[lane])
 				or (player_index == 0 and event.is_action_pressed(InputProfile.PADS[lane]))
-			):
+			)
+			if fret_pressed and not down.has(lane):
+				down[lane] = true
+				hit = true
+			elif fret_released:
+				down.erase(lane)
+			if hit:
 				h.on_input(lane, s.pad(now, lane))
 		return
 	for lane in frets.size():

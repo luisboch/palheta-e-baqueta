@@ -310,3 +310,24 @@ func test_joypad_events_only_reach_their_own_player() -> void:
 
 	assert_array(scene.session.held).is_empty()
 	assert_array(scene.session_2.held).is_equal(PackedInt32Array([4]))
+
+
+func test_drums_use_the_fret_buttons() -> void:
+	var scene := _play(_song_dir('{"strings": false, "drums": true}'), "drums", "Expert")
+	scene._autoplay = false
+	var note: PlayNote = scene.session.notes[0]
+	while scene._lead > 0.0 or scene.session.clock.now() < note.time - 0.02:
+		scene._process(1.0 / 60.0)
+	var press := InputEventAction.new()
+	press.pressed = true
+	for lane in note.lanes:
+		press.action = InputProfile.FRETS[lane]
+		scene._unhandled_input(press)
+		scene._unhandled_input(press)  # o gatilho repete: só a primeira descida bate
+	assert_int(note.state).is_equal(PlayNote.State.HIT)
+	assert_int(scene._drum_down[0].size()).is_equal(note.lanes.size())
+	press.pressed = false
+	for lane in note.lanes:
+		press.action = InputProfile.FRETS[lane]
+		scene._unhandled_input(press)
+	assert_bool(scene._drum_down[0].is_empty()).is_true()
