@@ -34,3 +34,16 @@ Difícil quase igual a ele (≈ 97% dos ataques). A bateria passou a seguir a re
 Muito difícil = colcheias e tercinas; Difícil = só colcheias, com chimbal e pratos só nas
 batidas. `version` da etapa `chart` foi para 4. No controle, a bateria usa os botões das
 Cordas (L2 bumbo, L1 caixa, R1, R2, X), e os pads antigos (B Y X A, LB) saíram.
+
+## Nota (2026-10-23): escala por parcela, igual para todos os instrumentos
+
+As regras por grade (só colcheias etc.) davam densidades diferentes por música e instrumento.
+Agora há uma **referência** (100%): colcheias e tercinas da transcrição, que é o que o Muito
+difícil era. Nenhum nível usa a referência inteira: **Muito difícil = 80%**, **Difícil = 70%**
+(`EXPERT_SHARE` e `HARD_SHARE` em `pbq/charts/difficulty.py`). Sai primeiro o ataque de pulso
+mais fraco (tercina, depois contratempo) e, no último pulso a caber, um subconjunto espaçado
+por igual. O Difícil é sempre um subconjunto do Muito difícil. Em ataques/min, médias de 6 a 7
+músicas, referência → Muito difícil → Difícil: Cordas 182 → 145 → 127, baixo 115 → 92 → 80,
+bateria 174 → 139 → 122. Fácil e Médio seguem as regras de grade; Médio e Difícil do baixo e
+Fácil e Médio da bateria ficaram próximos (71 × 80; 92 × 103).
+`version` da etapa `chart` foi para 5.

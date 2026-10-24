@@ -11,7 +11,7 @@ func test_strings_group_chords_and_sustain() -> void:
 	var chart := _sample()
 	var tm := TempoMap.new(chart["tempos"], chart["resolution"])
 	var notes := NoteTrack.build(chart, "ExpertSingle", tm, false)
-	assert_int(notes.size()).is_equal(7)
+	assert_int(notes.size()).is_equal(6)
 	assert_float(notes[0].time).is_equal_approx(0.5, 1e-9)  # 1ª batida em 0,5 s, como no backend
 	var last := notes[notes.size() - 1]
 	assert_int(last.lanes.size()).is_equal(2)  # acorde de 2

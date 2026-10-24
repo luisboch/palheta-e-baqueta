@@ -1,15 +1,19 @@
-"""As 4 dificuldades, por redução do Muito difícil (Expert).
+"""As 4 dificuldades, por redução do que o transcritor achou (100% dos ataques).
 
 Regras (só tiram notas, nunca as deslocam: o que sobra continua no tempo da música):
 
-    Cordas/baixo   Muito difícil  colcheias e tercinas (sem semicolcheias), 5 trastes, acordes até 3
-                   Difícil        só colcheias, 5 trastes, acordes até 2
-                   Médio          batidas + contratempo quando a batida está vazia, 4 trastes, sem acordes
-                   Fácil          tempos fortes (1 e 3 no 4/4; 1 nos outros), 3 trastes, sem acordes
-    Bateria        Muito difícil  colcheias e tercinas (sem semicolcheias), até 2 pads + bumbo
-                   Difícil        só colcheias; pratos e chimbal só nas batidas, até 2 pads + bumbo
-                   Médio          colcheias, mas pratos e chimbal só nas batidas; 1 pad + bumbo nas batidas
-                   Fácil          batidas, uma peça por vez
+    Referência     colcheias e tercinas da transcrição (100%, que nenhum nível usa inteira)
+    Muito difícil  80% da referência
+    Difícil        70% da referência
+    Médio          Cordas/baixo: batidas + contratempo quando a batida está vazia, 4 trastes, sem acordes
+                   Bateria: colcheias, mas pratos e chimbal só nas batidas; 1 pad + bumbo nas batidas
+    Fácil          Cordas/baixo: tempos fortes (1 e 3 no 4/4; 1 nos outros), 3 trastes, sem acordes
+                   Bateria: batidas, uma peça por vez
+
+A referência já descarta as semicolcheias. Depois, Muito difícil e Difícil perdem primeiro os
+ataques de pulso mais fraco (tercinas, depois contratempos) e, dentro do mesmo pulso, um a cada
+tantos, espalhados pela música toda. A parcela é a mesma em qualquer andamento (ADR 0020).
+Cordas/baixo: 5 trastes, acordes até 3 no Muito difícil e 2 no Difícil; bateria: até 2 pads + bumbo.
 
 Os trastes de cada dificuldade saem do contorno das notas que sobraram (pitched.to_notes): com
 menos notas e menos botões, o desenho da melodia continua coerente.
@@ -18,7 +22,7 @@ menos notas e menos botões, o desenho da melodia continua coerente.
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 
 from pbq.charts import drums
@@ -48,6 +52,39 @@ def on_eighths(tick: int, resolution: int) -> bool:
     return tick % (resolution // 2) == 0 or tick % (resolution // 3) == 0
 
 
+# Parcela da referência (colcheias e tercinas da transcrição) que cada nível alto mantém (ADR 0020).
+EXPERT_SHARE = 0.8
+HARD_SHARE = 0.7
+
+
+def pulse_level(tick: int, resolution: int) -> int:
+    """Quão forte é o pulso do tick: 0 batida, 1 colcheia, 2 tercina, 3 o resto (semicolcheias...)."""
+    if tick % resolution == 0:
+        return 0
+    if tick % (resolution // 2) == 0:
+        return 1
+    if tick % (resolution // 3) == 0:
+        return 2
+    return 3
+
+
+def thin(ticks: Iterable[int], share: float, resolution: int) -> set[int]:
+    """Fica com `share` dos ataques: os de pulso mais forte primeiro; no último nível a caber,
+    um subconjunto espaçado por igual (cortar do fim apagaria o final da música)."""
+    ordered = sorted(set(ticks))
+    quota = round(len(ordered) * share)
+    kept: set[int] = set()
+    for level in range(4):
+        group = [t for t in ordered if pulse_level(t, resolution) == level]
+        room = quota - len(kept)
+        if room >= len(group):
+            kept.update(group)
+        else:
+            kept.update(group[(2 * i + 1) * len(group) // (2 * room)] for i in range(room))
+            break
+    return kept
+
+
 def strong_beats(time_signatures: Sequence[TimeSignature], end_tick: int, resolution: int) -> set[int]:
     """Ticks dos tempos fortes: o 1 de cada compasso, e o do meio em compassos pares de 4+ batidas."""
     strong: set[int] = set()
@@ -65,10 +102,11 @@ def select_ticks(
 ) -> set[int]:
     """Quais ataques (ticks) transcritos ficam na dificuldade pedida (ADR 0020)."""
     present = set(ticks)
-    if difficulty == EXPERT:
-        return {t for t in present if on_eighths(t, resolution)}
-    if difficulty == HARD:
-        return {t for t in present if t % (resolution // 2) == 0}
+    if difficulty in (EXPERT, HARD):
+        reference = {t for t in present if on_eighths(t, resolution)}
+        expert = thin(reference, EXPERT_SHARE, resolution)
+        # O Difícil sai do Muito difícil (nunca tem ataque que o de cima não tenha).
+        return expert if difficulty == EXPERT else thin(expert, HARD_SHARE / EXPERT_SHARE, resolution)
     if difficulty == MEDIUM:
         half = resolution // 2
         return {
@@ -101,19 +139,11 @@ def drum_track(notes: Sequence[Note], difficulty: str, resolution: int) -> list[
             by_tick[n.tick].add(n.lane)
 
     rule: Callable[[int, set[int]], list[int]]
-    if difficulty == EXPERT:
+    if difficulty in (EXPERT, HARD):
+        kept = select_ticks(list(by_tick), difficulty, resolution, [])
 
         def rule(tick: int, lanes: set[int]) -> list[int]:
-            return sorted(lanes) if on_eighths(tick, resolution) else []
-    elif difficulty == HARD:
-        # Chimbal e pratos em toda colcheia são o que mais enche a bateria: só nas batidas.
-        def rule(tick: int, lanes: set[int]) -> list[int]:
-            if tick % (resolution // 2):
-                return []
-            on_beat = tick % resolution == 0
-            return sorted(
-                lane for lane in lanes if on_beat or lane not in drums.CYMBAL_FLAG or lane == drums.BLUE
-            )
+            return sorted(lanes) if tick in kept else []
     elif difficulty == MEDIUM:
         # Pratos e chimbal só nas batidas: com o chimbal em colcheias, o Médio saía quase igual ao
         # Difícil (164 × 167 ataques/min em Pais e Filhos).

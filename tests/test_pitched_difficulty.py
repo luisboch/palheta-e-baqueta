@@ -10,6 +10,7 @@ from pbq.charts.difficulty import (
     pitched_track,
     select_ticks,
     strong_beats,
+    thin,
 )
 from pbq.charts.model import Note
 from pbq.charts.pitched import BASS, STRINGS, Event, RawNote, chord_lanes, contour_lanes, events, to_notes
@@ -93,14 +94,39 @@ def test_strong_beats():
     assert strong_beats([TimeSignature(0, 3), TimeSignature(3 * R, 4)], 7 * R, R) == {0, 3 * R, 5 * R, 7 * R}
 
 
+def test_thin_keeps_the_strongest_pulses_and_spreads_the_rest():
+    ticks = [0, R, 2 * R, R // 2, 3 * R // 2, 5 * R // 2, 7 * R // 2, R // 3, R // 4]
+    assert thin(ticks, 1.0, R) == set(ticks)
+    assert thin(ticks, 0.0, R) == set()
+    assert thin(ticks, 3 / 9, R) == {0, R, 2 * R}  # batidas primeiro
+    five = thin(ticks, 5 / 9, R)
+    assert (
+        {0, R, 2 * R} < five
+        and len(five) == 5
+        and len(five & {R // 2, 3 * R // 2, 5 * R // 2, 7 * R // 2}) == 2
+    )
+    assert R // 3 not in thin(ticks, 8 / 9, R) or R // 4 not in thin(
+        ticks, 8 / 9, R
+    )  # o mais fraco sai antes
+    assert thin(ticks, 8 / 9, R) == set(ticks) - {R // 4}
+
+
 def test_select_ticks_per_difficulty():
-    ticks = [0, R // 4, R // 2, R + R // 2, 2 * R + R // 3, 3 * R]
-    # Muito difícil: sem semicolcheias (R // 4); Difícil: nem tercinas
-    assert select_ticks(ticks, EXPERT, R, FOUR_FOUR) == {0, R // 2, R + R // 2, 2 * R + R // 3, 3 * R}
-    assert select_ticks(ticks, HARD, R, FOUR_FOUR) == {0, R // 2, R + R // 2, 3 * R}
+    # referência: colcheias e tercinas (10 ataques); a semicolcheia R // 4 nunca entra
+    beats = [i * R for i in range(5)]
+    eighths = [i * R + R // 2 for i in range(4)]
+    ticks = beats + eighths + [R // 3, R // 4]
+    reference = set(beats + eighths + [R // 3])
+    expert = select_ticks(ticks, EXPERT, R, FOUR_FOUR)
+    hard = select_ticks(ticks, HARD, R, FOUR_FOUR)
+    assert len(expert) == 8 and len(hard) == 7  # 80% e 70% da referência
+    assert expert <= reference and hard <= reference
+    assert set(beats) <= hard  # as batidas ficam
+    assert R // 3 not in hard  # a tercina é o pulso mais fraco: sai primeiro
     # Médio: batidas + contratempo só quando a batida está vazia (a da batida 1 estava)
-    assert select_ticks(ticks, MEDIUM, R, FOUR_FOUR) == {0, R + R // 2, 3 * R}
-    assert select_ticks(ticks, EASY, R, FOUR_FOUR) == {0}
+    medium_ticks = [0, R // 4, R // 2, R + R // 2, 2 * R + R // 3, 3 * R]
+    assert select_ticks(medium_ticks, MEDIUM, R, FOUR_FOUR) == {0, R + R // 2, 3 * R}
+    assert select_ticks(medium_ticks, EASY, R, FOUR_FOUR) == {0}
     assert select_ticks([], EASY, R, FOUR_FOUR) == set()
 
 
@@ -109,12 +135,11 @@ def test_pitched_track_fewer_lanes_and_chords():
     expert = pitched_track(evts, EXPERT, R, FOUR_FOUR)
     easy = pitched_track(evts, EASY, R, FOUR_FOUR)
     medium = pitched_track(evts, MEDIUM, R, FOUR_FOUR)
-    assert len(expert) == 24 and max(n.lane for n in expert) == 4
+    assert len(expert) == 18 and max(n.lane for n in expert) == 4  # 6 de 8 ataques (80%) × 3 notas
     assert [n.tick for n in easy] == [0, 2 * R, 4 * R, 6 * R] and max(n.lane for n in easy) <= 2
     assert len(medium) == 8 and max(n.lane for n in medium) <= 3
-    assert {
-        len([n for n in pitched_track(evts, HARD, R, FOUR_FOUR) if n.tick == t]) for t in range(0, 8 * R, R)
-    } == {2}
+    hard = pitched_track(evts, HARD, R, FOUR_FOUR)
+    assert {len([n for n in hard if n.tick == t]) for t in {n.tick for n in hard}} == {2}  # acordes de até 2
 
 
 def test_drum_track_reductions():
@@ -132,15 +157,16 @@ def test_drum_track_reductions():
         Note(R, r),
         Note(R, k),
     ]
-    top = drum_track(expert, EXPERT, R)
-    assert top == sorted(n for n in expert if n.tick != R // 4)  # só a semicolcheia sai
-    hard = drum_track(expert, HARD, R)
-    assert Note(R // 4, y) not in hard and Note(0, 68) in hard and Note(0, 66) in hard
-    assert [n for n in hard if n.tick == R // 2] == [Note(R // 2, k), Note(R // 2, r)]
-    hat_hard = drum_track([Note(R // 2, y), Note(R // 2, 66), Note(R, y), Note(R, 66)], HARD, R)
-    assert hat_hard == [Note(R, y), Note(R, 66)]  # chimbal só na batida, como no Médio
-    assert drum_track([Note(R // 3, r)], HARD, R) == []  # tercina só no Muito difícil
-    assert drum_track([Note(R // 3, r)], EXPERT, R) == [Note(R // 3, r)]
+    # 10 ataques (batidas e colcheias) na referência: Muito difícil fica com 8, Difícil com 7
+    grid = [Note(i * R // 2, r) for i in range(10)] + [Note(R // 4, y), Note(R // 4, 66)]
+    top = drum_track(grid, EXPERT, R)
+    hard = drum_track(grid, HARD, R)
+    assert len({n.tick for n in top}) == 8 and len({n.tick for n in hard}) == 7
+    assert R // 4 not in {n.tick for n in top}  # semicolcheia nunca entra
+    assert {n.tick for n in hard} <= {n.tick for n in top}
+    assert all(i * R in {n.tick for n in hard} for i in range(5))  # as batidas ficam
+    flagged = drum_track([Note(0, y), Note(0, 66), Note(0, k)], EXPERT, R)
+    assert flagged == [Note(0, k), Note(0, y), Note(0, 66)]  # o prato leva a marca junto
     medium = drum_track(expert, MEDIUM, R)
     assert [n for n in medium if n.tick == 0] == [Note(0, k), Note(0, g), Note(0, 68)]  # 1 pad: o prato
     assert [n for n in medium if n.tick == R // 2] == [Note(R // 2, r)]  # bumbo fora da batida sai

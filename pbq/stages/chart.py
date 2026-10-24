@@ -43,7 +43,7 @@ class ChartFile(Stage):
     name = "chart"
     label = "montando as dificuldades"
     summary = "notes.chart (Clone Hero): mapa de tempo, compassos e as 4 dificuldades"
-    version = 4  # 4: Difícil e Muito difícil com menos notas, nas Cordas, no baixo e na bateria (ADR 0020)
+    version = 5  # 5: Muito difícil e Difícil por parcela da referência (ADR 0020)
     requires = ("beats", "drums_chart", "pitched_chart")
 
     def outputs(self, song: Song) -> list[Path]:
