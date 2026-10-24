@@ -83,3 +83,8 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-23 · Quase nenhuma nota sustentada em Free Bird:** o limite de 1 batida (ADR 0012) era
   alto demais, o Basic Pitch corta as notas cedo. `PitchedOptions.sustain_beats` caiu para 0,5.
   A `version` de `PitchedChart` subiu para 2, então o worker refaz a etapa nas músicas já prontas.
+- **2026-10-23 · Tela piscando no fim da música (causa provável, não reproduzida):** se o áudio acaba antes de o chart terminar
+  (última nota perto do fim), `AudioStreamPlayer.get_playback_position()` volta a 0 e o
+  `SongClock` pulava para o começo, redesenhando a pista em loop em vez de mostrar o resultado.
+  `play.gd` usa `SongClock.advance(delta)` quando `player.playing` é falso. Explicaria acontecer só
+  em algumas músicas; confirmar jogando.

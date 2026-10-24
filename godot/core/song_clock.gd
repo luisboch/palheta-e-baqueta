@@ -45,5 +45,12 @@ func update(
 	return _time
 
 
+## Anda só com o relógio do frame, sem consultar o áudio. Serve quando o áudio acabou antes do
+## fim do chart: o player parado informa posição 0, o que faria o relógio pular para o começo.
+func advance(delta: float) -> float:
+	_time += delta
+	return _time
+
+
 func now() -> float:
 	return _time

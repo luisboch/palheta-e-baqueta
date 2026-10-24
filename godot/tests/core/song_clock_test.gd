@@ -28,3 +28,11 @@ func test_resyncs_on_big_jumps_and_reset() -> void:
 	clock.reset()
 	assert_float(clock.update(2.0, 0.0, 0.0, 0.016)).is_equal(2.0)
 	assert_float(clock.now()).is_equal(2.0)
+
+
+func test_advance_ignores_the_audio_after_it_ends() -> void:
+	var clock := SongClock.new()
+	clock.update(100.0, 0.0, 0.0, 0.016)
+	# player parado informa posição 0: o relógio segue em frente em vez de voltar ao começo
+	assert_float(clock.advance(0.5)).is_equal_approx(100.5, 1e-9)
+	assert_float(clock.now()).is_equal_approx(100.5, 1e-9)

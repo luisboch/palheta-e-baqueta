@@ -295,6 +295,8 @@ func _song_time(delta: float) -> float:
 		return -maxf(_lead, 0.0)
 	if not _started_audio:
 		return session.clock.update(session.clock.now() + delta, 0.0, 0.0, delta)
+	if not player.playing:  # o áudio acabou antes de o chart terminar (última nota perto do fim)
+		return session.clock.advance(delta)
 	return session.clock.update(
 		player.get_playback_position(),
 		AudioServer.get_time_since_last_mix(),
