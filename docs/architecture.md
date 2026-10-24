@@ -76,8 +76,9 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   só as notas nascem em tempo de jogo. Pista 3D
   (`godot/game/highway.gd`), placar (`godot/game/hud.gd`), áudio sincronizado e entrada. Só desenham e
   encaminham entrada para o `core` (`godot/core/play_session.gd` junta juiz, pontuação e relógio).
-  Regras de jogo: [ADR 0014](adr/0014-regras-de-jogo.md). Com 2 jogadores, duas pistas lado a
-  lado (a segunda é cópia da primeira) e o placar da Banda ou do Duelo
+  Regras de jogo: [ADR 0014](adr/0014-regras-de-jogo.md). Com 2 jogadores, a tela se divide ao meio,
+  cada metade com a sua pista (a segunda é cópia da primeira) e a sua câmera
+  ([ADR 0019](adr/0019-tela-dividida-2-jogadores.md)), e o placar da Banda ou do Duelo
   ([ADR 0017](adr/0017-modos-banda-e-duelo.md)).
 - **Fundo no ritmo** (`godot/game/background.gd` + `godot/game/background.gdshader`): uma
   `CanvasLayer` atrás da pista (o `Environment` usa o fundo "Canvas"). Recebe as batidas do

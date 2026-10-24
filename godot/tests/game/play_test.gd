@@ -188,6 +188,12 @@ func test_two_player_mode_spawns_two_highways_and_runs_both() -> void:
 	assert_that(scene.highway_2).is_not_null()
 	assert_float(scene.highway.position.x).is_less(0.0)
 	assert_float(scene.highway_2.position.x).is_greater(0.0)
+	# Tela dividida: cada câmera na sua metade, no centro da própria pista.
+	assert_that(scene.split).is_not_null()
+	assert_that(scene.camera.get_viewport()).is_not_equal(scene.get_viewport())
+	assert_that(scene.camera_2.get_viewport()).is_not_equal(scene.camera.get_viewport())
+	assert_float(scene.camera.global_position.x).is_equal(scene.highway.position.x)
+	assert_float(scene.camera_2.global_position.x).is_equal(scene.highway_2.position.x)
 
 	# Banda: placar único no centro, sequência de cada um sobre a própria pista.
 	var band: Label = scene.get_node("%Band")
@@ -285,3 +291,22 @@ func test_two_player_mode_routes_inputs_to_correct_player() -> void:
 
 	assert_array(scene.session.held).is_empty()
 	assert_array(scene.session_2.held).is_empty()
+
+
+func test_joypad_events_only_reach_their_own_player() -> void:
+	var dir := _song_dir('{"strings": true, "bass": true}')
+	var scene: Node = PlayScene.instantiate()
+	scene.auto_start = false
+	add_child(scene)
+	auto_free(scene)
+	scene.start(dir, "strings", "Hard", false, "versus", "bass", "Hard")
+
+	# Botão A do controle 2 = traste 4 do jogador 2; o jogador 1 não pode reagir.
+	var pad := InputEventJoypadButton.new()
+	pad.button_index = JOY_BUTTON_A
+	pad.device = 1
+	pad.pressed = true
+	scene._unhandled_input(pad)
+
+	assert_array(scene.session.held).is_empty()
+	assert_array(scene.session_2.held).is_equal(PackedInt32Array([4]))

@@ -12,10 +12,13 @@ extends Node3D
 const LEAD_IN := 2.0  ## s antes da música: dá para ver as primeiras notas chegando
 const MUSIC_BUS := "Music"
 const CAM_1P_POS := Vector3(0.0, 2.4, 2.9)
-const CAM_2P_POS := Vector3(0.0, 2.9, 4.0)
-const HIGHWAY_2P_OFFSET := 1.75
+const CAM_2P_POS := Vector3(0.0, 2.9, 4.0)  ## x vem da pista de cada jogador
+## Com 2 jogadores, cada pista tem a sua câmera e a sua metade da tela (ADR 0019). As pistas
+## ficam longe o bastante para que a câmera de um jogador não enxergue a pista do outro.
+const HIGHWAY_2P_OFFSET := 50.0
 
 var auto_start := true
+var camera_2: Camera3D
 var highway_2: Highway
 var paused := false
 var play_mode := "solo"
@@ -23,6 +26,7 @@ var player: AudioStreamPlayer
 var session: PlaySession
 var session_2: PlaySession
 var sfx: SoundEffects
+var split: CanvasLayer  ## metades da tela com 2 jogadores (null no solo)
 
 var _autoplay := false
 var _bands := SpectrumBands.new()
@@ -117,13 +121,13 @@ func start(
 		var inst_2: String = choice_p2[0]
 		var diff_2: String = choice_p2[1]
 		session_2 = PlaySession.new(_loaded["chart"], inst_2, diff_2)
-		if camera:
-			camera.position = CAM_2P_POS
 		highway.position.x = -HIGHWAY_2P_OFFSET
 		highway_2 = highway.duplicate()
 		add_child(highway_2)
 		highway_2.position.x = HIGHWAY_2P_OFFSET
 		highway_2.setup(session_2)
+		if camera:
+			_split_screen()
 	else:
 		if camera:
 			camera.position = CAM_1P_POS
@@ -143,6 +147,47 @@ func start(
 		combos
 	)
 	_setup_audio(instrument, session_2.instrument if session_2 else "")
+
+
+## Tela dividida: P1 à esquerda, P2 à direita, cada metade com a câmera no centro da própria
+## pista, para as notas virem do ponto de fuga de cada um. As duas metades veem o mesmo mundo
+## 3D; o fundo (CanvasLayer atrás) aparece pelo fundo transparente delas.
+func _split_screen() -> void:
+	split = CanvasLayer.new()
+	split.name = "Split"
+	split.layer = 0  # entre o fundo (-1) e o HUD (1)
+	var row := HBoxContainer.new()
+	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row.add_theme_constant_override("separation", 0)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	split.add_child(row)
+	add_child(split)
+
+	# Numa SubViewport o fundo "Canvas" seria o canvas vazio dela: cor transparente no lugar.
+	var env: Environment = $Environment.environment.duplicate()
+	env.background_mode = Environment.BG_CLEAR_COLOR
+	env.background_color = Color(0, 0, 0, 0)
+	camera_2 = camera.duplicate()
+	for i in 2:
+		var cam := camera if i == 0 else camera_2
+		var road := highway if i == 0 else highway_2
+		var box := SubViewportContainer.new()
+		box.stretch = true
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var view := SubViewport.new()
+		view.world_3d = get_viewport().world_3d
+		view.transparent_bg = true
+		view.handle_input_locally = false
+		box.add_child(view)
+		row.add_child(box)
+		if cam.get_parent():
+			cam.reparent(view, false)
+		else:
+			view.add_child(cam)
+		cam.environment = env
+		cam.position = Vector3(road.position.x, CAM_2P_POS.y, CAM_2P_POS.z)
+		cam.current = true
 
 
 func _exit_tree() -> void:
@@ -327,6 +372,10 @@ func _handle_player_input(
 ) -> void:
 	if s == null or h == null:
 		return
+	# O InputMap do Godot 4 ignora o device ao casar botões de controle: sem este filtro o
+	# controle 2 também tocaria no jogador 1 (e vice-versa). Teclado e ações puras passam.
+	if _joypad_device(event) not in [-1, player_index]:
+		return
 	var pads := InputProfile.player_pads(player_index)
 	var frets := InputProfile.player_frets(player_index)
 	var strums := InputProfile.player_strum(player_index)
@@ -369,6 +418,13 @@ func _handle_player_input(
 			h.on_strum(result)
 			if result.get("grade") == Judge.OVERSTRUM and sfx:
 				sfx.play_error()
+
+
+## Número do controle que gerou o evento; -1 se não veio de controle.
+static func _joypad_device(event: InputEvent) -> int:
+	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		return event.device
+	return -1
 
 
 func _args() -> Dictionary:

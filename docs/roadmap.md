@@ -132,6 +132,8 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
 
 - Entrada independente para P1 e P2 (`godot/core/input_profile.gd`).
 - Duas pistas e duas sessões simultâneas na partida, com o stem de cada um.
+- Tela dividida: cada jogador com a sua câmera, no centro da própria pista
+  ([ADR 0019](adr/0019-tela-dividida-2-jogadores.md)).
 - Modos Banda e Duelo ([ADR 0017](adr/0017-modos-banda-e-duelo.md)): placar da Banda (pontos e
   multiplicador) ou de P1 × P2 com quem está na frente; sequência de cada um sobre a pista;
   resultado com estrelas e a parte de cada um (Banda) ou o vencedor e a comparação (Duelo).

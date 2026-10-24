@@ -77,3 +77,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-23 · L2/R2 são eixos no Godot:** `JOY_BUTTON_*` não tem os gatilhos; é
   `JOY_AXIS_TRIGGER_*` (`["axis", …]` no `InputProfile`). E cada movimento do gatilho acima da
   zona morta chega como outro "apertado": a partida só toca se o traste ainda não estava preso.
+- **2026-10-23 · O InputMap ignora o device dos botões de controle:** `p1_*` e `p2_*` casam
+  com qualquer controle, então o controle 2 tocava no jogador 1 também. `play.gd` descarta o
+  evento de controle cujo `device` não é o do jogador (`_joypad_device`).
