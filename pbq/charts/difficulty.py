@@ -7,7 +7,7 @@ Regras (só tiram notas, nunca as deslocam: o que sobra continua no tempo da mú
     Difícil        70% da referência
     Médio          Cordas/baixo: batidas + contratempo quando a batida está vazia, 4 trastes, sem acordes
                    Bateria: colcheias, mas pratos e chimbal só nas batidas; 1 pad + bumbo nas batidas
-    Fácil          Cordas/baixo: tempos fortes (1 e 3 no 4/4; 1 nos outros), 3 trastes, sem acordes
+    Fácil          Cordas/baixo: batidas (só os ataques que caem nelas), 3 trastes, sem acordes
                    Bateria: batidas, uma peça por vez
 
 A referência já descarta as semicolcheias. Depois, Muito difícil e Difícil perdem primeiro os
@@ -28,7 +28,6 @@ from dataclasses import dataclass
 from pbq.charts import drums
 from pbq.charts.model import DIFFICULTIES, Note
 from pbq.charts.pitched import Event, to_notes
-from pbq.charts.tempo import TimeSignature
 
 EASY, MEDIUM, HARD, EXPERT = DIFFICULTIES
 
@@ -85,21 +84,7 @@ def thin(ticks: Iterable[int], share: float, resolution: int) -> set[int]:
     return kept
 
 
-def strong_beats(time_signatures: Sequence[TimeSignature], end_tick: int, resolution: int) -> set[int]:
-    """Ticks dos tempos fortes: o 1 de cada compasso, e o do meio em compassos pares de 4+ batidas."""
-    strong: set[int] = set()
-    for i, ts in enumerate(time_signatures):
-        stop = time_signatures[i + 1].tick if i + 1 < len(time_signatures) else end_tick + 1
-        bar = ts.beats * resolution
-        accents = [0] + ([ts.beats // 2 * resolution] if ts.beats >= 4 and ts.beats % 2 == 0 else [])
-        for start in range(ts.tick, stop, bar):
-            strong.update(start + a for a in accents if start + a < stop)
-    return strong
-
-
-def select_ticks(
-    ticks: Sequence[int], difficulty: str, resolution: int, time_signatures: Sequence[TimeSignature]
-) -> set[int]:
+def select_ticks(ticks: Sequence[int], difficulty: str, resolution: int) -> set[int]:
     """Quais ataques (ticks) transcritos ficam na dificuldade pedida (ADR 0020)."""
     present = set(ticks)
     if difficulty in (EXPERT, HARD):
@@ -112,14 +97,13 @@ def select_ticks(
         return {
             t for t in present if t % resolution == 0 or (t % resolution == half and t - half not in present)
         }
-    strong = strong_beats(time_signatures, max(present, default=0), resolution)
-    return present & strong
+    # Só os tempos fortes (1 e 3) deixavam o Fácil quase parado; em toda batida ele fica a meio
+    # caminho do Médio, que soma os contratempos.
+    return {t for t in present if t % resolution == 0}
 
 
-def pitched_track(
-    evts: Sequence[Event], difficulty: str, resolution: int, time_signatures: Sequence[TimeSignature]
-) -> list[Note]:
-    keep = select_ticks([e.tick for e in evts], difficulty, resolution, time_signatures)
+def pitched_track(evts: Sequence[Event], difficulty: str, resolution: int) -> list[Note]:
+    keep = select_ticks([e.tick for e in evts], difficulty, resolution)
     spec = PITCHED[difficulty]
     return to_notes([e for e in evts if e.tick in keep], spec.lanes, spec.max_chord)
 
@@ -140,7 +124,7 @@ def drum_track(notes: Sequence[Note], difficulty: str, resolution: int) -> list[
 
     rule: Callable[[int, set[int]], list[int]]
     if difficulty in (EXPERT, HARD):
-        kept = select_ticks(list(by_tick), difficulty, resolution, [])
+        kept = select_ticks(list(by_tick), difficulty, resolution)
 
         def rule(tick: int, lanes: set[int]) -> list[int]:
             return sorted(lanes) if tick in kept else []

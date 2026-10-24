@@ -129,7 +129,7 @@ def gen_sample_chart(root: Path) -> str:
     )
     for difficulty in DIFFICULTIES:
         chart.tracks[track_name("strings", difficulty)] = pitched_track(
-            evts, difficulty, tempo_map.resolution, signatures
+            evts, difficulty, tempo_map.resolution
         )
         chart.tracks[track_name("drums", difficulty)] = drum_track(
             expert_drums, difficulty, tempo_map.resolution

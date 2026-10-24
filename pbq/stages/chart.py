@@ -43,7 +43,7 @@ class ChartFile(Stage):
     name = "chart"
     label = "montando as dificuldades"
     summary = "notes.chart (Clone Hero): mapa de tempo, compassos e as 4 dificuldades"
-    version = 5  # 5: Muito difícil e Difícil por parcela da referência (ADR 0020)
+    version = 6  # 6: Fácil de Cordas e baixo em todas as batidas (ADR 0020)
     requires = ("beats", "drums_chart", "pitched_chart")
 
     def outputs(self, song: Song) -> list[Path]:
@@ -72,7 +72,7 @@ class ChartFile(Stage):
                     notes = drum_track([Note(*n) for n in part["notes"]], difficulty, tempo_map.resolution)
                 else:
                     evts = [Event(t, tuple(p), length) for t, p, length in part["events"]]
-                    notes = pitched_track(evts, difficulty, tempo_map.resolution, signatures)
+                    notes = pitched_track(evts, difficulty, tempo_map.resolution)
                 chart.tracks[track_name(instrument, difficulty)] = notes
         out = song.path(CHART)
         tmp = tmp_path(out)

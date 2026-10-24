@@ -17,9 +17,10 @@ func test_parses_chart_written_by_the_pipeline() -> void:
 	for difficulty: String in InstrumentRules.DIFFICULTIES:
 		assert_bool(chart["tracks"].has(difficulty + "Single")).is_true()
 		assert_bool(chart["tracks"].has(difficulty + "Drums")).is_true()
-	assert_array(chart["tracks"]["EasySingle"]).is_equal(
-		[[192, 0, 0], [576, 1, 0], [960, 2, 0], [1344, 1, 480]]
-	)
+	# Fácil: um ataque por batida (ADR 0020), a nota longa no fim continua sustentada.
+	var easy := [[192, 0, 0], [384, 1, 0], [576, 2, 0], [768, 2, 0], [960, 2, 0], [1152, 2, 0]]
+	easy.append([1344, 1, 480])
+	assert_array(chart["tracks"]["EasySingle"]).is_equal(easy)
 
 
 func test_tolerates_other_charts() -> void:

@@ -47,3 +47,10 @@ músicas, referência → Muito difícil → Difícil: Cordas 182 → 145 → 12
 bateria 174 → 139 → 122. Fácil e Médio seguem as regras de grade; Médio e Difícil do baixo e
 Fácil e Médio da bateria ficaram próximos (71 × 80; 92 × 103).
 `version` da etapa `chart` foi para 5.
+
+## Nota (2026-10-24): Fácil de Cordas e baixo em todas as batidas
+
+Jogando, o Fácil de Cordas e baixo estava fácil demais: só os tempos fortes (o 1 e o 3) deixavam
+a pista quase parada. Agora o Fácil fica com os ataques que caem em **qualquer batida**, ainda
+com 3 trastes e sem acordes: cerca do dobro de notas, abaixo do Médio (que soma os contratempos
+e um quarto traste). A bateria não mudou. `version` da etapa `chart` foi para 6.

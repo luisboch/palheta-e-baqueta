@@ -9,13 +9,12 @@ from pbq.charts.difficulty import (
     drum_track,
     pitched_track,
     select_ticks,
-    strong_beats,
     thin,
 )
 from pbq.charts.model import Note
 from pbq.charts.pitched import BASS, STRINGS, Event, RawNote, chord_lanes, contour_lanes, events, to_notes
 from pbq.charts.tempo import RESOLUTION as R
-from pbq.charts.tempo import Tempo, TempoMap, TimeSignature
+from pbq.charts.tempo import Tempo, TempoMap
 
 TM = TempoMap([Tempo(0, 60000)])  # 1 batida = 1 s: tempo (s) × R = tick
 
@@ -86,13 +85,6 @@ def test_chords_and_notes():
 
 # --- dificuldades -------------------------------------------------------------------
 
-FOUR_FOUR = [TimeSignature(0, 4)]
-
-
-def test_strong_beats():
-    assert strong_beats(FOUR_FOUR, 8 * R, R) == {0, 2 * R, 4 * R, 6 * R, 8 * R}
-    assert strong_beats([TimeSignature(0, 3), TimeSignature(3 * R, 4)], 7 * R, R) == {0, 3 * R, 5 * R, 7 * R}
-
 
 def test_thin_keeps_the_strongest_pulses_and_spreads_the_rest():
     ticks = [0, R, 2 * R, R // 2, 3 * R // 2, 5 * R // 2, 7 * R // 2, R // 3, R // 4]
@@ -117,28 +109,28 @@ def test_select_ticks_per_difficulty():
     eighths = [i * R + R // 2 for i in range(4)]
     ticks = beats + eighths + [R // 3, R // 4]
     reference = set(beats + eighths + [R // 3])
-    expert = select_ticks(ticks, EXPERT, R, FOUR_FOUR)
-    hard = select_ticks(ticks, HARD, R, FOUR_FOUR)
+    expert = select_ticks(ticks, EXPERT, R)
+    hard = select_ticks(ticks, HARD, R)
     assert len(expert) == 8 and len(hard) == 7  # 80% e 70% da referência
     assert expert <= reference and hard <= reference
     assert set(beats) <= hard  # as batidas ficam
     assert R // 3 not in hard  # a tercina é o pulso mais fraco: sai primeiro
     # Médio: batidas + contratempo só quando a batida está vazia (a da batida 1 estava)
     medium_ticks = [0, R // 4, R // 2, R + R // 2, 2 * R + R // 3, 3 * R]
-    assert select_ticks(medium_ticks, MEDIUM, R, FOUR_FOUR) == {0, R + R // 2, 3 * R}
-    assert select_ticks(medium_ticks, EASY, R, FOUR_FOUR) == {0}
-    assert select_ticks([], EASY, R, FOUR_FOUR) == set()
+    assert select_ticks(medium_ticks, MEDIUM, R) == {0, R + R // 2, 3 * R}
+    assert select_ticks(medium_ticks, EASY, R) == {0, 3 * R}  # só batidas
+    assert select_ticks([], EASY, R) == set()
 
 
 def test_pitched_track_fewer_lanes_and_chords():
     evts = [Event(i * R, (48 + 2 * i, 52 + 2 * i, 55 + 2 * i)) for i in range(8)]
-    expert = pitched_track(evts, EXPERT, R, FOUR_FOUR)
-    easy = pitched_track(evts, EASY, R, FOUR_FOUR)
-    medium = pitched_track(evts, MEDIUM, R, FOUR_FOUR)
+    expert = pitched_track(evts, EXPERT, R)
+    easy = pitched_track(evts, EASY, R)
+    medium = pitched_track(evts, MEDIUM, R)
     assert len(expert) == 18 and max(n.lane for n in expert) == 4  # 6 de 8 ataques (80%) × 3 notas
-    assert [n.tick for n in easy] == [0, 2 * R, 4 * R, 6 * R] and max(n.lane for n in easy) <= 2
+    assert [n.tick for n in easy] == [i * R for i in range(8)] and max(n.lane for n in easy) <= 2
     assert len(medium) == 8 and max(n.lane for n in medium) <= 3
-    hard = pitched_track(evts, HARD, R, FOUR_FOUR)
+    hard = pitched_track(evts, HARD, R)
     assert {len([n for n in hard if n.tick == t]) for t in {n.tick for n in hard}} == {2}  # acordes de até 2
 
 
@@ -179,4 +171,4 @@ def test_drum_track_reductions():
 def test_difficulty_names_cover_all():
     assert set(difficulty.PITCHED) == {EASY, MEDIUM, HARD, EXPERT}
     with pytest.raises(KeyError):
-        pitched_track([], "Impossível", R, FOUR_FOUR)
+        pitched_track([], "Impossível", R)
