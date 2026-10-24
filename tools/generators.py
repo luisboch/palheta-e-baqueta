@@ -182,6 +182,28 @@ static func is_valid(data: Variant, types: Dictionary) -> bool:
 """
 
 
+def read_versions(root: Path) -> dict[str, str]:
+    """scripts/versions.env (NOME=valor; # comenta), o mesmo arquivo que os scripts leem."""
+    versions: dict[str, str] = {}
+    for line in (root / "scripts/versions.env").read_text().splitlines():
+        name, sep, value = line.partition("=")
+        if sep and not name.lstrip().startswith("#"):
+            versions[name.strip()] = value.strip()
+    return versions
+
+
+def gen_mise_toml(root: Path) -> str:
+    """mise.toml: as ferramentas de fora do uv nas versões de scripts/versions.env."""
+    v = read_versions(root)
+    return f"""# GERADO por tools/generators.py a partir de scripts/versions.env.
+# Não edite: mude a versão lá e rode `uv run python -m tools.docs_check --fix`.
+[tools]
+"conda:ffmpeg" = "{v["FFMPEG_VERSION"]}"
+godot = "{v["GODOT_VERSION"]}-stable"
+uv = "{v["UV_VERSION"]}"
+"""
+
+
 Generator = Callable[[Path], str]
 
 DOC_GENERATORS: dict[str, Generator] = {
@@ -198,4 +220,5 @@ DOC_GENERATORS: dict[str, Generator] = {
 FILE_GENERATORS: dict[Path, Generator] = {
     Path("godot/core/backend_protocol.gd"): gen_gd_protocol,
     Path("godot/tests/fixtures/pipeline_sample.chart"): gen_sample_chart,
+    Path("mise.toml"): gen_mise_toml,
 }

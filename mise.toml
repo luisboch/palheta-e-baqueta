@@ -1,0 +1,6 @@
+# GERADO por tools/generators.py a partir de scripts/versions.env.
+# Não edite: mude a versão lá e rode `uv run python -m tools.docs_check --fix`.
+[tools]
+"conda:ffmpeg" = "9.0.2"
+godot = "4.7.2-stable"
+uv = "0.12.19"

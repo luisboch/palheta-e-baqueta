@@ -32,7 +32,8 @@ jogo abre, ele instala a IA do backend (alguns GB, precisa de internet) em
 
 ## Instalação (desenvolvimento)
 
-Requisitos:
+Com o [mise](https://mise.jdx.dev), `mise install` instala uv, Godot e ffmpeg nas versões de
+`scripts/versions.env` (o `mise.toml` é gerado dele). Sem o mise, os requisitos são:
 - [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`);
 - `ffmpeg` com libvorbis;
 - git;
