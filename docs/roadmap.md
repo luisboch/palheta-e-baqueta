@@ -141,5 +141,6 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
   o segundo começa num instrumento diferente do primeiro.
 - Nota sustentada que pontua enquanto se segura, whammy nos analógicos (cauda ondulando, som
   desafinando, bônus) e o instrumento de cada jogador num player e bus próprios
-  ([ADR 0021](adr/0021-sustentacao-e-whammy.md)).
+  ([ADR 0021](adr/0021-sustentacao-e-whammy.md)). MSAA 4× no 3D: a linha do meio da bateria
+  sumia no fundo da pista.
 - A seguir: controles USB, calibração, tela de controles.

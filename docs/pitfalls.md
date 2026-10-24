@@ -92,6 +92,10 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   B Y X A e LB. Agora os 4 pads, na ordem da pista, ficam em L2 L1 R1 R2 e o bumbo em X
   (`InputProfile.drum_fret`; a 1ª versão pulava o L2 porque o bumbo era a lane 0); `kick`/`pad_*` ficaram só com o teclado. O gatilho repete "apertado" a cada
   movimento, por isso `play.gd` guarda os botões da bateria já apertados (`_drum_down`).
+- **2026-10-24 · Linha do meio da bateria "mais curta":** não era o tamanho (as 6 linhas têm o
+  mesmo comprimento), era serrilhado. Sem MSAA, uma linha fina apontando reto para a câmera some
+  inteira longe dela, enquanto as inclinadas só ficam tracejadas. `msaa_3d` em `project.godot`, e
+  copiado para as `SubViewport` da tela dividida, que não herdam o do projeto.
 - **2026-10-24 · `gdformat godot` formata o GdUnit4:** o addon fica dentro de `godot/addons/` e
   quebra (o gdformat não entende um trecho dele). Formate `godot/core godot/game godot/tests`; se
   já formatou, apague `godot/addons/gdUnit4` e rode `scripts/setup.sh`.

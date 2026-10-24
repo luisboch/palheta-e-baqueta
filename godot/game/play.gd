@@ -189,6 +189,9 @@ func _split_screen() -> void:
 		var view := SubViewport.new()
 		view.world_3d = get_viewport().world_3d
 		view.transparent_bg = true
+		# A SubViewport não herda o MSAA do projeto: sem ele as linhas finas da pista somem
+		# no fundo (a do meio, reta para a câmera, some primeiro).
+		view.msaa_3d = get_viewport().msaa_3d
 		view.handle_input_locally = false
 		box.add_child(view)
 		row.add_child(box)
