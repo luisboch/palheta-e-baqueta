@@ -43,7 +43,8 @@ const FRET_TAPS := true
 ## curso: não dispara com o dedo só encostado e não exige apertar até o fim.
 const TRIGGER_DEADZONE := 0.5
 
-## ação → [["key", keycode] | ["joy", botão, device] | ["axis", eixo, device]]
+## ação → [["key", keycode] | ["joy", botão, device] | ["axis", eixo, device, sentido]]
+## O sentido do eixo é opcional (1.0): -1.0 para esquerda e para cima no analógico.
 ## L2/R2 são eixos no Godot, não botões: um gatilho manda um evento a cada mudança de posição.
 const DEFAULTS := {
 	# Menus: o Godot 4 só liga ui_accept/ui_cancel ao teclado (Enter/Espaço, Esc); sem isto o
@@ -95,6 +96,28 @@ const DEFAULTS := {
 	"p2_pad_green": [["key", KEY_KP_ADD]],
 	"p2_pause": [["key", KEY_PAUSE], ["joy", JOY_BUTTON_START, 1]],
 	"p2_whammy": [["key", KEY_KP_6]],
+	# Menus por jogador: na escolha de instrumento cada um anda com o próprio cursor (ADR 0022).
+	# P1 nas setas e no controle 1; P2 no teclado numérico e no controle 2. Analógico também.
+	"p1_menu_left":
+	[["key", KEY_LEFT], ["joy", JOY_BUTTON_DPAD_LEFT, 0], ["axis", JOY_AXIS_LEFT_X, 0, -1.0]],
+	"p1_menu_right":
+	[["key", KEY_RIGHT], ["joy", JOY_BUTTON_DPAD_RIGHT, 0], ["axis", JOY_AXIS_LEFT_X, 0]],
+	"p1_menu_up":
+	[["key", KEY_UP], ["joy", JOY_BUTTON_DPAD_UP, 0], ["axis", JOY_AXIS_LEFT_Y, 0, -1.0]],
+	"p1_menu_down":
+	[["key", KEY_DOWN], ["joy", JOY_BUTTON_DPAD_DOWN, 0], ["axis", JOY_AXIS_LEFT_Y, 0]],
+	"p1_menu_accept": [["key", KEY_ENTER], ["key", KEY_SPACE], ["joy", JOY_BUTTON_A, 0]],
+	"p1_menu_back": [["key", KEY_ESCAPE], ["key", KEY_BACKSPACE], ["joy", JOY_BUTTON_B, 0]],
+	"p2_menu_left":
+	[["key", KEY_KP_4], ["joy", JOY_BUTTON_DPAD_LEFT, 1], ["axis", JOY_AXIS_LEFT_X, 1, -1.0]],
+	"p2_menu_right":
+	[["key", KEY_KP_6], ["joy", JOY_BUTTON_DPAD_RIGHT, 1], ["axis", JOY_AXIS_LEFT_X, 1]],
+	"p2_menu_up":
+	[["key", KEY_KP_8], ["joy", JOY_BUTTON_DPAD_UP, 1], ["axis", JOY_AXIS_LEFT_Y, 1, -1.0]],
+	"p2_menu_down":
+	[["key", KEY_KP_5], ["joy", JOY_BUTTON_DPAD_DOWN, 1], ["axis", JOY_AXIS_LEFT_Y, 1]],
+	"p2_menu_accept": [["key", KEY_KP_ENTER], ["joy", JOY_BUTTON_A, 1]],
+	"p2_menu_back": [["key", KEY_KP_PERIOD], ["joy", JOY_BUTTON_B, 1]],
 }
 
 
@@ -123,6 +146,11 @@ static func player_whammy(player_index: int) -> String:
 	return P1_WHAMMY if player_index == 0 else P2_WHAMMY
 
 
+## Ação de menu do jogador (0 ou 1): "left", "right", "up", "down", "accept" ou "back".
+static func menu_action(player_index: int, what: String) -> String:
+	return "p%d_menu_%s" % [player_index + 1, what]
+
+
 ## Cria as ações no InputMap (sem apagar as que já existem com outros eventos nem repetir).
 static func apply(bindings: Dictionary = DEFAULTS) -> void:
 	for action: String in bindings:
@@ -142,7 +170,7 @@ static func event_for(binding: Array) -> InputEvent:
 	if binding[0] == "axis":
 		var trigger := InputEventJoypadMotion.new()
 		trigger.axis = binding[1]
-		trigger.axis_value = 1.0
+		trigger.axis_value = binding[3] if binding.size() > 3 else 1.0
 		trigger.device = binding[2] if binding.size() > 2 else 0
 		return trigger
 	var button := InputEventJoypadButton.new()

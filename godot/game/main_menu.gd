@@ -20,9 +20,9 @@ func _ready() -> void:
 	App.start_worker()
 	_one.pressed.connect(start.bind(1))
 	_two.pressed.connect(start.bind(2))
-	_manage.pressed.connect(App.goto.bind(App.DRIVE))
+	_manage.pressed.connect(App.go.bind(MenuFlow.MANAGE))
 	_quit.pressed.connect(get_tree().quit)
-	_one.grab_focus()
+	(_two if App.flow.players == 2 else _one).grab_focus()  # volta onde estava
 	_status.text = ""
 
 
@@ -35,5 +35,4 @@ func _process(delta: float) -> void:
 
 ## Começa o caminho até a partida com 1 ou 2 jogadores.
 func start(players: int) -> void:
-	App.selection["mode"] = "solo" if players == 1 else App.selection.get("mode_2p", "coop")
-	App.goto(App.SONG_SELECT)
+	App.go(App.flow.start(players))

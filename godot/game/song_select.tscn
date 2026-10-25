@@ -1,18 +1,7 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene format=3]
 
-[ext_resource type="Script" path="res://game/song_select.gd" id="1_select"]
+[ext_resource type="Script" path="res://game/song_select.gd" id="1_songs"]
 [ext_resource type="Theme" path="res://game/theme.tres" id="2_theme"]
-[ext_resource type="PackedScene" path="res://game/background.tscn" id="3_bkgnd"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_instruments"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_difficulties"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_instruments_2"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_difficulties_2"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_modes"]
 
 [node name="SongSelect" type="Control"]
 layout_mode = 3
@@ -21,340 +10,126 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme = ExtResource("2_theme")
-script = ExtResource("1_select")
+script = ExtResource("1_songs")
 
-[node name="Background" parent="." instance=ExtResource("3_bkgnd")]
-
-[node name="Margin" type="MarginContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_bottom = -44.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 12
-
-[node name="Columns" type="HBoxContainer" parent="Margin"]
-layout_mode = 2
-theme_override_constants/separation = 24
-
-[node name="Songs" type="PanelContainer" parent="Margin/Columns"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="List" type="VBoxContainer" parent="Margin/Columns/Songs"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="Header" type="Label" parent="Margin/Columns/Songs/List"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+[node name="Header" type="Label" parent="."]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 26.0
+offset_right = 360.0
+offset_bottom = 70.0
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 32
-text = "Músicas"
+text = "Escolha a música"
 
-[node name="Empty" type="Label" parent="Margin/Columns/Songs/List"]
+[node name="Songs" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 90.0
+offset_right = 488.0
+offset_bottom = -96.0
+grow_vertical = 2
+
+[node name="List" type="VBoxContainer" parent="Songs"]
+layout_mode = 2
+
+[node name="Empty" type="Label" parent="Songs/List"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
 text = "Nenhuma música pronta ainda.
-Traga MP3s pelo Pendrive, no menu."
+Traga MP3s pelo pendrive em Gerenciar músicas."
 autowrap_mode = 3
 
-[node name="Scroll" type="ScrollContainer" parent="Margin/Columns/Songs/List"]
+[node name="Scroll" type="ScrollContainer" parent="Songs/List"]
 layout_mode = 2
 size_flags_vertical = 3
+follow_focus = true
 horizontal_scroll_mode = 0
 
-[node name="SongList" type="VBoxContainer" parent="Margin/Columns/Songs/List/Scroll"]
-unique_name_in_owner = true
+[node name="Margin" type="MarginContainer" parent="Songs/List/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
 
-[node name="Example" type="Button" parent="Margin/Columns/Songs/List/Scroll/SongList"]
+[node name="SongList" type="VBoxContainer" parent="Songs/List/Scroll/Margin"]
+unique_name_in_owner = true
 layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Example" type="Button" parent="Songs/List/Scroll/Margin/SongList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
 text = "Música de exemplo — Artista"
 alignment = 0
 text_overrun_behavior = 3
 
-[node name="Details" type="PanelContainer" parent="Margin/Columns"]
+[node name="Card" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -620.0
+offset_top = -250.0
+offset_right = -36.0
+offset_bottom = -96.0
+grow_horizontal = 0
+grow_vertical = 0
+rotation = -0.015
+
+[node name="Box" type="VBoxContainer" parent="Card"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="SongTitle" type="Label" parent="Card/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.2
-
-[node name="Box" type="VBoxContainer" parent="Margin/Columns/Details"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Top" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="Cover" type="TextureRect" parent="Margin/Columns/Details/Box/Top"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 130)
-layout_mode = 2
-expand_mode = 1
-stretch_mode = 6
-
-[node name="Names" type="VBoxContainer" parent="Margin/Columns/Details/Box/Top"]
-layout_mode = 2
-size_flags_horizontal = 3
-alignment = 1
-
-[node name="SongTitle" type="Label" parent="Margin/Columns/Details/Box/Top/Names"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 38
 text = "Título da música"
-autowrap_mode = 3
+text_overrun_behavior = 3
 
-[node name="Artist" type="Label" parent="Margin/Columns/Details/Box/Top/Names"]
+[node name="Artist" type="Label" parent="Card/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.302, 0.588, 1, 1)
+theme_override_colors/font_color = Color(0.902, 0.224, 0.275, 1)
+theme_override_font_sizes/font_size = 28
 text = "Artista"
-autowrap_mode = 3
+text_overrun_behavior = 3
 
-[node name="Info" type="Label" parent="Margin/Columns/Details/Box/Top/Names"]
+[node name="Info" type="Label" parent="Card/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 22
+text = "3:25 · 120 BPM"
+
+[node name="Absent" type="Label" parent="Card/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.153, 0.392, 0.851, 1)
 theme_override_font_sizes/font_size = 20
-text = "4:08 · 92 BPM"
+text = "Baixo não toca nesta música"
 
-[node name="Modes" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Solo" type="Button" parent="Margin/Columns/Details/Box/Modes"]
+[node name="Back" type="Button" parent="."]
 unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_pressed = true
-button_group = SubResource("ButtonGroup_modes")
-text = "Solo"
-
-[node name="Coop" type="Button" parent="Margin/Columns/Details/Box/Modes"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_modes")
-text = "Banda (2)"
-
-[node name="Versus" type="Button" parent="Margin/Columns/Details/Box/Modes"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_modes")
-text = "Duelo (2)"
-
-[node name="InstrumentLabel" type="Label" parent="Margin/Columns/Details/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 20
-text = "Instrumento"
-
-[node name="Instruments" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Strings" type="Button" parent="Margin/Columns/Details/Box/Instruments"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-toggle_mode = true
-button_pressed = true
-button_group = SubResource("ButtonGroup_instruments")
-text = "Cordas"
-
-[node name="Bass" type="Button" parent="Margin/Columns/Details/Box/Instruments"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-toggle_mode = true
-button_group = SubResource("ButtonGroup_instruments")
-text = "Baixo"
-
-[node name="Drums" type="Button" parent="Margin/Columns/Details/Box/Instruments"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-disabled = true
-toggle_mode = true
-button_group = SubResource("ButtonGroup_instruments")
-text = "Bateria"
-
-[node name="Difficulties" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Easy" type="Button" parent="Margin/Columns/Details/Box/Difficulties"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_difficulties")
-text = "Fácil"
-
-[node name="Medium" type="Button" parent="Margin/Columns/Details/Box/Difficulties"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_difficulties")
-text = "Médio"
-
-[node name="Hard" type="Button" parent="Margin/Columns/Details/Box/Difficulties"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_pressed = true
-button_group = SubResource("ButtonGroup_difficulties")
-text = "Difícil"
-
-[node name="Expert" type="Button" parent="Margin/Columns/Details/Box/Difficulties"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_difficulties")
-text = "Muito difícil"
-
-[node name="Player2" type="VBoxContainer" parent="Margin/Columns/Details/Box"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="P2Label" type="Label" parent="Margin/Columns/Details/Box/Player2"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 20
-text = "Jogador 2"
-
-[node name="Instruments2" type="HBoxContainer" parent="Margin/Columns/Details/Box/Player2"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Strings2" type="Button" parent="Margin/Columns/Details/Box/Player2/Instruments2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-toggle_mode = true
-button_group = SubResource("ButtonGroup_instruments_2")
-text = "Cordas"
-
-[node name="Bass2" type="Button" parent="Margin/Columns/Details/Box/Player2/Instruments2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-toggle_mode = true
-button_group = SubResource("ButtonGroup_instruments_2")
-text = "Baixo"
-
-[node name="Drums2" type="Button" parent="Margin/Columns/Details/Box/Player2/Instruments2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-toggle_mode = true
-button_pressed = true
-button_group = SubResource("ButtonGroup_instruments_2")
-text = "Bateria"
-
-[node name="Difficulties2" type="HBoxContainer" parent="Margin/Columns/Details/Box/Player2"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Easy2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_difficulties_2")
-text = "Fácil"
-
-[node name="Medium2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_difficulties_2")
-text = "Médio"
-
-[node name="Hard2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_pressed = true
-button_group = SubResource("ButtonGroup_difficulties_2")
-text = "Difícil"
-
-[node name="Expert2" type="Button" parent="Margin/Columns/Details/Box/Player2/Difficulties2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-toggle_mode = true
-button_group = SubResource("ButtonGroup_difficulties_2")
-text = "Muito difícil"
-
-[node name="Absent" type="Label" parent="Margin/Columns/Details/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.55, 0.62, 1)
-theme_override_font_sizes/font_size = 18
-text = "Bateria não toca nesta música"
-
-[node name="Spacer" type="Control" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="Actions" type="HBoxContainer" parent="Margin/Columns/Details/Box"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Start" type="Button" parent="Margin/Columns/Details/Box/Actions"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 64)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 30
-text = "Jogar"
-
-[node name="Edit" type="Button" parent="Margin/Columns/Details/Box/Actions"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Editar nome"
-
-[node name="Back" type="Button" parent="Margin/Columns/Details/Box/Actions"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -78.0
+offset_right = 176.0
+offset_bottom = -30.0
+grow_vertical = 0
 text = "Voltar"
 
 [node name="Status" type="Label" parent="."]
@@ -364,81 +139,12 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = -44.0
+offset_left = 200.0
+offset_top = -70.0
 offset_right = -24.0
-offset_bottom = -12.0
+offset_bottom = -38.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"OverLabel"
 text = "Preparando Banda - Música: separando os instrumentos 45%"
-horizontal_alignment = 1
-
-[node name="EditPanel" type="PanelContainer" parent="."]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -200.0
-offset_right = 320.0
-offset_bottom = 200.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Box" type="VBoxContainer" parent="EditPanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Header" type="Label" parent="EditPanel/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
-theme_override_font_sizes/font_size = 30
-text = "Editar nome"
-
-[node name="TitleLabel" type="Label" parent="EditPanel/Box"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Título"
-
-[node name="TitleEdit" type="LineEdit" parent="EditPanel/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-placeholder_text = "Nome da música"
-
-[node name="ArtistLabel" type="Label" parent="EditPanel/Box"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Artista"
-
-[node name="ArtistEdit" type="LineEdit" parent="EditPanel/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-placeholder_text = "Banda ou artista"
-
-[node name="EditError" type="Label" parent="EditPanel/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.42, 0.42, 1)
-theme_override_font_sizes/font_size = 18
-autowrap_mode = 3
-
-[node name="Buttons" type="HBoxContainer" parent="EditPanel/Box"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 2
-
-[node name="Save" type="Button" parent="EditPanel/Box/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Salvar"
-
-[node name="Cancel" type="Button" parent="EditPanel/Box/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Cancelar"
+horizontal_alignment = 2

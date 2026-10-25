@@ -6,7 +6,9 @@
 ## o instrumento em destaque). Fora da casca (testes, F6 no editor), `world` fica null.
 ##
 ## Para abrir direto numa tela (conferir uma estação, gravar quadros):
-##   godot --path godot res://game/shell.tscn -- --screen res://game/song_select.tscn
+##   godot --path godot res://game/shell.tscn -- --screen res://game/song_select.tscn \
+##         [--players 2] [--song <id>]
+## Com PALHETA_HOME apontando para outra pasta, a biblioteca vem de lá (App.home_dir).
 class_name Shell
 extends Node3D
 
@@ -24,7 +26,9 @@ const LEAVE_FOV := 25.0  ## graus a mais no mergulho: sensação de velocidade
 ## Tela → estação do cenário onde ela abre.
 const STATIONS := {
 	App.MAIN_MENU: "Main",
+	App.MODE_SELECT: "Mode",
 	App.SONG_SELECT: "Songs",
+	App.INSTRUMENT_SELECT: "Instruments",
 	App.DRIVE: "Manage",
 }
 
@@ -34,6 +38,7 @@ var _fly: Tween
 
 @onready var camera: Camera3D = $Camera3D
 @onready var sky: ComicSky = $Sky
+@onready var fx: FocusFx = $Fx/FocusFx
 @onready var _stations: Node3D = $World/Stations
 @onready var _holder: Control = %Screens
 @onready var _fade: ColorRect = %Fade
@@ -42,7 +47,12 @@ var _fly: Tween
 func _ready() -> void:
 	Comic.toonify($World)
 	App.shell = self
-	var first := App.pending_screen if App.pending_screen != "" else _screen_arg()
+	var first := App.pending_screen if App.pending_screen != "" else _arg("--screen", App.MAIN_MENU)
+	if App.pending_screen == "" and _arg("--players", "") != "":
+		App.flow.start(int(_arg("--players", "1")))
+	if App.pending_screen == "" and _arg("--song", "") != "":
+		App.selection["id"] = _arg("--song", "")
+		App.selection["dir"] = App.library_dir.path_join(App.selection["id"])
 	App.pending_screen = ""
 	show_screen(first, true)
 
@@ -52,10 +62,16 @@ func _exit_tree() -> void:
 		App.shell = null
 
 
-static func _screen_arg() -> String:
+static func _arg(name: String, default: String) -> String:
 	var args := OS.get_cmdline_user_args()
-	var at := args.find("--screen")
-	return args[at + 1] if at >= 0 and at + 1 < args.size() else App.MAIN_MENU
+	var at := args.find(name)
+	return args[at + 1] if at >= 0 and at + 1 < args.size() else default
+
+
+## Onomatopeia de quadrinho no meio da tela (ou em `at`).
+func burst(text: String, at := Vector2(-1, -1), color := Comic.YELLOW) -> void:
+	var where := at if at.x >= 0 else get_viewport().get_visible_rect().size / 2
+	Burst.spawn($Fx, text, where, color)
 
 
 ## Abre a tela (caminho da cena) e leva a câmera até a estação dela.

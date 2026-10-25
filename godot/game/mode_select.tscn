@@ -1,0 +1,72 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/mode_select.gd" id="1_mode"]
+[ext_resource type="Theme" path="res://game/theme.tres" id="2_theme"]
+
+[node name="ModeSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_mode")
+
+[node name="Header" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 560.0
+offset_bottom = 76.0
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 32
+text = "2 jogadores: como vai ser?"
+
+[node name="Modes" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 80.0
+offset_top = -250.0
+offset_right = -80.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 80
+
+[node name="Coop" type="Button" parent="Modes"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_right = NodePath("../Versus")
+theme_type_variation = &"BigButton"
+text = "Banda
+tocam juntos, pontos somados"
+
+[node name="Versus" type="Button" parent="Modes"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_left = NodePath("../Coop")
+theme_type_variation = &"BigButton"
+text = "Duelo
+um contra o outro"
+
+[node name="Back" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -76.0
+offset_right = 180.0
+offset_bottom = -28.0
+grow_vertical = 0
+text = "Voltar"

@@ -14,9 +14,11 @@ uniform float shade = 0.4;
 uniform float dot_size = 6.0;
 // Brilho duro nas facetas (o globo espelhado): 0 desliga.
 uniform float sparkle = 0.0;
+// Escurece um objeto só (instrumento que não toca na música), sem material próprio.
+instance uniform vec3 dim : source_color = vec3(1.0);
 
 void fragment() {
-	ALBEDO = albedo;
+	ALBEDO = albedo * dim;
 	EMISSION = emission;
 	ROUGHNESS = 1.0;
 }

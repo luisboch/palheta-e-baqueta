@@ -1,0 +1,37 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/comic/lamp.gd" id="1_lamp"]
+[ext_resource type="PackedScene" path="res://game/models/spotlight.glb" id="2_model"]
+[ext_resource type="Shader" path="res://game/comic/beam.gdshader" id="3_beam"]
+
+[sub_resource type="ShaderMaterial" id="beam_material"]
+shader = ExtResource("3_beam")
+
+[sub_resource type="CylinderMesh" id="beam_mesh"]
+top_radius = 0.12
+bottom_radius = 2.6
+height = 8.0
+radial_segments = 24
+rings = 1
+cap_top = false
+cap_bottom = false
+
+[node name="Lamp" type="Node3D"]
+script = ExtResource("1_lamp")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+
+[node name="Light" type="SpotLight3D" parent="Model/Head"]
+position = Vector3(0, -0.6, 0)
+rotation_degrees = Vector3(-90, 0, 0)
+light_energy = 6.0
+spot_range = 12.0
+spot_angle = 18.0
+
+[node name="Beam" type="MeshInstance3D" parent="Model/Head"]
+position = Vector3(0, -4.6, 0)
+cast_shadow = 0
+material_override = SubResource("beam_material")
+mesh = SubResource("beam_mesh")
+
+[editable path="Model"]

@@ -5,7 +5,9 @@ extends Node
 ## A casca dos menus (ADR 0022): o cenário 3D em que as telas abrem. A partida é outra cena.
 const SHELL := "res://game/shell.tscn"
 const MAIN_MENU := "res://game/main_menu.tscn"
+const MODE_SELECT := "res://game/mode_select.tscn"
 const SONG_SELECT := "res://game/song_select.tscn"
+const INSTRUMENT_SELECT := "res://game/instrument_select.tscn"
 const DRIVE := "res://game/drive.tscn"
 const PLAY := "res://game/play.tscn"
 ## O repositório fica um nível acima do projeto Godot (godot/): data/ e .venv/ estão lá.
@@ -16,6 +18,15 @@ const HOME_ENV := "PALHETA_HOME"
 const PBQ := ".venv/bin/pbq"  ## instalado por scripts/setup.sh
 const ENV := "/usr/bin/env"  ## `env -C <repo>`: roda o pbq na raiz do repositório
 const WORKER_LOCK := ".worker.lock"
+## Nome de tela do MenuFlow → cena.
+const SCENES := {
+	MenuFlow.MAIN: MAIN_MENU,
+	MenuFlow.MODE: MODE_SELECT,
+	MenuFlow.SONGS: SONG_SELECT,
+	MenuFlow.INSTRUMENTS: INSTRUMENT_SELECT,
+	MenuFlow.MANAGE: DRIVE,
+	MenuFlow.PLAY: PLAY,
+}
 
 ## Falso nos testes (GdUnit4, pela linha de comando ou pelo editor): nada de worker nem comandos
 ## contra a data/ real (AGENTS.md), nem troca de cena (trocaria a cena do executor de testes).
@@ -25,6 +36,8 @@ var last_scene := ""
 ## A partida escolhida no menu: {dir, instrument, difficulty}. Vazio: play.tscn rodando sozinha
 ## (F6 no editor ou linha de comando).
 var selection := {}
+## O caminho dos menus: 1 ou 2 jogadores, o modo e o que vem depois de cada tela.
+var flow := MenuFlow.new()
 ## A casca aberta (null na partida, nos testes e com uma tela rodando sozinha no editor).
 var shell: Shell
 ## Tela que a casca abre ao carregar (voltando da partida); "" é o menu principal.
@@ -71,6 +84,11 @@ func goto(scene: String) -> void:
 		pending_screen = scene
 		scene = SHELL
 	get_tree().change_scene_to_file.call_deferred(scene)
+
+
+## Vai para a tela de nome `screen_name` (MenuFlow.MAIN, MenuFlow.SONGS…).
+func go(screen_name: String) -> void:
+	goto(SCENES.get(screen_name, MAIN_MENU))
 
 
 ## Inicia o worker uma vez por execução do jogo. Ele morre junto com o jogo

@@ -9,6 +9,11 @@
 [ext_resource type="Script" path="res://game/comic/spin.gd" id="7_spin"]
 [ext_resource type="Script" path="res://game/comic/focus_fx.gd" id="8_focus"]
 [ext_resource type="Theme" path="res://game/theme.tres" id="9_theme"]
+[ext_resource type="Script" path="res://game/comic/mode_station.gd" id="10_mode"]
+[ext_resource type="Script" path="res://game/comic/stage_station.gd" id="11_stage"]
+[ext_resource type="Script" path="res://game/comic/instrument_station.gd" id="12_inst"]
+[ext_resource type="PackedScene" path="res://game/comic/lamp.tscn" id="13_lamp"]
+[ext_resource type="FontFile" path="res://game/fonts/Bangers-Regular.ttf" id="14_font"]
 [ext_resource type="PackedScene" path="res://game/models/city.glb" id="m_city"]
 [ext_resource type="PackedScene" path="res://game/models/emblem.glb" id="m_emblem"]
 [ext_resource type="PackedScene" path="res://game/models/pedestal.glb" id="m_pedestal"]
@@ -39,6 +44,26 @@ shader_parameter/albedo = Color(0.42, 0.45, 0.58, 1)
 
 [sub_resource type="PlaneMesh" id="ground_mesh"]
 size = Vector2(130, 130)
+
+[sub_resource type="ShaderMaterial" id="coop_material"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo = Color(1, 0.824, 0.247, 1)
+
+[sub_resource type="TextMesh" id="coop_word"]
+text = "BANDA"
+font = ExtResource("14_font")
+font_size = 110
+depth = 0.3
+
+[sub_resource type="ShaderMaterial" id="versus_material"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo = Color(0.902, 0.224, 0.275, 1)
+
+[sub_resource type="TextMesh" id="versus_word"]
+text = "DUELO"
+font = ExtResource("14_font")
+font_size = 110
+depth = 0.3
 
 [sub_resource type="ShaderMaterial" id="ink_material"]
 render_priority = 100
@@ -100,9 +125,42 @@ position = Vector3(0, 2.3, 8)
 [node name="Target" type="Marker3D" parent="World/Stations/Main"]
 position = Vector3(-0.9, 2.2, 0)
 
+[node name="Mode" type="Node3D" parent="World/Stations"]
+position = Vector3(0, 0, -24)
+script = ExtResource("10_mode")
+sky_a = Color(0.153, 0.392, 0.851, 1)
+sky_b = Color(0.231, 0.808, 0.675, 1)
+sky_dots = Color(1, 0.824, 0.247, 1)
+
+[node name="Coop" type="Node3D" parent="World/Stations/Mode"]
+position = Vector3(-3.2, 0, 0)
+
+[node name="Pedestal" parent="World/Stations/Mode/Coop" instance=ExtResource("m_pedestal")]
+
+[node name="Word" type="MeshInstance3D" parent="World/Stations/Mode/Coop"]
+position = Vector3(0, 1.4, 0)
+material_override = SubResource("coop_material")
+mesh = SubResource("coop_word")
+
+[node name="Versus" type="Node3D" parent="World/Stations/Mode"]
+position = Vector3(3.2, 0, 0)
+
+[node name="Pedestal" parent="World/Stations/Mode/Versus" instance=ExtResource("m_pedestal")]
+
+[node name="Word" type="MeshInstance3D" parent="World/Stations/Mode/Versus"]
+position = Vector3(0, 1.4, 0)
+material_override = SubResource("versus_material")
+mesh = SubResource("versus_word")
+
+[node name="Eye" type="Marker3D" parent="World/Stations/Mode"]
+position = Vector3(0, 2.6, 9.5)
+
+[node name="Target" type="Marker3D" parent="World/Stations/Mode"]
+position = Vector3(0, 0.9, 0)
+
 [node name="Songs" type="Node3D" parent="World/Stations"]
 position = Vector3(18, 0, -16)
-script = ExtResource("6_station")
+script = ExtResource("11_stage")
 sky_a = Color(0.482, 0.173, 0.749, 1)
 sky_b = Color(0.153, 0.392, 0.851, 1)
 sky_dots = Color(0.102, 0.102, 0.122, 1)
@@ -114,15 +172,41 @@ position = Vector3(0, 6.4, -1.8)
 script = ExtResource("7_spin")
 degrees_per_second = Vector3(0, 40, 0)
 
+[node name="Lamps" type="Node3D" parent="World/Stations/Songs"]
+
+[node name="Lamp1" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
+position = Vector3(-4.2, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.0
+tilt_degrees = -22.0
+
+[node name="Lamp2" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
+position = Vector3(-1.4, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.25
+tilt_degrees = -22.0
+
+[node name="Lamp3" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
+position = Vector3(1.4, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.5
+tilt_degrees = -22.0
+
+[node name="Lamp4" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
+position = Vector3(4.2, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.75
+tilt_degrees = -22.0
+
 [node name="Eye" type="Marker3D" parent="World/Stations/Songs"]
-position = Vector3(0, 3.6, 13)
+position = Vector3(-1, 4.2, 15.5)
 
 [node name="Target" type="Marker3D" parent="World/Stations/Songs"]
-position = Vector3(0, 3.3, -1)
+position = Vector3(-3.6, 3.2, -1)
 
 [node name="Instruments" type="Node3D" parent="World/Stations"]
 position = Vector3(-18, 0, -16)
-script = ExtResource("6_station")
+script = ExtResource("12_inst")
 sky_a = Color(0.902, 0.224, 0.275, 1)
 sky_b = Color(1, 0.549, 0.259, 1)
 sky_dots = Color(1, 0.824, 0.247, 1)
@@ -136,13 +220,13 @@ position = Vector3(-3.4, 0, 0)
 position = Vector3(3.4, 0, 0)
 
 [node name="Guitar" parent="World/Stations/Instruments" instance=ExtResource("m_guitar")]
-position = Vector3(-3.4, 1.35, 0)
-scale = Vector3(1.25, 1.25, 1.25)
+position = Vector3(-3.4, 1.2, 0)
+scale = Vector3(1.05, 1.05, 1.05)
 script = ExtResource("7_spin")
 
 [node name="Bass" parent="World/Stations/Instruments" instance=ExtResource("m_bass")]
-position = Vector3(0, 1.35, 0)
-scale = Vector3(1.25, 1.25, 1.25)
+position = Vector3(0, 1.2, 0)
+scale = Vector3(1.05, 1.05, 1.05)
 script = ExtResource("7_spin")
 
 [node name="Drums" parent="World/Stations/Instruments" instance=ExtResource("m_drums")]
@@ -150,11 +234,29 @@ position = Vector3(3.4, 0.42, 0)
 script = ExtResource("7_spin")
 degrees_per_second = Vector3(0, 15, 0)
 
+[node name="LampStrings" parent="World/Stations/Instruments" instance=ExtResource("13_lamp")]
+position = Vector3(-3.4, 6.2, 0.6)
+sweep_degrees = 0.0
+tilt_degrees = 6.0
+on = false
+
+[node name="LampBass" parent="World/Stations/Instruments" instance=ExtResource("13_lamp")]
+position = Vector3(0, 6.2, 0.6)
+sweep_degrees = 0.0
+tilt_degrees = 6.0
+on = false
+
+[node name="LampDrums" parent="World/Stations/Instruments" instance=ExtResource("13_lamp")]
+position = Vector3(3.4, 6.2, 0.6)
+sweep_degrees = 0.0
+tilt_degrees = 6.0
+on = false
+
 [node name="Eye" type="Marker3D" parent="World/Stations/Instruments"]
-position = Vector3(0, 2.8, 9)
+position = Vector3(0, 3.4, 10.5)
 
 [node name="Target" type="Marker3D" parent="World/Stations/Instruments"]
-position = Vector3(0, 1.7, 0)
+position = Vector3(0, 0.9, 0)
 
 [node name="Manage" type="Node3D" parent="World/Stations"]
 position = Vector3(16, 0, 14)

@@ -62,8 +62,13 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   relógio da música, o julgamento de acertos, a pontuação, o placar de 2 jogadores
   (`godot/core/match_result.gd`), as regras de seleção de instrumento e os perfis de entrada. Tudo testado com GdUnit4.
 - **Telas** (`godot/game/`, uma cena por tela, montada com nós no editor; regras em
-  [ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal (`godot/game/main_menu.tscn`), escolha de
-  música (`godot/game/song_select.tscn`), pendrive (`godot/game/drive.tscn`) e a partida. O visual
+  [ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal (`godot/game/main_menu.tscn`), modo de 2
+  jogadores (`godot/game/mode_select.tscn`), escolha de música (`godot/game/song_select.tscn`),
+  instrumento e dificuldade de cada jogador, com o "PRONTO" (`godot/game/instrument_select.tscn`),
+  pendrive (`godot/game/drive.tscn`) e a partida. A ordem das telas e o "voltar" ficam em lógica
+  pura (`godot/core/menu_flow.gd`), assim como o cursor de cada jogador
+  (`godot/core/player_pick.gd`) e a cor das luzes do palco tirada da capa
+  (`godot/core/cover_color.gd`). O visual
   dos menus vem de um tema só, de quadrinho (`godot/game/theme.tres`, fonte Bangers). Linhas de
   lista (músicas, pendrives) são cópias de um botão-modelo que está na cena.
 - **A casca dos menus** (`godot/game/shell.tscn` + `godot/game/shell.gd`, a cena principal;
@@ -73,7 +78,10 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   de quadrinho vem de shaders em `godot/game/comic/`: sombra em faixas com retícula nos modelos
   (`toon.gdshader`, aplicado por `godot/game/comic/comic.gd`), contorno de tinta num passe só
   (`ink.gdshader`) e o céu de explosão (`comic_sky.gdshader`). O foco dos botões é desenhado por
-  `godot/game/comic/focus_fx.gd`.
+  `godot/game/comic/focus_fx.gd`. Estações com comportamento: o modo
+  (`godot/game/comic/mode_station.gd`), o palco com a capa no telão e os refletores
+  (`godot/game/comic/stage_station.gd`, `godot/game/comic/lamp.tscn`) e os instrumentos com a luz
+  na cor de cada jogador (`godot/game/comic/instrument_station.gd`).
 - **Modelos 3D** (`godot/game/models/*.glb`): exportados por `art/build_models.py`, rodado no
   Blender por `scripts/build_models.sh` ([ADR 0023](adr/0023-modelos-3d-por-script-no-blender.md)).
 - **Autoload `App`** (`godot/game/app.gd`): caminhos de `data/` (na raiz do repositório, ou em

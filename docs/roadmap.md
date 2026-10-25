@@ -158,5 +158,10 @@ construídos por script no Blender ([ADR 0023](adr/0023-modelos-3d-por-script-no
 - 11 modelos (`art/build_models.py`): emblema, guitarra, baixo, bateria, pedestal, palco, globo
   espelhado, refletor, pendrive, disco e a cidade.
 - Menu principal novo: 1 Jogador, 2 Jogadores, Gerenciar músicas, Sair.
-- A seguir: tela de modo (Banda × Duelo) e de instrumento com o "PRONTO" de cada jogador; o palco
-  das músicas com a capa no telão; Gerenciar músicas; a partida no tema novo; medir no Deck.
+- Fluxo em lógica pura (`godot/core/menu_flow.gd`): modo (Banda × Duelo, com as palavras em 3D),
+  música e instrumento. Na tela de instrumento, cada jogador anda com o próprio cursor no próprio
+  controle e dá o seu "PRONTO" (`godot/core/player_pick.gd`); a luz do instrumento sai na cor de
+  cada um. Onomatopeias ("PRONTO!", "VAMOS!") só nesses momentos.
+- Palco das músicas: a capa no telão em retícula, refletores varrendo na cor tirada da capa
+  (`godot/core/cover_color.gd`) e globo espelhado.
+- A seguir: Gerenciar músicas (pendrive e editar nome); a partida no tema novo; medir no Deck.

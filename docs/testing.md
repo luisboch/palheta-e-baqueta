@@ -27,5 +27,10 @@
   O relatório fica em `godot/reports/gd_coverage.json`.
 - **Cenas**: `godot/tests/game/` monta a cena da partida com o chart de exemplo, sem áudio, e joga
   em autoplay até o fim.
+- **Telas dos menus**: `godot/tests/game/menus_test.gd` abre cada tela sozinha (sem cenário) e a
+  casca inteira, com uma biblioteca de mentira num diretório temporário.
+- **Ver uma tela no cenário**: `godot res://game/shell.tscn -- --screen <cena> [--players 2]
+  [--song <id>]` (ver `godot/game/shell.gd`). Para não usar a `data/` real, aponte
+  `PALHETA_HOME` para uma pasta com `data/library/` de mentira.
 - **Ver o jogo sem tela**: `--write-movie quadros.png --fixed-fps 30 --quit-after N` com
   `-- --song <pasta> --autoplay 1` grava quadros em PNG (precisa de GPU, não roda headless).

@@ -29,8 +29,8 @@ static func toonify(root: Node) -> void:
 	if root is MeshInstance3D:
 		meshes.append(root)
 	for node: MeshInstance3D in meshes:
-		if node.mesh == null:
-			continue
+		if node.mesh == null or node.material_override != null:
+			continue  # quem já tem material próprio (feixe, texto 3D) fica como está
 		for i in node.mesh.get_surface_count():
 			var source := node.get_active_material(i)
 			if source != null and source.resource_name != SCREEN:

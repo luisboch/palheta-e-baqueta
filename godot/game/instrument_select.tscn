@@ -1,0 +1,164 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/instrument_select.gd" id="1_inst"]
+[ext_resource type="Theme" path="res://game/theme.tres" id="2_theme"]
+
+[node name="InstrumentSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_inst")
+
+[node name="Header" type="Label" parent="."]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 26.0
+offset_right = 420.0
+offset_bottom = 70.0
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 32
+text = "Escolha o instrumento"
+
+[node name="SongName" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 40.0
+offset_top = 80.0
+offset_right = 900.0
+offset_bottom = 112.0
+theme_type_variation = &"OverLabel"
+text = "Música — Artista"
+text_overrun_behavior = 3
+
+[node name="Players" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -320.0
+offset_right = -36.0
+offset_bottom = -92.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 48
+alignment = 1
+
+[node name="Player" type="PanelContainer" parent="Players"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(570, 0)
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="Players/Player"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Top" type="HBoxContainer" parent="Players/Player/Box"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Players/Player/Box/Top"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 34
+text = "Jogador 1"
+
+[node name="Ready" type="Label" parent="Players/Player/Box/Top"]
+visible = false
+layout_mode = 2
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 28
+text = "Pronto!"
+
+[node name="Instruments" type="HBoxContainer" parent="Players/Player/Box"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Strings" type="Button" parent="Players/Player/Box/Instruments"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+text = "Cordas"
+
+[node name="Bass" type="Button" parent="Players/Player/Box/Instruments"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+text = "Baixo"
+
+[node name="Drums" type="Button" parent="Players/Player/Box/Instruments"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+text = "Bateria"
+
+[node name="Difficulties" type="HBoxContainer" parent="Players/Player/Box"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Easy" type="Button" parent="Players/Player/Box/Difficulties"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 19
+toggle_mode = true
+text = "Fácil"
+
+[node name="Medium" type="Button" parent="Players/Player/Box/Difficulties"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 19
+toggle_mode = true
+text = "Médio"
+
+[node name="Hard" type="Button" parent="Players/Player/Box/Difficulties"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 19
+toggle_mode = true
+text = "Difícil"
+
+[node name="Expert" type="Button" parent="Players/Player/Box/Difficulties"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 19
+toggle_mode = true
+text = "Muito difícil"
+
+[node name="Hint" type="Label" parent="Players/Player/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.36, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "Direcional escolhe · A: pronto · B: volta"
+horizontal_alignment = 1
+
+[node name="Back" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -78.0
+offset_right = 176.0
+offset_bottom = -30.0
+grow_vertical = 0
+focus_mode = 0
+text = "Voltar"

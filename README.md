@@ -63,8 +63,11 @@ Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/b
 Abra `godot/project.godot` no editor e aperte **F5** (ou rode `$(scripts/godot.sh) --path godot`).
 O jogo abre no menu, num cenário 3D de quadrinho:
 
-- **1 Jogador** e **2 Jogadores**: lista de músicas prontas → instrumento (os que não tocam na
-  música ficam desabilitados) → dificuldade → Jogar. "Editar nome" corrige título e artista.
+- **1 Jogador**: música (a capa aparece no telão do palco) → instrumento e dificuldade (os que
+  não tocam na música ficam desabilitados) → "PRONTO".
+- **2 Jogadores**: modo (Banda ou Duelo) → música → cada um escolhe o instrumento no próprio
+  controle (jogador 1 nas setas ou no controle 1, jogador 2 no teclado numérico ou no controle 2)
+  e dá o seu "PRONTO"; a partida começa com os dois prontos.
 - **Gerenciar músicas**: escolha o pendrive e a ação: trazer os MP3s novos de `palheta/` (eles são
   processados sozinhos, com o andamento embaixo do menu), importar músicas prontas ou salvar a
   biblioteca no pendrive. Nada é lido antes de você escolher ([ADR 0003](docs/adr/0003-pendrive-pelo-menu.md)).
