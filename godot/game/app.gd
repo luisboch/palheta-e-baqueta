@@ -18,6 +18,9 @@ const HOME_ENV := "PALHETA_HOME"
 const PBQ := ".venv/bin/pbq"  ## instalado por scripts/setup.sh
 const ENV := "/usr/bin/env"  ## `env -C <repo>`: roda o pbq na raiz do repositório
 const WORKER_LOCK := ".worker.lock"
+## Quadro mais longo que isso (s) vai para o game.log: o jogo "engasga" e queremos saber onde.
+const HITCH_LOG := 0.25
+const STATS_EVERY := 60.0  ## s entre os registros de memória no game.log
 ## Nome de tela do MenuFlow → cena.
 const SCENES := {
 	MenuFlow.MAIN: MAIN_MENU,
@@ -46,6 +49,7 @@ var repo := home_dir()
 var data_dir := repo.path_join("data")
 var library_dir := data_dir.path_join("library")
 var _worker_pid := -1
+var _since_stats := 0.0
 
 
 ## Onde ficam data/ e o backend: $PALHETA_HOME, senão a raiz do repositório.
@@ -66,6 +70,33 @@ static func _under_tests() -> bool:
 ## Os menus já precisam do controle (A confirma, B volta), antes de qualquer partida.
 func _ready() -> void:
 	InputProfile.apply()
+
+
+## Diagnóstico de lentidão que aparece só depois de um tempo de jogo: registra no game.log os
+## quadros longos e, a cada minuto, a memória (vídeo inclusive), os nós e o FPS.
+func _process(delta: float) -> void:
+	if not live:
+		return
+	var scene := get_tree().current_scene
+	if delta > HITCH_LOG:
+		print("travada: %.0f ms em %s" % [delta * 1000.0, scene.name if scene else "?"])
+	_since_stats += delta
+	if _since_stats < STATS_EVERY:
+		return
+	_since_stats = 0.0
+	print(
+		(
+			"stats: %d fps, nós %d, órfãos %d, mem %.0f MB, vídeo %.0f MB, tela %s"
+			% [
+				Performance.get_monitor(Performance.TIME_FPS),
+				Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
+				Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT),
+				Performance.get_monitor(Performance.MEMORY_STATIC) / 1e6,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1e6,
+				scene.name if scene else "?",
+			]
+		)
+	)
 
 
 ## Vai para a tela (ou a partida). Entre telas, a casca só troca a tela e voa com a câmera; fora

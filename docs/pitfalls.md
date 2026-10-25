@@ -112,3 +112,7 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-25 · A música não terminava (travava no fim):** no fim do stream o `player` informa
   posição ~0 por um quadro; o `SongClock` tratava como salto e voltava ao começo, e o resultado
   só viria minutos depois. Agora o salto só vale para a frente.
+- **2026-10-25 · Menus lentos depois de jogar um tempo (em investigação):** nos testes sem janela
+  (trocar de tela 200 vezes e abrir/fechar a partida 8 vezes) memória, nós e tempo por quadro
+  ficam estáveis, então o vazamento não está na lógica. O `App` registra no `data/game.log`
+  quadros acima de 250 ms (`travada:`) e, a cada minuto, FPS, nós, memória e vídeo (`stats:`).
