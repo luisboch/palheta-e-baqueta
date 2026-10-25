@@ -4,7 +4,7 @@ shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, fog_disabled;
 
 instance uniform vec3 beam_color : source_color = vec3(1.0);
-uniform float strength = 0.3;
+uniform float strength = 0.2;
 
 void fragment() {
 	// UV.y vai de 0 (lâmpada) a 1 (chão) no CylinderMesh.

@@ -39,6 +39,8 @@ static func toonify(root: Node) -> void:
 
 ## Material toon com a cor (e o brilho, pelo nome) do material importado.
 static func material_for(source: Material) -> Material:
+	if source is ShaderMaterial and (source as ShaderMaterial).shader == TOON:
+		return source  # já é toon: uma cena copiada (a pista do jogador 2) passa por aqui de novo
 	var key := source.resource_name
 	if key != "" and _cache.has(key):
 		return _cache[key]

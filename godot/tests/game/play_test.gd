@@ -360,3 +360,30 @@ func test_drums_use_the_fret_buttons() -> void:
 		press.action = InputProfile.FRETS[InputProfile.drum_fret(lane)]
 		scene._unhandled_input(press)
 	assert_bool(scene._drum_down[0].is_empty()).is_true()
+
+
+func test_comic_effects_follow_the_player() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	var road: Highway = scene.highway
+	road.set_fret(2, true)  # anel aceso e faixa de luz na lane
+	assert_bool(road._rings[2].get_node("Lane").visible).is_true()
+	road.set_fret(2, false)
+	road._pop(2)  # onda de choque e faíscas
+	assert_bool(road._rings[2].get_node("Wave").visible).is_true()
+	road.set_power(4, 1.0)  # 4×: bordas amarelas, pulsando
+	assert_object(road._rail_material.emission).is_equal(Comic.YELLOW)
+	assert_float(road._rail_material.emission_energy_multiplier).is_greater(Highway.RAIL_GLOW[3])
+	road.on_miss(scene.session.notes[0])  # a pista treme
+	assert_float(road._miss).is_equal(Highway.MISS_TIME)
+	var scoring := Scoring.new()
+	scoring.streak = Scoring.STREAK_PER_STEP * (Scoring.MAX_MULTIPLIER - 1)
+	var bursts: int = scene.hud.get_child_count()
+	scene.hud.update_score(scoring, null, 0.5)  # chegou ao 4×: "Energia máxima!"
+	assert_int(scene.hud.get_child_count()).is_equal(bursts + 1)
+	scene.hud.update_score(scoring, null, 0.5)  # continua no 4×: não repete
+	assert_int(scene.hud.get_child_count()).is_equal(bursts + 1)
+	var meter: PowerMeter = scene.get_node("%Meter")
+	assert_float(meter.progress).is_equal(1.0)
+	for i in 30:  # balanço da câmera, palco e refletores no ritmo
+		scene._process(1.0 / 60.0)
+	assert_vector(scene.camera.position).is_not_equal(scene._camera_rest[0])

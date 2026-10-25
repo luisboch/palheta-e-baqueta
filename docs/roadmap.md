@@ -166,5 +166,11 @@ construídos por script no Blender ([ADR 0023](adr/0023-modelos-3d-por-script-no
   (`godot/core/cover_color.gd`) e globo espelhado.
 - Gerenciar músicas (`godot/game/manage.tscn`): o painel do pendrive e a biblioteca com "Editar
   nome", na estação do pendrive gigante.
-- A seguir: a partida no tema novo (palco com a capa atrás da pista, refletores, alvos e
-  multiplicador); medir no Deck.
+- Partida no tema novo: o palco com a capa atrás de cada pista, com refletores varrendo no
+  compasso e globo girando com os médios; anéis nos alvos (aceso com o traste, onda de choque e
+  faíscas no acerto); bordas da pista na cor do multiplicador, pulsando no 4×; tremor e linha
+  vermelha no erro; placar de HQ com o medidor de energia e "Energia máxima!" ao chegar no 4×;
+  câmera balançando de leve; escuro desfazendo ao entrar.
+- Medido numa Iris Xe (GPU de força parecida com a do Deck): 60 FPS nos menus e na partida com 1
+  e 2 jogadores, depois de trocar o contorno da partida por silhuetas.
+- A seguir: conferir no Deck (modo jogo) e jogar a dois para ajustar o visual.

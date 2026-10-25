@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/comic/stage_backdrop.gd" id="1_backdrop"]
+[ext_resource type="PackedScene" path="res://game/models/stage.glb" id="2_stage"]
+[ext_resource type="PackedScene" path="res://game/models/mirror_ball.glb" id="3_ball"]
+[ext_resource type="PackedScene" path="res://game/comic/lamp.tscn" id="4_lamp"]
+[ext_resource type="Script" path="res://game/comic/spin.gd" id="5_spin"]
+
+[node name="Backdrop" type="Node3D"]
+script = ExtResource("1_backdrop")
+
+[node name="Stage" parent="." instance=ExtResource("2_stage")]
+
+[node name="MirrorBall" parent="." instance=ExtResource("3_ball")]
+position = Vector3(0, 6.4, -1.8)
+script = ExtResource("5_spin")
+degrees_per_second = Vector3(0, 40, 0)
+
+[node name="Lamps" type="Node3D" parent="."]
+
+[node name="Lamp1" parent="Lamps" instance=ExtResource("4_lamp")]
+position = Vector3(-4.2, 7.05, -1.5)
+sweep_degrees = 22.0
+tilt_degrees = -22.0
+
+[node name="Lamp2" parent="Lamps" instance=ExtResource("4_lamp")]
+position = Vector3(-1.4, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.25
+tilt_degrees = -22.0
+
+[node name="Lamp3" parent="Lamps" instance=ExtResource("4_lamp")]
+position = Vector3(1.4, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.5
+tilt_degrees = -22.0
+
+[node name="Lamp4" parent="Lamps" instance=ExtResource("4_lamp")]
+position = Vector3(4.2, 7.05, -1.5)
+sweep_degrees = 22.0
+phase = 0.75
+tilt_degrees = -22.0

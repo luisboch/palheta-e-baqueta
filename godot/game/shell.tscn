@@ -14,11 +14,10 @@
 [ext_resource type="Script" path="res://game/comic/instrument_station.gd" id="12_inst"]
 [ext_resource type="PackedScene" path="res://game/comic/lamp.tscn" id="13_lamp"]
 [ext_resource type="FontFile" path="res://game/fonts/Bangers-Regular.ttf" id="14_font"]
+[ext_resource type="PackedScene" path="res://game/comic/stage_backdrop.tscn" id="15_backdrop"]
 [ext_resource type="PackedScene" path="res://game/models/city.glb" id="m_city"]
 [ext_resource type="PackedScene" path="res://game/models/emblem.glb" id="m_emblem"]
 [ext_resource type="PackedScene" path="res://game/models/pedestal.glb" id="m_pedestal"]
-[ext_resource type="PackedScene" path="res://game/models/stage.glb" id="m_stage"]
-[ext_resource type="PackedScene" path="res://game/models/mirror_ball.glb" id="m_ball"]
 [ext_resource type="PackedScene" path="res://game/models/guitar.glb" id="m_guitar"]
 [ext_resource type="PackedScene" path="res://game/models/bass.glb" id="m_bass"]
 [ext_resource type="PackedScene" path="res://game/models/drums.glb" id="m_drums"]
@@ -165,38 +164,7 @@ sky_a = Color(0.482, 0.173, 0.749, 1)
 sky_b = Color(0.153, 0.392, 0.851, 1)
 sky_dots = Color(0.102, 0.102, 0.122, 1)
 
-[node name="Stage" parent="World/Stations/Songs" instance=ExtResource("m_stage")]
-
-[node name="MirrorBall" parent="World/Stations/Songs" instance=ExtResource("m_ball")]
-position = Vector3(0, 6.4, -1.8)
-script = ExtResource("7_spin")
-degrees_per_second = Vector3(0, 40, 0)
-
-[node name="Lamps" type="Node3D" parent="World/Stations/Songs"]
-
-[node name="Lamp1" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
-position = Vector3(-4.2, 7.05, -1.5)
-sweep_degrees = 22.0
-phase = 0.0
-tilt_degrees = -22.0
-
-[node name="Lamp2" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
-position = Vector3(-1.4, 7.05, -1.5)
-sweep_degrees = 22.0
-phase = 0.25
-tilt_degrees = -22.0
-
-[node name="Lamp3" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
-position = Vector3(1.4, 7.05, -1.5)
-sweep_degrees = 22.0
-phase = 0.5
-tilt_degrees = -22.0
-
-[node name="Lamp4" parent="World/Stations/Songs/Lamps" instance=ExtResource("13_lamp")]
-position = Vector3(4.2, 7.05, -1.5)
-sweep_degrees = 22.0
-phase = 0.75
-tilt_degrees = -22.0
+[node name="Backdrop" parent="World/Stations/Songs" instance=ExtResource("15_backdrop")]
 
 [node name="Eye" type="Marker3D" parent="World/Stations/Songs"]
 position = Vector3(-1, 4.2, 15.5)

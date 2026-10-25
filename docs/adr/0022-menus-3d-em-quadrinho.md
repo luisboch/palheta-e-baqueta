@@ -3,6 +3,13 @@
 - **Status:** Aceita
 - **Data:** 2026-10-24
 
+> **2026-10-24:** a partida ganhou o mesmo visual: o palco com a capa no telão atrás de cada
+> pista (`godot/game/comic/stage_backdrop.tscn`), refletores e globo seguindo as batidas, anéis
+> nos alvos com onda de choque e faíscas, bordas da pista acendendo com o multiplicador e o
+> medidor de energia no placar. Na partida o contorno é só de silhuetas
+> (`godot/game/comic/ink_silhouette.gdshader`): o completo, com a textura de normais, derrubava
+> a tela dividida de 60 para 47 FPS numa Iris Xe.
+
 ## Contexto
 
 Os menus da fase 9 ([ADR 0016](0016-menus-e-navegacao.md)) eram painéis escuros sobre o fundo

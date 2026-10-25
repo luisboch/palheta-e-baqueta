@@ -102,3 +102,10 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-24 · Blender do flatpak não acha o script:** `flatpak run org.blender.Blender
   --python art/build_models.py` roda com o diretório de trabalho em `/app/blender`, e o caminho
   relativo falha. `scripts/build_models.sh` passa caminhos absolutos.
+- **2026-10-24 · Contorno com normais pesa na tela dividida:** `hint_normal_roughness_texture`
+  num shader faz o Forward+ desenhar a cena num passe a mais. Com 2 jogadores (cena desenhada
+  duas vezes) caiu de 60 para 47 FPS numa Iris Xe. A partida usa `ink_silhouette.gdshader`, que
+  só lê a profundidade.
+- **2026-10-24 · Toon aplicado duas vezes fica branco:** a pista do jogador 2 é cópia da
+  primeira, já com os materiais toon; aplicar de novo lia a cor de um `ShaderMaterial` (que não
+  tem `albedo_color`) e virava branco. `Comic.material_for` devolve o material se ele já for toon.

@@ -12,6 +12,8 @@ signal resume
 const STAR_ON := "★"
 const STAR_OFF := "☆"
 const MODE_NAMES := {"coop": "Banda", "versus": "Duelo"}
+const FADE_IN := 0.4  ## s do escuro (a casca mergulha e escurece) até a partida aparecer
+const MAXED_WORDS := "Energia máxima!"
 
 var play_mode := "solo"
 var _players: Array[String] = []  ## "Cordas · Difícil" de cada jogador, para as sequências
@@ -22,6 +24,8 @@ var _combos: Array[Label3D] = []
 @onready var _score: Label = $Score
 @onready var _center: Label = $Center
 @onready var _results: PanelContainer = %Results
+@onready var _meter: PowerMeter = %Meter
+@onready var _fade: ColorRect = %Fade
 
 
 func _ready() -> void:
@@ -30,6 +34,10 @@ func _ready() -> void:
 	%Resume.pressed.connect(resume.emit)
 	%Restart.pressed.connect(again.emit)
 	%QuitSong.pressed.connect(choose_song.emit)
+	_meter.maxed.connect(_on_maxed)
+	var fade := create_tween()
+	fade.tween_property(_fade, "modulate:a", 0.0, FADE_IN)
+	fade.tween_callback(_fade.hide)
 
 
 func show_pause(visible_now: bool) -> void:
@@ -61,11 +69,11 @@ func setup(
 	)
 	var two := play_mode != "solo"
 	_score.visible = not two
+	_meter.visible = not two
 	%Band.visible = play_mode == "coop"
 	%Duel.visible = play_mode == "versus"
 	if not two:
 		_title.text = "%s\n%s" % [heading, _players[0]]
-		_score.position.y = 100
 		return
 	_players.append(_player_name(instrument_2, difficulty_2))
 	_instruments.append(SongCatalog.INSTRUMENT_NAMES.get(instrument_2, instrument_2))
@@ -75,11 +83,11 @@ func setup(
 		combo.visible = true
 
 
-func update_score(scoring: Scoring, scoring_2: Scoring = null) -> void:
+## `pulse`: a batida (0 a 1), para o medidor cheio pulsar.
+func update_score(scoring: Scoring, scoring_2: Scoring = null, pulse := 0.0) -> void:
 	if scoring_2 == null:
-		_score.text = (
-			"%d pontos   %d×   sequência %d" % [scoring.score, scoring.multiplier(), scoring.streak]
-		)
+		_score.text = str(scoring.score)
+		_meter.show_score(scoring, pulse)
 		return
 	var both: Array[Scoring] = [scoring, scoring_2]
 	for i in mini(_combos.size(), both.size()):
@@ -99,6 +107,12 @@ func update_score(scoring: Scoring, scoring_2: Scoring = null) -> void:
 	%DuelP1.text = "P1  %d" % scoring.score
 	%DuelP2.text = "%d  P2" % scoring_2.score
 	%Lead.text = ["empate", "◄ na frente", "na frente ►"][MatchResult.leader(scoring, scoring_2)]
+
+
+## A onomatopeia ao encher o medidor: uma vez por chegada ao 4×.
+func _on_maxed() -> void:
+	var at := _meter.get_global_rect().get_center() + Vector2(150, -90)
+	Burst.spawn(self, MAXED_WORDS, at)
 
 
 func show_message(text: String) -> void:

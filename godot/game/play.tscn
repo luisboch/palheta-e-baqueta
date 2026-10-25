@@ -5,10 +5,26 @@
 [ext_resource type="Script" uid="uid://boo8lqst1ymnv" path="res://game/hud.gd" id="3_fxqnm"]
 [ext_resource type="PackedScene" path="res://game/background.tscn" id="4_bkgnd"]
 [ext_resource type="Theme" path="res://game/theme.tres" id="5_theme"]
+[ext_resource type="PackedScene" path="res://game/comic/stage_backdrop.tscn" id="6_backdrop"]
+[ext_resource type="Shader" path="res://game/comic/ink_silhouette.gdshader" id="7_ink"]
+[ext_resource type="FontFile" path="res://game/fonts/Bangers-Regular.ttf" id="8_font"]
+[ext_resource type="Script" path="res://game/comic/power_meter.gd" id="9_meter"]
+[ext_resource type="Script" path="res://game/comic/focus_fx.gd" id="10_focus"]
 
 [sub_resource type="Environment" id="Environment_crsts"]
 background_mode = 3
+ambient_light_source = 2
+ambient_light_color = Color(1, 0.95, 0.86, 1)
+ambient_light_energy = 0.32
 glow_enabled = true
+
+[sub_resource type="ShaderMaterial" id="ink_material"]
+render_priority = 100
+shader = ExtResource("7_ink")
+shader_parameter/depth_threshold = 0.1
+
+[sub_resource type="QuadMesh" id="ink_mesh"]
+size = Vector2(2, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5x2mm"]
 albedo_color = Color(0.10980392, 0.10980392, 0.16470589, 1)
@@ -122,6 +138,13 @@ script = ExtResource("1_l2lu5")
 transform = Transform3D(1, 0, 0, 0, 0.96152395, 0.27472115, 0, -0.27472115, 0.96152395, 0, 2.4, 2.9)
 fov = 60.0
 
+[node name="Ink" type="MeshInstance3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+cast_shadow = 0
+extra_cull_margin = 16384.0
+material_override = SubResource("ink_material")
+mesh = SubResource("ink_mesh")
+
 [node name="Sun" type="DirectionalLight3D" parent="." unique_id=906070909]
 transform = Transform3D(0.9396926, 0.28016648, -0.1961747, 0, 0.57357645, 0.81915206, 0.34202012, -0.76975113, 0.53898555, 0, 0, 0)
 
@@ -206,6 +229,9 @@ material_override = SubResource("StandardMaterial3D_fwmjg")
 transparency = 0.6
 mesh = SubResource("CylinderMesh_ylo47")
 
+[node name="Backdrop" parent="Highway" instance=ExtResource("6_backdrop")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, -1.4, -27)
+
 [node name="BeatLines" type="Node3D" parent="Highway"]
 
 [node name="Notes" type="Node3D" parent="Highway" unique_id=1274922452]
@@ -215,6 +241,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.55)
 visible = false
 pixel_size = 0.0026
 no_depth_test = true
+font = ExtResource("8_font")
 outline_size = 18
 font_size = 64
 text = "P1 · Cordas
@@ -225,24 +252,41 @@ script = ExtResource("3_fxqnm")
 
 [node name="Title" type="Label" parent="Hud" unique_id=594418351]
 offset_left = 24.0
-offset_top = 16.0
+offset_top = 18.0
 offset_right = 24.0
-offset_bottom = 16.0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 28
+offset_bottom = 18.0
+rotation = -0.015
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 24
 text = "Música — Artista
 Cordas · Difícil"
 
 [node name="Score" type="Label" parent="Hud" unique_id=1017330632]
-offset_left = 24.0
-offset_top = 100.0
-offset_right = 24.0
-offset_bottom = 100.0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 28
-text = "0 pontos   1×   sequência 0"
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -420.0
+offset_top = 10.0
+offset_right = -28.0
+offset_bottom = 96.0
+grow_horizontal = 0
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 64
+text = "0"
+horizontal_alignment = 2
+
+[node name="Meter" type="Control" parent="Hud"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -230.0
+offset_right = 208.0
+offset_bottom = -50.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("9_meter")
 
 [node name="Band" type="Label" parent="Hud"]
 unique_name_in_owner = true
@@ -250,14 +294,12 @@ visible = false
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -260.0
-offset_top = 100.0
-offset_right = 260.0
-offset_bottom = 184.0
+offset_left = -200.0
+offset_top = 16.0
+offset_right = 200.0
+offset_bottom = 100.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 30
 text = "BANDA
 0 pontos · 1×"
@@ -270,9 +312,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -340.0
-offset_top = 110.0
+offset_top = 24.0
 offset_right = 340.0
-offset_bottom = 154.0
+offset_bottom = 80.0
 grow_horizontal = 2
 theme_override_constants/separation = 16
 
@@ -280,9 +322,9 @@ theme_override_constants/separation = 16
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 30
+theme_type_variation = &"OverLabel"
+theme_override_colors/font_color = Color(1, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 40
 text = "P1  0"
 horizontal_alignment = 2
 
@@ -290,9 +332,7 @@ horizontal_alignment = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 24
 text = "empate"
 horizontal_alignment = 1
@@ -302,9 +342,9 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 30
+theme_type_variation = &"OverLabel"
+theme_override_colors/font_color = Color(0.55, 0.72, 1, 1)
+theme_override_font_sizes/font_size = 40
 text = "0  P2"
 
 [node name="Center" type="Label" parent="Hud" unique_id=466246669]
@@ -319,8 +359,7 @@ offset_right = 0.5
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_type_variation = &"OverLabel"
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 
@@ -347,8 +386,9 @@ theme_override_constants/separation = 12
 [node name="Header" type="Label" parent="Hud/Results/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
-theme_override_font_sizes/font_size = 44
+size_flags_horizontal = 4
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 48
 text = "Fim!"
 horizontal_alignment = 1
 
@@ -356,7 +396,7 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_colors/font_color = Color(0.902, 0.224, 0.275, 1)
 theme_override_font_sizes/font_size = 48
 text = "★★★★☆"
 horizontal_alignment = 1
@@ -425,8 +465,9 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="Label" parent="Hud/Pause/Box"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
-theme_override_font_sizes/font_size = 44
+size_flags_horizontal = 4
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 48
 text = "Pausado"
 horizontal_alignment = 1
 
@@ -451,3 +492,22 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 text = "Sair da música"
+
+[node name="Fade" type="ColorRect" parent="Hud"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.102, 0.102, 0.122, 1)
+
+[node name="FocusFx" type="Control" parent="Hud"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("10_focus")

@@ -31,6 +31,14 @@ const HOLD_STEP := 0.08  ## distância entre os pontos da cauda segurada (a onda
 const WOBBLE_AMPLITUDE := 0.09  ## deslocamento lateral da onda com o whammy no máximo
 const WOBBLE_HZ := 9.0
 const WOBBLE_WAVES := 1.6  ## ondas por unidade de pista: a cauda serpenteia, não só balança
+const RING := preload("res://game/comic/target_ring.tscn")
+## Bordas da pista: acendem com o multiplicador (1× a 4×). No 4× pulsam na batida.
+const RAIL_SIZE := Vector3(0.07, 0.07, 18.2)
+const RAIL_COLORS: Array[Color] = [Comic.CREAM, Comic.CYAN, Comic.PURPLE, Comic.YELLOW]
+const RAIL_GLOW: Array[float] = [0.3, 1.0, 1.8, 3.0]
+const RAIL_PULSE := 2.0  ## brilho a mais na batida, no 4×
+const MISS_SHAKE := 0.04  ## m de tremor da pista no erro
+const MISS_TIME := 0.18  ## s do tremor e da linha de acerto vermelha
 
 var session: PlaySession
 var lanes := 5
@@ -40,9 +48,16 @@ var _flash := 0.0
 var _beat_lines: Array[MeshInstance3D] = []
 var _hold: MeshInstance3D  ## caudas sendo seguradas, refeitas a cada quadro
 var _time := 0.0
+var _rings: Array[TargetRing] = []
+var _rails: Array[MeshInstance3D] = []
+var _rail_material := StandardMaterial3D.new()
+var _miss := 0.0  ## s que faltam do tremor do erro
+var _base_x := 0.0
 
 ## Sequência do jogador sobre a pista, com 2 jogadores (o texto vem do Hud).
 @onready var combo: Label3D = $Combo
+## O palco atrás da pista, com a capa no telão (a play.gd o faz seguir a música).
+@onready var backdrop: StageBackdrop = $Backdrop
 @onready var _board: MeshInstance3D = $Board
 @onready var _strikeline: MeshInstance3D = $Strikeline
 @onready var _lines: Node3D = $Lines
@@ -79,6 +94,9 @@ func setup(play_session: PlaySession) -> void:
 		target.material_override = fresh.material_override
 		fresh.free()
 	_make_beat_lines(board.size.x)
+	_make_rings()
+	_make_rails(board.size.x)
+	_base_x = position.x
 	if _hold == null:
 		_hold = MeshInstance3D.new()
 		_hold.mesh = ImmediateMesh.new()
@@ -101,6 +119,47 @@ func _make_beat_lines(width: float) -> void:
 		line.visible = false
 		_beat_root.add_child(line)
 		_beat_lines.append(line)
+
+
+## Um anel (TargetRing) em cada alvo, na cor da lane.
+func _make_rings() -> void:
+	for ring in _rings:
+		ring.free()
+	_rings.clear()
+	for lane in lanes:
+		var ring: TargetRing = RING.instantiate()
+		ring.position = _targets.position + Vector3(_x(lane), 0, 0)
+		add_child(ring)  # fora de Targets: lá cada filho é o alvo de uma lane
+		ring.set_color(_lane_color(lane))
+		_rings.append(ring)
+
+
+func _make_rails(width: float) -> void:
+	for rail in _rails:
+		rail.free()
+	_rails.clear()
+	_rail_material.emission_enabled = true
+	for side: int in [-1, 1]:
+		var rail := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = RAIL_SIZE
+		rail.mesh = box
+		rail.material_override = _rail_material
+		rail.position = Vector3(side * width / 2, 0, _board.position.z)
+		add_child(rail)
+		_rails.append(rail)
+	set_power(1)
+
+
+## Bordas da pista no multiplicador do jogador (1 a 4); `pulse`: a batida (0 a 1).
+func set_power(multiplier: int, pulse := 0.0) -> void:
+	var level := clampi(multiplier, 1, RAIL_COLORS.size()) - 1
+	_rail_material.albedo_color = RAIL_COLORS[level]
+	_rail_material.emission = RAIL_COLORS[level]
+	var top := level == RAIL_COLORS.size() - 1
+	_rail_material.emission_energy_multiplier = (
+		RAIL_GLOW[level] + (RAIL_PULSE * pulse if top else 0.0)
+	)
 
 
 func _x(lane: int) -> float:
@@ -144,6 +203,11 @@ func update_view(now: float, grid: BeatGrid = null, whammy := 0.0) -> void:
 	var pulse := grid.pulse(now) if grid else 0.0
 	var mat: StandardMaterial3D = _strikeline.material_override
 	mat.emission_energy_multiplier = 1.5 + _flash * 4.0 + pulse * 0.6
+	# Erro: a pista treme um instante e a linha de acerto fica vermelha.
+	_miss = maxf(_miss - get_process_delta_time(), 0.0)
+	var miss := _miss / MISS_TIME
+	mat.emission = Color.WHITE.lerp(Comic.RED, miss)
+	position.x = _base_x + sin(_time * 90.0) * MISS_SHAKE * miss
 	if grid:
 		_update_beat_lines(now, grid)
 
@@ -269,6 +333,7 @@ func _box(size: Vector3, color: Color, glow: float = 0.0) -> MeshInstance3D:
 func set_fret(lane: int, pressed: bool) -> void:
 	if lane < lanes:
 		_target(lane).transparency = 0.0 if pressed else 0.6
+		_rings[lane].set_pressed(pressed)
 
 
 func _target(lane: int) -> MeshInstance3D:
@@ -289,6 +354,7 @@ func _pop(screen: int) -> void:
 	var target := _target(screen)
 	target.scale = Vector3(HIT_POP, 0.4 * HIT_POP, HIT_POP)
 	create_tween().tween_property(target, "scale", Vector3(1, 0.4, 1), HIT_POP_TIME)
+	_rings[screen].hit()
 
 
 func on_input(lane: int, result: Dictionary) -> void:
@@ -302,6 +368,7 @@ func on_input(lane: int, result: Dictionary) -> void:
 
 
 func on_miss(note: PlayNote) -> void:
+	_miss = MISS_TIME
 	var view: Node3D = _views.get(note)
 	if view == null:
 		return

@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/comic/target_ring.gd" id="1_ring"]
+
+[sub_resource type="TorusMesh" id="rim_mesh"]
+inner_radius = 0.22
+outer_radius = 0.26
+rings = 32
+ring_segments = 8
+
+[sub_resource type="BoxMesh" id="lane_mesh"]
+size = Vector3(0.44, 0.005, 9)
+
+[sub_resource type="TorusMesh" id="wave_mesh"]
+inner_radius = 0.23
+outer_radius = 0.25
+rings = 32
+ring_segments = 4
+
+[sub_resource type="QuadMesh" id="spark_mesh"]
+size = Vector2(0.07, 0.07)
+
+[node name="TargetRing" type="Node3D"]
+script = ExtResource("1_ring")
+
+[node name="Rim" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.02, 0)
+cast_shadow = 0
+mesh = SubResource("rim_mesh")
+
+[node name="Lane" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.035, -4.5)
+cast_shadow = 0
+mesh = SubResource("lane_mesh")
+
+[node name="Wave" type="MeshInstance3D" parent="."]
+visible = false
+cast_shadow = 0
+mesh = SubResource("wave_mesh")
+
+[node name="Sparks" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 16
+lifetime = 0.35
+one_shot = true
+explosiveness = 1.0
+mesh = SubResource("spark_mesh")
+direction = Vector3(0, 1, 0)
+spread = 70.0
+gravity = Vector3(0, -12, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 3.6
+scale_amount_min = 0.6
+scale_amount_max = 1.2

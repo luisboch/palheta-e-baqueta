@@ -22,6 +22,11 @@ const CAM_2P_POS := Vector3(0.0, 2.9, 4.0)  ## x vem da pista de cada jogador
 ## Com 2 jogadores, cada pista tem a sua câmera e a sua metade da tela (ADR 0019). As pistas
 ## ficam longe o bastante para que a câmera de um jogador não enxergue a pista do outro.
 const HIGHWAY_2P_OFFSET := 50.0
+## Câmera viva: balança devagar e "respira" na batida. Pouco, para a pista continuar parada
+## aos olhos de quem lê as notas.
+const SWAY := Vector2(0.05, 0.03)  ## m de balanço (lado, altura)
+const SWAY_SECONDS := 7.0  ## um balanço inteiro
+const BEAT_FOV := 0.8  ## graus a mais de abertura na batida
 
 var auto_start := true
 var camera_2: Camera3D
@@ -49,6 +54,10 @@ var _whammies: Array[Whammy] = [Whammy.new(), Whammy.new()]
 var _bends: Array[float] = [0.0, 0.0]
 var _drum_down: Array[Dictionary] = [{}, {}]  ## botões da bateria apertados, por jogador
 var _others: Array[int] = []  ## stems dos instrumentos que ninguém está tocando
+var _cameras: Array[Camera3D] = []
+var _camera_rest: Array[Vector3] = []  ## onde cada câmera fica parada
+var _fov := 0.0
+var _clock := 0.0  ## s desde o começo, para o balanço da câmera
 
 @onready var background: Background = $Background
 @onready var camera: Camera3D = $Camera3D
@@ -158,6 +167,22 @@ func start(
 		combos
 	)
 	_setup_audio(instrument, session_2.instrument if session_2 else "")
+	_show_cover()
+	for cam: Camera3D in [camera, camera_2]:
+		if cam:
+			_cameras.append(cam)
+			_camera_rest.append(cam.position)
+			_fov = cam.fov
+
+
+## A capa da música no telão do palco atrás de cada pista, com as luzes na cor dela.
+func _show_cover() -> void:
+	var path := SongLoader.file_path(_loaded, "cover")
+	var image := Image.load_from_file(path) if path != "" else null
+	var texture := ImageTexture.create_from_image(image) if image else null
+	for road: Highway in [highway, highway_2]:
+		if road:
+			road.backdrop.show_cover(texture, CoverColor.dominant(image))
 
 
 ## Tela dividida: P1 à esquerda, P2 à direita, cada metade com a câmera no centro da própria
@@ -294,12 +319,27 @@ func _process(delta: float) -> void:
 	_update_player(0, session, highway, now, delta)
 	if session_2 and highway_2:
 		_update_player(1, session_2, highway_2, now, delta)
-	background.update(now, _grid, _bands.update(_magnitudes(), delta))
-	hud.update_score(session.scoring, session_2.scoring if session_2 else null)
+	var levels := _bands.update(_magnitudes(), delta)
+	background.update(now, _grid, levels)
+	var pulse := _grid.pulse(now)
+	for road: Highway in [highway, highway_2]:
+		if road:
+			road.backdrop.update(now, _grid, levels)
+	hud.update_score(session.scoring, session_2.scoring if session_2 else null, pulse)
+	_move_cameras(delta, pulse)
 	var finished_all := session.finished(now) and (session_2 == null or session_2.finished(now))
 	if finished_all and (player == null or not player.playing or now > session.duration + 3.0):
 		_done = true
 		hud.show_results(session.scoring, session_2.scoring if session_2 else null)
+
+
+func _move_cameras(delta: float, pulse: float) -> void:
+	_clock += delta
+	var t := TAU * _clock / SWAY_SECONDS
+	var sway := Vector3(sin(t) * SWAY.x, sin(t * 1.3) * SWAY.y, 0)
+	for i in _cameras.size():
+		_cameras[i].position = _camera_rest[i] + sway
+		_cameras[i].fov = _fov + BEAT_FOV * pulse
 
 
 ## Um quadro da partida de um jogador: whammy, notas perdidas e soltas, som e pista.
@@ -316,6 +356,7 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 		h.on_drop(events["dropped"])
 	_set_stem(index, events["volume_db"], events["bend"])
 	h.update_view(now, _grid, events["bend"])
+	h.set_power(s.scoring.multiplier(), _grid.pulse(now))
 
 
 ## Posição de um analógico (o esquerdo ou o direito) do controle do jogador.
