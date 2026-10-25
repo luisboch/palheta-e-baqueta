@@ -1,0 +1,179 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/manage.gd" id="1_manage"]
+[ext_resource type="Theme" path="res://game/theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://game/drive.tscn" id="3_drive"]
+
+[node name="Manage" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_manage")
+
+[node name="Header" type="Label" parent="."]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 26.0
+offset_right = 400.0
+offset_bottom = 70.0
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 32
+text = "Gerenciar músicas"
+
+[node name="Columns" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 90.0
+offset_right = -300.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+
+[node name="Drive" parent="Columns" instance=ExtResource("3_drive")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+
+[node name="Library" type="PanelContainer" parent="Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Box" type="VBoxContainer" parent="Columns/Library"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="Columns/Library/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Biblioteca"
+
+[node name="Hint" type="Label" parent="Columns/Library/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.36, 0.4, 1)
+theme_override_font_sizes/font_size = 19
+text = "Escolha uma música para corrigir o título ou o artista."
+autowrap_mode = 3
+
+[node name="Empty" type="Label" parent="Columns/Library/Box"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Nenhuma música pronta ainda."
+
+[node name="Scroll" type="ScrollContainer" parent="Columns/Library/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Margin" type="MarginContainer" parent="Columns/Library/Box/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="SongList" type="VBoxContainer" parent="Columns/Library/Box/Scroll/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Example" type="Button" parent="Columns/Library/Box/Scroll/Margin/SongList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Música de exemplo — Artista"
+alignment = 0
+text_overrun_behavior = 3
+
+[node name="Back" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -78.0
+offset_right = 176.0
+offset_bottom = -30.0
+grow_vertical = 0
+text = "Voltar"
+
+[node name="EditPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -210.0
+offset_right = 320.0
+offset_bottom = 210.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = -0.012
+
+[node name="Box" type="VBoxContainer" parent="EditPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="EditPanel/Box"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 30
+text = "Editar nome"
+
+[node name="TitleLabel" type="Label" parent="EditPanel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Título"
+
+[node name="TitleEdit" type="LineEdit" parent="EditPanel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Nome da música"
+
+[node name="ArtistLabel" type="Label" parent="EditPanel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Artista"
+
+[node name="ArtistEdit" type="LineEdit" parent="EditPanel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Banda ou artista"
+
+[node name="EditError" type="Label" parent="EditPanel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.902, 0.224, 0.275, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="EditPanel/Box"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 2
+
+[node name="Save" type="Button" parent="EditPanel/Box/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Salvar"
+
+[node name="Cancel" type="Button" parent="EditPanel/Box/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cancelar"

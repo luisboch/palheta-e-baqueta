@@ -29,7 +29,7 @@ const STATIONS := {
 	App.MODE_SELECT: "Mode",
 	App.SONG_SELECT: "Songs",
 	App.INSTRUMENT_SELECT: "Instruments",
-	App.DRIVE: "Manage",
+	App.MANAGE: "Manage",
 }
 
 var screen: Control  ## a tela aberta

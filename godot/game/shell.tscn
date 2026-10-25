@@ -266,14 +266,14 @@ sky_b = Color(0.153, 0.392, 0.851, 1)
 sky_dots = Color(0.102, 0.102, 0.122, 1)
 
 [node name="UsbStick" parent="World/Stations/Manage" instance=ExtResource("m_usb")]
-position = Vector3(2.2, 0.3, 0)
+position = Vector3(1.6, 0.3, 0)
 scale = Vector3(1.4, 1.4, 1.4)
 script = ExtResource("7_spin")
 degrees_per_second = Vector3(0, 25, 0)
 bob_height = 0.2
 
 [node name="Tilt" type="Node3D" parent="World/Stations/Manage"]
-position = Vector3(3.6, 1.4, -1.5)
+position = Vector3(2.8, 3.6, -2.5)
 rotation_degrees = Vector3(70, 0, 0)
 
 [node name="Vinyl" parent="World/Stations/Manage/Tilt" instance=ExtResource("m_vinyl")]
@@ -281,10 +281,10 @@ script = ExtResource("7_spin")
 degrees_per_second = Vector3(0, 90, 0)
 
 [node name="Eye" type="Marker3D" parent="World/Stations/Manage"]
-position = Vector3(0, 2.4, 8)
+position = Vector3(-1.5, 2.6, 10)
 
 [node name="Target" type="Marker3D" parent="World/Stations/Manage"]
-position = Vector3(-0.4, 1.8, 0)
+position = Vector3(-4, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 fov = 50.0

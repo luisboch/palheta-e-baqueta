@@ -8,7 +8,7 @@ const MAIN_MENU := "res://game/main_menu.tscn"
 const MODE_SELECT := "res://game/mode_select.tscn"
 const SONG_SELECT := "res://game/song_select.tscn"
 const INSTRUMENT_SELECT := "res://game/instrument_select.tscn"
-const DRIVE := "res://game/drive.tscn"
+const MANAGE := "res://game/manage.tscn"
 const PLAY := "res://game/play.tscn"
 ## O repositório fica um nível acima do projeto Godot (godot/): data/ e .venv/ estão lá.
 const REPO_FROM_PROJECT := ".."
@@ -24,7 +24,7 @@ const SCENES := {
 	MenuFlow.MODE: MODE_SELECT,
 	MenuFlow.SONGS: SONG_SELECT,
 	MenuFlow.INSTRUMENTS: INSTRUMENT_SELECT,
-	MenuFlow.MANAGE: DRIVE,
+	MenuFlow.MANAGE: MANAGE,
 	MenuFlow.PLAY: PLAY,
 }
 

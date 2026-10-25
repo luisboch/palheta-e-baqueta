@@ -164,4 +164,7 @@ construídos por script no Blender ([ADR 0023](adr/0023-modelos-3d-por-script-no
   cada um. Onomatopeias ("PRONTO!", "VAMOS!") só nesses momentos.
 - Palco das músicas: a capa no telão em retícula, refletores varrendo na cor tirada da capa
   (`godot/core/cover_color.gd`) e globo espelhado.
-- A seguir: Gerenciar músicas (pendrive e editar nome); a partida no tema novo; medir no Deck.
+- Gerenciar músicas (`godot/game/manage.tscn`): o painel do pendrive e a biblioteca com "Editar
+  nome", na estação do pendrive gigante.
+- A seguir: a partida no tema novo (palco com a capa atrás da pista, refletores, alvos e
+  multiplicador); medir no Deck.

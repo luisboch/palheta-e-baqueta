@@ -65,7 +65,8 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
   [ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal (`godot/game/main_menu.tscn`), modo de 2
   jogadores (`godot/game/mode_select.tscn`), escolha de música (`godot/game/song_select.tscn`),
   instrumento e dificuldade de cada jogador, com o "PRONTO" (`godot/game/instrument_select.tscn`),
-  pendrive (`godot/game/drive.tscn`) e a partida. A ordem das telas e o "voltar" ficam em lógica
+  Gerenciar músicas (`godot/game/manage.tscn`: o painel do pendrive, `godot/game/drive.tscn`, e a
+  biblioteca com "Editar nome") e a partida. A ordem das telas e o "voltar" ficam em lógica
   pura (`godot/core/menu_flow.gd`), assim como o cursor de cada jogador
   (`godot/core/player_pick.gd`) e a cor das luzes do palco tirada da capa
   (`godot/core/cover_color.gd`). O visual

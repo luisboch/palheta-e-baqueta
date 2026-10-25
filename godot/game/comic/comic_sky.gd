@@ -1,12 +1,13 @@
 ## Céu de quadrinho dos menus (comic_sky.gdshader): gira devagar, pulsa num ritmo calmo de
-## mentira (como o fundo da partida nos menus antigos) e troca de cores com a tela.
+## mentira e troca de cores com a tela.
 class_name ComicSky
 extends CanvasLayer
 
 const SPIN_SPEED := 0.03  ## rad/s dos raios: movimento que se nota, sem distrair
+const IDLE_BPM := 90.0  ## o pulso dos menus: um ritmo calmo de mentira, sem música tocando
 const PALETTE_TIME := 0.6  ## s da troca de cores entre telas
 
-var _grid := BeatGrid.from_tempo(TempoMap.new([[0, int(Background.IDLE_BPM * 1000)]]), 3600.0)
+var _grid := BeatGrid.from_tempo(TempoMap.new([[0, int(IDLE_BPM * 1000)]]), 3600.0)
 var _time := 0.0
 var _colors: Array[Color] = [Comic.YELLOW, Comic.ORANGE, Comic.RED]
 var _tween: Tween

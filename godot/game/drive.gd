@@ -1,8 +1,8 @@
-## Pendrive pelo menu (ADR 0003): escolher o pendrive e uma ação. Cada ação é um comando
-## `pbq drive …` com andamento na barra (docs/backend-protocol.md).
+## Painel do pendrive, dentro de Gerenciar músicas (ADR 0003): escolher o pendrive e uma ação.
+## Cada ação é um comando `pbq drive …` com andamento na barra (docs/backend-protocol.md).
 ##
 ## O botão "Example" da cena é o modelo de cada pendrive da lista.
-extends Control
+extends PanelContainer
 
 ## Ação → [comando, o que dizer ao terminar (%d = quantas músicas)].
 const ACTIONS := {
@@ -17,7 +17,6 @@ var mount := ""  ## pendrive escolhido
 var _template: Button
 var _job: BackendJob
 
-@onready var _background: Background = $Background
 @onready var _list: VBoxContainer = %DriveList
 @onready var _no_drive: Label = %NoDrive
 @onready var _progress: ProgressBar = %Progress
@@ -29,7 +28,6 @@ func _ready() -> void:
 	_template = _list.get_child(0)
 	_list.remove_child(_template)
 	%Rescan.pressed.connect(scan)
-	%Back.pressed.connect(App.goto.bind(App.MAIN_MENU))
 	for action: String in _actions:
 		_actions[action].pressed.connect(run.bind(action))
 	scan()
@@ -39,30 +37,21 @@ func _exit_tree() -> void:
 	_template.free()
 
 
-func _process(delta: float) -> void:
-	_background.update_idle(delta)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") and not _busy():
-		App.goto(App.MAIN_MENU)
-		get_viewport().set_input_as_handled()
-
-
-func _busy() -> bool:
+## Um comando rodando: a tela não deixa sair no meio.
+func busy() -> bool:
 	return _job != null and _job.running
 
 
 ## Pergunta ao backend quais pendrives estão montados.
 func scan() -> void:
-	if _busy():
+	if busy():
 		return
 	_set_message("Procurando pendrives…", 0.0)
 	_start(["drive", "list"])
 
 
 func run(action: String) -> void:
-	if _busy() or mount == "":
+	if busy() or mount == "":
 		return
 	_set_message("Começando…", 0.0)
 	_start(["drive", ACTIONS[action][0], "--mount", mount], action)
@@ -133,9 +122,8 @@ func _choose(path: String) -> void:
 
 func _update_buttons() -> void:
 	for action: String in _actions:
-		_actions[action].disabled = mount == "" or _busy()
-	%Rescan.disabled = _busy()
-	%Back.disabled = _busy()
+		_actions[action].disabled = mount == "" or busy()
+	%Rescan.disabled = busy()
 
 
 func _set_message(text: String, fraction: float) -> void:

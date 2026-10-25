@@ -71,6 +71,7 @@ O jogo abre no menu, num cenário 3D de quadrinho:
 - **Gerenciar músicas**: escolha o pendrive e a ação: trazer os MP3s novos de `palheta/` (eles são
   processados sozinhos, com o andamento embaixo do menu), importar músicas prontas ou salvar a
   biblioteca no pendrive. Nada é lido antes de você escolher ([ADR 0003](docs/adr/0003-pendrive-pelo-menu.md)).
+  Na biblioteca, ao lado, escolha uma música para corrigir o título e o artista.
 - Menus: setas/direcional e `Enter`/A; `Esc`/B volta.
 - Partida: trastes `1`–`5` (ou `A S D F G`); a nota toca ao apertar o traste, sem palhetada
   ([ADR 0015](docs/adr/0015-tocar-no-traste-sem-palhetada.md)). Bateria: bumbo `Espaço`, pads

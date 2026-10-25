@@ -6,6 +6,7 @@ const ModeSelectScene := preload("res://game/mode_select.tscn")
 const InstrumentSelectScene := preload("res://game/instrument_select.tscn")
 const DriveScene := preload("res://game/drive.tscn")
 const MainMenuScene := preload("res://game/main_menu.tscn")
+const ManageScene := preload("res://game/manage.tscn")
 const ShellScene := preload("res://game/shell.tscn")
 
 var _saved_library: String
@@ -86,7 +87,7 @@ func test_main_menu_starts_with_one_or_two_players() -> void:
 	scene.start(2)
 	assert_str(App.last_scene).is_equal(App.MODE_SELECT)
 	scene.get_node("%Manage").pressed.emit()
-	assert_str(App.last_scene).is_equal(App.DRIVE)
+	assert_str(App.last_scene).is_equal(App.MANAGE)
 
 
 func test_mode_select_chooses_and_goes_back() -> void:
@@ -221,6 +222,25 @@ func test_shell_flies_between_stations() -> void:
 	shell.queue_free()
 	await await_idle_frame()
 	assert_object(App.shell).is_null()
+
+
+func test_manage_edits_names_without_backend() -> void:
+	_library()
+	var scene := _scene(ManageScene)
+	assert_int(scene.get_node("%SongList").get_child_count()).is_equal(2)
+	scene.get_node("%SongList").get_child(1).pressed.emit()  # "Beta" (ordem: artista e título)
+	assert_bool(scene.get_node("%EditPanel").visible).is_true()
+	assert_str(scene.get_node("%TitleEdit").text).is_equal("Beta")
+	scene.save_edit()  # nos testes o backend fica desligado
+	assert_str(scene.get_node("%EditError").text).contains("Backend")
+	_press(scene, "ui_cancel")  # fecha a edição, não sai
+	assert_bool(scene.get_node("%EditPanel").visible).is_false()
+	assert_str(App.last_scene).is_equal("")
+	_press(scene, "ui_cancel")
+	assert_str(App.last_scene).is_equal(App.MAIN_MENU)
+	DirAccess.remove_absolute(App.library_dir.path_join("index.json"))
+	scene.reload()
+	assert_bool(scene.get_node("%Empty").visible).is_true()
 
 
 func test_drive_screen_follows_messages() -> void:

@@ -7,22 +7,7 @@ extends CanvasLayer
 ## Cores dos compassos: a paleta das lanes, uma por compasso, em sequência.
 const BAR_COLORS := Highway.COLORS
 
-## Menus: um ritmo calmo de mentira (sem música tocando), com o som "médio".
-const IDLE_BPM := 90.0
-const IDLE_LEVEL := 0.35
-
-var _idle_grid: BeatGrid
-var _idle_time := 0.0
-
 @onready var _sky: ColorRect = $Sky
-
-
-## Para as telas de menu: chame a cada quadro.
-func update_idle(delta: float) -> void:
-	if _idle_grid == null:
-		_idle_grid = BeatGrid.from_tempo(TempoMap.new([[0, int(IDLE_BPM * 1000)]]), 3600.0)
-	_idle_time += delta
-	update(_idle_time, _idle_grid, PackedFloat32Array([IDLE_LEVEL, IDLE_LEVEL, IDLE_LEVEL]))
 
 
 func update(now: float, grid: BeatGrid, levels: PackedFloat32Array) -> void:
