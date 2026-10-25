@@ -386,3 +386,10 @@ func test_comic_effects_follow_the_player() -> void:
 	for i in 30:  # balanço da câmera, palco e refletores no ritmo
 		scene._process(1.0 / 60.0)
 	assert_vector(scene.camera.position).is_not_equal(scene._camera_rest[0])
+
+
+func test_drum_button_released_without_an_event_is_dropped() -> void:
+	var scene := _play(_song_dir('{"drums": true}'), "drums", "Expert")
+	scene._drum_down[0][1] = true  # o evento de soltar se perdeu: o Input não vê o botão apertado
+	scene._sync_drum_down(0)
+	assert_bool(scene._drum_down[0].is_empty()).is_true()

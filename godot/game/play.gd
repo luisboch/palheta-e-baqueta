@@ -350,6 +350,8 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	if not s.drums and not _autoplay:
 		for lane in s.sync_frets(_pressed_frets(index)):
 			h.set_fret(lane, false)
+	if s.drums and not _autoplay:
+		_sync_drum_down(index)
 	var events := s.update(now, delta)
 	if not events["missed"].is_empty() and sfx:
 		sfx.play_miss()
@@ -360,6 +362,16 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	_set_stem(index, events["volume_db"], events["bend"])
 	h.update_view(now, _grid, events["bend"])
 	h.set_power(s.scoring.multiplier(), _grid.pulse(now))
+
+
+## Solta da bateria o botão que o Input já não considera apertado: se o evento de soltar se
+## perde, o botão ficaria "apertado" e a próxima batida nele seria ignorada.
+func _sync_drum_down(index: int) -> void:
+	var down: Dictionary = _drum_down[index]
+	var pressed := _pressed_frets(index)
+	for lane in down.keys():
+		if InputProfile.drum_fret(lane) not in pressed:
+			down.erase(lane)
 
 
 ## Trastes que estão apertados de verdade agora, lidos direto do Input (não dos eventos).

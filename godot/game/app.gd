@@ -50,6 +50,7 @@ var data_dir := repo.path_join("data")
 var library_dir := data_dir.path_join("library")
 var _worker_pid := -1
 var _since_stats := 0.0
+var _triggers_down := {}  ## "device:eixo" → gatilho além da zona morta (só para o log)
 
 
 ## Onde ficam data/ e o backend: $PALHETA_HOME, senão a raiz do repositório.
@@ -97,6 +98,38 @@ func _process(delta: float) -> void:
 			]
 		)
 	)
+
+
+## Registra no game.log o que o controle manda (botões e gatilhos, com o número do controle):
+## um botão que "gruda" mostra se o jogo recebeu o soltar ou se o controle não o mandou.
+func _input(event: InputEvent) -> void:
+	if not live:
+		return
+	if event is InputEventJoypadButton:
+		var button := event as InputEventJoypadButton
+		print(
+			(
+				"controle %d: botão %d %s"
+				% [button.device, button.button_index, "desceu" if button.pressed else "subiu"]
+			)
+		)
+	elif event is InputEventJoypadMotion:
+		var motion := event as InputEventJoypadMotion
+		if motion.axis != JOY_AXIS_TRIGGER_LEFT and motion.axis != JOY_AXIS_TRIGGER_RIGHT:
+			return
+		var key := "%d:%d" % [motion.device, motion.axis]
+		var down := motion.axis_value > InputProfile.TRIGGER_DEADZONE
+		if down != _triggers_down.has(key):
+			print(
+				(
+					"controle %d: gatilho %d %s"
+					% [motion.device, motion.axis, "desceu" if down else "subiu"]
+				)
+			)
+			if down:
+				_triggers_down[key] = true
+			else:
+				_triggers_down.erase(key)
 
 
 ## Vai para a tela (ou a partida). Entre telas, a casca só troca a tela e voa com a câmera; fora
