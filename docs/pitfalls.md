@@ -109,3 +109,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-24 · Toon aplicado duas vezes fica branco:** a pista do jogador 2 é cópia da
   primeira, já com os materiais toon; aplicar de novo lia a cor de um `ShaderMaterial` (que não
   tem `albedo_color`) e virava branco. `Comic.material_for` devolve o material se ele já for toon.
+- **2026-10-25 · A música não terminava (travava no fim):** no fim do stream o `player` informa
+  posição ~0 por um quadro; o `SongClock` tratava como salto e voltava ao começo, e o resultado
+  só viria minutos depois. Agora o salto só vale para a frente.

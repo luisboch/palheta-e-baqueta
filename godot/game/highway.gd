@@ -341,7 +341,11 @@ func _target(lane: int) -> MeshInstance3D:
 
 
 func on_strum(result: Dictionary) -> void:
-	_flash = 1.0 if result.has("note") else 0.3
+	# O clarão da linha inteira é das sustentadas; a nota comum já tem o estouro do próprio alvo.
+	if not result.has("note"):
+		_flash = 0.3
+	elif result["note"].is_sustain():
+		_flash = 1.0
 	if result.has("note"):
 		for lane: int in result["note"].lanes:
 			_pop(lane)

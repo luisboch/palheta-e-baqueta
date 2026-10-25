@@ -24,7 +24,8 @@ func test_resyncs_on_big_jumps_and_reset() -> void:
 	var clock := SongClock.new()
 	clock.update(1.0, 0.0, 0.0, 0.016)
 	assert_float(clock.update(30.0, 0.0, 0.0, 0.016)).is_equal(30.0)  # seek
-	assert_float(clock.update(5.0, 0.0, 0.0, 0.016)).is_equal(5.0)  # voltou de verdade
+	# Posição 0 no fim do stream não volta o relógio: senão a música nunca terminaria.
+	assert_float(clock.update(0.0, 0.0, 0.0, 0.016)).is_equal(30.0)
 	clock.reset()
 	assert_float(clock.update(2.0, 0.0, 0.0, 0.016)).is_equal(2.0)
 	assert_float(clock.now()).is_equal(2.0)

@@ -44,6 +44,19 @@ func release_fret(lane: int) -> void:
 		held.remove_at(i)
 
 
+## Solta os trastes que o jogo acha apertados mas o controle já soltou (`pressed` = os que estão
+## apertados de verdade). Um evento de soltar perdido (pausa, troca de foco, gatilho analógico)
+## deixaria o traste preso, e como a nota simples vale pelo traste mais agudo, travaria as
+## próximas notas. Devolve os trastes soltos.
+func sync_frets(pressed: PackedInt32Array) -> PackedInt32Array:
+	var released := PackedInt32Array()
+	for lane in held.duplicate():
+		if lane not in pressed:
+			release_fret(lane)
+			released.append(lane)
+	return released
+
+
 ## Palhetada agora (s). Devolve o resultado do juiz ({note, grade} ou overstrum).
 func strum(now: float) -> Dictionary:
 	var result := judge.strum(now, held)

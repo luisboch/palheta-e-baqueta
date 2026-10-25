@@ -1,10 +1,11 @@
 ## A escolha de um jogador na tela de instrumento (ADR 0022): instrumento, dificuldade e o
-## "PRONTO". Cada jogador tem o seu cursor de duas linhas, no próprio controle: esquerda/direita
-## troca a escolha da linha, cima/baixo troca de linha. Pronto, a escolha fica travada até ele
-## desistir.
+## "PRONTO". Cada jogador escolhe em etapas, no próprio controle: instrumento, depois dificuldade
+## (só aparece depois do instrumento), depois pronto. Esquerda/direita troca a escolha da etapa,
+## confirmar avança e voltar recua uma etapa. Pronto, a escolha fica travada até ele voltar.
 class_name PlayerPick
 extends RefCounted
 
+## A etapa da vez (`row`): a linha do cursor.
 const ROW_INSTRUMENT := 0
 const ROW_DIFFICULTY := 1
 ## A ordem na tela (e nos pedestais do cenário).
@@ -42,21 +43,34 @@ func move(step: int) -> bool:
 	return [instrument, difficulty] != before
 
 
-func move_row(step: int) -> void:
-	if not is_ready:
-		row = clampi(row + step, ROW_INSTRUMENT, ROW_DIFFICULTY)
+## Confirma a etapa: do instrumento vai para a dificuldade, da dificuldade para o pronto.
+## Devolve true se ficou pronto.
+func advance() -> bool:
+	if not playable() or is_ready:
+		return false
+	if row == ROW_INSTRUMENT:
+		row = ROW_DIFFICULTY
+		return false
+	is_ready = true
+	return true
+
+
+## Volta uma etapa (desfaz o pronto, ou a dificuldade volta ao instrumento). false se já estava
+## na primeira: quem chama sai da tela.
+func retreat() -> bool:
+	if is_ready:
+		is_ready = false
+	elif row == ROW_DIFFICULTY:
+		row = ROW_INSTRUMENT
+	else:
+		return false
+	return true
 
 
 ## Escolha direta (clique): também desfaz o pronto.
 func pick(wanted_instrument: String, wanted_difficulty: String) -> void:
 	is_ready = false
 	_apply(wanted_instrument, wanted_difficulty)
-
-
-## Marca ou desmarca o pronto; devolve o estado novo.
-func toggle_ready() -> bool:
-	is_ready = playable() and not is_ready
-	return is_ready
 
 
 ## Ajusta o pedido ao que a música tem (InstrumentRules.choose); mantém a dificuldade se der.

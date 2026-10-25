@@ -86,20 +86,16 @@ func _unhandled_input(event: InputEvent) -> void:
 func _handle(event: InputEvent, player: int) -> bool:
 	var pick := picks[player]
 	if _pressed(event, player, "accept"):
-		toggle_ready(player)
+		advance(player)
 	elif _pressed(event, player, "back"):
-		if pick.is_ready:
-			toggle_ready(player)
+		if pick.retreat():
+			_refresh()
 		else:
 			back()
 	elif _pressed(event, player, "left") or _pressed(event, player, "right"):
 		if pick.move(1 if _pressed(event, player, "right") else -1):
 			_refresh()
 			_flash(player)
-	elif _pressed(event, player, "up") or _pressed(event, player, "down"):
-		pick.move_row(1 if _pressed(event, player, "down") else -1)
-		_refresh()
-		_flash(player)
 	else:
 		return false
 	return true
@@ -118,13 +114,17 @@ func _click(player: int, instrument: String, difficulty: String) -> void:
 		instrument if instrument != "" else pick.instrument,
 		difficulty if difficulty != "" else pick.difficulty
 	)
-	pick.row = PlayerPick.ROW_INSTRUMENT if instrument != "" else PlayerPick.ROW_DIFFICULTY
-	_refresh()
+	pick.row = PlayerPick.ROW_DIFFICULTY
+	if instrument != "":
+		_refresh()  # escolheu o instrumento: falta a dificuldade
+	else:
+		advance(player)  # escolheu a dificuldade: pronto
 
 
-## Marca ou desmarca o pronto do jogador; com todos prontos, a partida começa.
-func toggle_ready(player: int) -> void:
-	var now_ready := picks[player].toggle_ready()
+## Confirma a etapa do jogador (instrumento → dificuldade → pronto); com todos prontos, a
+## partida começa.
+func advance(player: int) -> void:
+	var now_ready := picks[player].advance()
 	_refresh()
 	if picks.all(func(p: PlayerPick) -> bool: return p.is_ready):
 		start()
@@ -189,6 +189,8 @@ func _refresh() -> void:
 				on_cursor and not pick.is_ready,
 				player
 			)
+		# O nível só aparece depois de escolhido o instrumento.
+		_panels[player].get_node(DIFFICULTY_ROW).visible = pick.row == PlayerPick.ROW_DIFFICULTY
 		_panels[player].get_node("Box/Top/Ready").visible = pick.is_ready
 	if world and world.station is InstrumentStation:
 		var chosen: Array[String] = []

@@ -128,3 +128,12 @@ func test_song_loader_and_input_profile() -> void:
 	assert_bool(InputMap.has_action("kick")).is_true()
 	var joy := InputProfile.event_for(["joy", JOY_BUTTON_A])
 	assert_bool(joy is InputEventJoypadButton).is_true()
+
+
+func test_sync_frets_releases_a_fret_whose_release_event_was_lost() -> void:
+	var s := _session("strings", "Expert")
+	s.press_fret(0)
+	s.press_fret(3)
+	var released := s.sync_frets(PackedInt32Array([0]))
+	assert_array(released).contains_exactly([3])
+	assert_array(s.held).contains_exactly([0])

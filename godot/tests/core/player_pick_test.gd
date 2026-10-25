@@ -12,7 +12,7 @@ func test_starts_from_the_request_or_the_default() -> void:
 	pick = PlayerPick.new({})
 	assert_bool(pick.playable()).is_false()
 	assert_bool(pick.move(1)).is_false()
-	assert_bool(pick.toggle_ready()).is_false()
+	assert_bool(pick.advance()).is_false()
 
 
 func test_moves_through_what_the_song_has() -> void:
@@ -22,9 +22,7 @@ func test_moves_through_what_the_song_has() -> void:
 	assert_bool(pick.move(1)).is_false()  # não dá a volta
 	pick.move(-1)
 	assert_array([pick.instrument, pick.difficulty]).is_equal(["strings", "Expert"])
-	pick.move_row(1)
-	assert_int(pick.row).is_equal(PlayerPick.ROW_DIFFICULTY)
-	pick.move_row(1)
+	pick.advance()
 	assert_int(pick.row).is_equal(PlayerPick.ROW_DIFFICULTY)
 	pick.move(-1)
 	assert_str(pick.difficulty).is_equal("Hard")
@@ -32,14 +30,20 @@ func test_moves_through_what_the_song_has() -> void:
 	assert_str(pick.difficulty).is_equal("Easy")
 
 
-func test_ready_locks_the_choice() -> void:
+func test_steps_instrument_then_difficulty_then_ready_and_back() -> void:
 	var pick := PlayerPick.new(AVAILABLE)
-	assert_bool(pick.toggle_ready()).is_true()
-	assert_bool(pick.move(1)).is_false()
-	pick.move_row(1)
 	assert_int(pick.row).is_equal(PlayerPick.ROW_INSTRUMENT)
-	assert_bool(pick.toggle_ready()).is_false()
-	pick.toggle_ready()
+	assert_bool(pick.advance()).is_false()  # instrumento → dificuldade
+	assert_int(pick.row).is_equal(PlayerPick.ROW_DIFFICULTY)
+	assert_bool(pick.advance()).is_true()  # dificuldade → pronto
+	assert_bool(pick.move(-1)).is_false()  # pronto trava a escolha
+	assert_bool(pick.retreat()).is_true()
+	assert_bool(pick.is_ready).is_false()
+	assert_bool(pick.retreat()).is_true()
+	assert_int(pick.row).is_equal(PlayerPick.ROW_INSTRUMENT)
+	assert_bool(pick.retreat()).is_false()  # primeira etapa: quem chama sai da tela
+	pick.advance()
+	pick.advance()
 	pick.pick("drums", "Expert")  # clique desfaz o pronto
 	assert_bool(pick.is_ready).is_false()
 	assert_str(pick.instrument).is_equal("drums")

@@ -146,15 +146,19 @@ func test_instrument_select_one_player() -> void:
 	assert_bool(bass.disabled).is_true()  # o chart tem baixo; a música não
 	_press(scene, "p2_menu_right")  # sozinho, qualquer lado vale
 	assert_str(scene.picks[0].instrument).is_equal("drums")
-	_press(scene, "p1_menu_down")
-	assert_int(scene.picks[0].row).is_equal(PlayerPick.ROW_DIFFICULTY)
-	_press(scene, "p1_menu_up")
+	var levels: Control = scene.get_node("%Player/Box/Difficulties")
+	assert_bool(levels.visible).is_false()  # o nível só aparece depois do instrumento
+	_press(scene, "p1_menu_accept")
+	assert_bool(levels.visible).is_true()
+	_press(scene, "p1_menu_back")  # volta ao instrumento: esconde o nível de novo
+	assert_bool(levels.visible).is_false()
+	assert_str(App.last_scene).is_equal("")
 	scene.get_node("%Player/Box/Instruments/Strings").pressed.emit()  # clique
-	scene.get_node("%Player/Box/Difficulties/Easy").pressed.emit()
+	assert_bool(levels.visible).is_true()
+	scene.get_node("%Player/Box/Difficulties/Easy").pressed.emit()  # o nível fecha a escolha
 	assert_array([scene.picks[0].instrument, scene.picks[0].difficulty]).is_equal(
 		["strings", "Easy"]
 	)
-	_press(scene, "p1_menu_accept")
 	assert_bool(scene.starting).is_true()
 	assert_str(App.last_scene).is_equal(App.PLAY)
 	assert_dict(App.selection).contains_key_value("instrument", "strings")
@@ -173,6 +177,7 @@ func test_instrument_select_two_players_ready_each() -> void:
 	assert_str(scene.picks[1].instrument).is_equal("drums")  # sugere o outro instrumento
 	assert_int(scene.get_node("%Players").get_child_count()).is_equal(2)
 	_press(scene, "p1_menu_accept")
+	_press(scene, "p1_menu_accept")
 	assert_bool(scene.picks[0].is_ready).is_true()
 	assert_bool(scene.starting).is_false()  # falta o jogador 2
 	_press(scene, "p1_menu_back")  # pronto: desfaz, não sai
@@ -181,6 +186,7 @@ func test_instrument_select_two_players_ready_each() -> void:
 	_press(scene, "p2_menu_left")
 	assert_str(scene.picks[1].instrument).is_equal("strings")
 	_press(scene, "p1_menu_accept")
+	_press(scene, "p2_menu_accept")
 	_press(scene, "p2_menu_accept")
 	assert_bool(scene.starting).is_true()
 	assert_dict(App.selection).contains_key_value("mode", "versus")

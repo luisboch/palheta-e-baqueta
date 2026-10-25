@@ -347,6 +347,9 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	var sticks: Array[Vector2] = [_stick(index, true), _stick(index, false)]
 	var key := Input.is_action_pressed(InputProfile.player_whammy(index))
 	s.whammy = _whammies[index].update(sticks, key, delta)
+	if not s.drums and not _autoplay:
+		for lane in s.sync_frets(_pressed_frets(index)):
+			h.set_fret(lane, false)
 	var events := s.update(now, delta)
 	if not events["missed"].is_empty() and sfx:
 		sfx.play_miss()
@@ -357,6 +360,19 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	_set_stem(index, events["volume_db"], events["bend"])
 	h.update_view(now, _grid, events["bend"])
 	h.set_power(s.scoring.multiplier(), _grid.pulse(now))
+
+
+## Trastes que estão apertados de verdade agora, lidos direto do Input (não dos eventos).
+static func _pressed_frets(player_index: int) -> PackedInt32Array:
+	var frets := InputProfile.player_frets(player_index)
+	var out := PackedInt32Array()
+	for lane in frets.size():
+		if (
+			Input.is_action_pressed(frets[lane])
+			or (player_index == 0 and Input.is_action_pressed(InputProfile.FRETS[lane]))
+		):
+			out.append(lane)
+	return out
 
 
 ## Posição de um analógico (o esquerdo ou o direito) do controle do jogador.

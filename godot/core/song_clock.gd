@@ -4,7 +4,7 @@
 ## última mistura e desconta-se a latência de saída do driver (recomendação da documentação do
 ## Godot para sincronia), mais a calibração do jogador (`offset`; positivo = o som chega depois).
 ## O resultado é suavizado: anda com o relógio do frame e só se corrige aos poucos em direção ao
-## áudio, para as notas não tremerem; nunca volta para trás.
+## áudio, para as notas não tremerem; nunca volta para trás (nem em salto).
 class_name SongClock
 extends RefCounted
 
@@ -39,7 +39,9 @@ func update(
 	var predicted := _time + delta
 	var drift := target - predicted
 	if absf(drift) > RESYNC:
-		_time = target
+		# Só pula para a frente: no fim do stream o player pode informar posição 0 por um quadro,
+		# e voltar ao começo faria a música nunca terminar.
+		_time = maxf(_time, target)
 	else:
 		_time = maxf(_time, predicted + drift * SMOOTHING)
 	return _time

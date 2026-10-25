@@ -365,8 +365,7 @@ func test_drums_use_the_fret_buttons() -> void:
 func test_comic_effects_follow_the_player() -> void:
 	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
 	var road: Highway = scene.highway
-	road.set_fret(2, true)  # anel aceso e faixa de luz na lane
-	assert_bool(road._rings[2].get_node("Lane").visible).is_true()
+	road.set_fret(2, true)
 	road.set_fret(2, false)
 	road._pop(2)  # onda de choque e faíscas
 	assert_bool(road._rings[2].get_node("Wave").visible).is_true()

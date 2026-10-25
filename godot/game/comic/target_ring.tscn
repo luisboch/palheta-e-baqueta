@@ -8,9 +8,6 @@ outer_radius = 0.26
 rings = 32
 ring_segments = 8
 
-[sub_resource type="BoxMesh" id="lane_mesh"]
-size = Vector3(0.44, 0.005, 9)
-
 [sub_resource type="TorusMesh" id="wave_mesh"]
 inner_radius = 0.23
 outer_radius = 0.25
@@ -27,11 +24,6 @@ script = ExtResource("1_ring")
 position = Vector3(0, -0.02, 0)
 cast_shadow = 0
 mesh = SubResource("rim_mesh")
-
-[node name="Lane" type="MeshInstance3D" parent="."]
-position = Vector3(0, -0.035, -4.5)
-cast_shadow = 0
-mesh = SubResource("lane_mesh")
 
 [node name="Wave" type="MeshInstance3D" parent="."]
 visible = false

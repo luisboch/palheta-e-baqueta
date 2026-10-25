@@ -160,7 +160,8 @@ construídos por script no Blender ([ADR 0023](adr/0023-modelos-3d-por-script-no
 - Menu principal novo: 1 Jogador, 2 Jogadores, Gerenciar músicas, Sair.
 - Fluxo em lógica pura (`godot/core/menu_flow.gd`): modo (Banda × Duelo, com as palavras em 3D),
   música e instrumento. Na tela de instrumento, cada jogador anda com o próprio cursor no próprio
-  controle e dá o seu "PRONTO" (`godot/core/player_pick.gd`); a luz do instrumento sai na cor de
+  controle, em etapas (instrumento, depois o nível, que só aparece então; B recua uma etapa), e dá
+  o seu "PRONTO" (`godot/core/player_pick.gd`); a luz do instrumento sai na cor de
   cada um. Onomatopeias ("PRONTO!", "VAMOS!") só nesses momentos.
 - Palco das músicas: a capa no telão em retícula, refletores varrendo na cor tirada da capa
   (`godot/core/cover_color.gd`) e globo espelhado.
