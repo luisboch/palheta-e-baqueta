@@ -2,6 +2,8 @@
 ## pbq), a música escolhida e a troca de tela.
 extends Node
 
+## A casca dos menus (ADR 0022): o cenário 3D em que as telas abrem. A partida é outra cena.
+const SHELL := "res://game/shell.tscn"
 const MAIN_MENU := "res://game/main_menu.tscn"
 const SONG_SELECT := "res://game/song_select.tscn"
 const DRIVE := "res://game/drive.tscn"
@@ -23,6 +25,10 @@ var last_scene := ""
 ## A partida escolhida no menu: {dir, instrument, difficulty}. Vazio: play.tscn rodando sozinha
 ## (F6 no editor ou linha de comando).
 var selection := {}
+## A casca aberta (null na partida, nos testes e com uma tela rodando sozinha no editor).
+var shell: Shell
+## Tela que a casca abre ao carregar (voltando da partida); "" é o menu principal.
+var pending_screen := ""
 var repo := home_dir()
 var data_dir := repo.path_join("data")
 var library_dir := data_dir.path_join("library")
@@ -49,10 +55,22 @@ func _ready() -> void:
 	InputProfile.apply()
 
 
+## Vai para a tela (ou a partida). Entre telas, a casca só troca a tela e voa com a câmera; fora
+## dela (vindo da partida), carrega a casca já na tela pedida.
 func goto(scene: String) -> void:
 	last_scene = scene
-	if live:
-		get_tree().change_scene_to_file.call_deferred(scene)
+	if not live:
+		return
+	if shell != null:
+		if scene == PLAY:
+			shell.leave_to(scene)
+		else:
+			shell.show_screen(scene)
+		return
+	if scene != PLAY:
+		pending_screen = scene
+		scene = SHELL
+	get_tree().change_scene_to_file.call_deferred(scene)
 
 
 ## Inicia o worker uma vez por execução do jogo. Ele morre junto com o jogo

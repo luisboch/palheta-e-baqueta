@@ -33,6 +33,8 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0019 | [Tela dividida para 2 jogadores](0019-tela-dividida-2-jogadores.md) | Aceita |
 | 0020 | [Cordas e baixo menos densos no Difícil e no Muito difícil; os outros instrumentos continuam tocando](0020-dificuldade-cordas-e-som-dos-outros-instrumentos.md) | Aceita |
 | 0021 | [Nota sustentada que pontua, whammy nos analógicos e o instrumento do jogador num player próprio](0021-sustentacao-e-whammy.md) | Aceita |
+| 0022 | [Menus num cenário 3D, com visual de quadrinho de herói](0022-menus-3d-em-quadrinho.md) | Aceita |
+| 0023 | [Modelos 3D construídos por script no Blender](0023-modelos-3d-por-script-no-blender.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

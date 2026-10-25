@@ -35,7 +35,7 @@ from tools.generators import DOC_GENERATORS, FILE_GENERATORS
 REPO = Path(__file__).resolve().parent.parent
 
 # Pastas do repositório: um caminho entre crases que começa por uma delas tem que existir.
-ROOTS = ("pbq", "tools", "tests", "godot", "docs", "scripts", ".github")
+ROOTS = ("pbq", "tools", "tests", "godot", "docs", "scripts", "art", ".github")
 # Nunca varridos: dependências, dados do usuário, addons de terceiros.
 SKIP_DIRS = {
     ".git",

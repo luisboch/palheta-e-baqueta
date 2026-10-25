@@ -3,6 +3,11 @@
 - **Status:** Aceita
 - **Data:** 2026-10-23
 
+> **2026-10-24:** o fluxo e o visual dos menus mudaram com o
+> [ADR 0022](0022-menus-3d-em-quadrinho.md): as telas abrem num cenário 3D (sem trocar de cena),
+> com tema de quadrinho, e a escolha de música se dividiu em modo, música e instrumento. Uma cena
+> de `Control` por tela, montada no editor, continua valendo.
+>
 > **2026-10-23:** a partida ganhou pausa (`Esc`/Start, e sozinha quando o jogo perde o foco, como
 > no botão Steam): Continuar, Recomeçar ou Sair da música.
 >

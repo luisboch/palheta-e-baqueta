@@ -99,3 +99,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
 - **2026-10-24 · `gdformat godot` formata o GdUnit4:** o addon fica dentro de `godot/addons/` e
   quebra (o gdformat não entende um trecho dele). Formate `godot/core godot/game godot/tests`; se
   já formatou, apague `godot/addons/gdUnit4` e rode `scripts/setup.sh`.
+- **2026-10-24 · Blender do flatpak não acha o script:** `flatpak run org.blender.Blender
+  --python art/build_models.py` roda com o diretório de trabalho em `/app/blender`, e o caminho
+  relativo falha. `scripts/build_models.sh` passa caminhos absolutos.

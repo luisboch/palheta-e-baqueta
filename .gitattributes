@@ -3,3 +3,5 @@
 *.wav binary
 *.ogg binary
 *.chart -text
+*.glb binary
+*.ttf binary

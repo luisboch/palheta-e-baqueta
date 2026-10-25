@@ -14,6 +14,7 @@ tabela (regra 5 da [doc viva](adr/0001-documentacao-viva-verificada.md)).
 | 7 | Visual: notas quadradas e redondas, fundo no ritmo | ✅ concluída | 95,5% | 93,2% |
 | 8 | 2 jogadores, controles USB, calibração | 🚧 em andamento | | |
 | 9 | Menus, seleção (bloqueando ausentes), resultados | ✅ concluída (MVP) | 95,5% | 90,9% |
+| 10 | Visual de quadrinho: menus num cenário 3D, palco, partida | 🚧 em andamento | | |
 
 ## Fase 1
 
@@ -144,3 +145,18 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
   ([ADR 0021](adr/0021-sustentacao-e-whammy.md)). MSAA 4× no 3D: a linha do meio da bateria
   sumia no fundo da pista.
 - A seguir: controles USB, calibração, tela de controles.
+
+## Fase 10 (em andamento)
+
+O jogo ganha cara de jogo: um cenário 3D de quadrinho de herói para os menus, com a câmera
+voando entre as telas ([ADR 0022](adr/0022-menus-3d-em-quadrinho.md)), e modelos próprios
+construídos por script no Blender ([ADR 0023](adr/0023-modelos-3d-por-script-no-blender.md)).
+
+- Casca dos menus (`godot/game/shell.tscn`) com 4 estações: emblema, palco, instrumentos e
+  pendrive. Sombra em faixas com retícula, contorno de tinta por pós-processamento e céu de
+  explosão, tudo em shader. Tema de HQ com a fonte Bangers e foco com linhas de ação.
+- 11 modelos (`art/build_models.py`): emblema, guitarra, baixo, bateria, pedestal, palco, globo
+  espelhado, refletor, pendrive, disco e a cidade.
+- Menu principal novo: 1 Jogador, 2 Jogadores, Gerenciar músicas, Sair.
+- A seguir: tela de modo (Banda × Duelo) e de instrumento com o "PRONTO" de cada jogador; o palco
+  das músicas com a capa no telão; Gerenciar músicas; a partida no tema novo; medir no Deck.

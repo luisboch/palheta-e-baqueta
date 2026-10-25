@@ -64,11 +64,21 @@ O formato de saída é compatível com o Clone Hero ([ADR 0007](adr/0007-formato
 - **Telas** (`godot/game/`, uma cena por tela, montada com nós no editor; regras em
   [ADR 0016](adr/0016-menus-e-navegacao.md)): menu principal (`godot/game/main_menu.tscn`), escolha de
   música (`godot/game/song_select.tscn`), pendrive (`godot/game/drive.tscn`) e a partida. O visual
-  dos menus vem de um tema só (`godot/game/theme.tres`). Linhas de lista (músicas, pendrives) são
-  cópias de um botão-modelo que está na cena.
+  dos menus vem de um tema só, de quadrinho (`godot/game/theme.tres`, fonte Bangers). Linhas de
+  lista (músicas, pendrives) são cópias de um botão-modelo que está na cena.
+- **A casca dos menus** (`godot/game/shell.tscn` + `godot/game/shell.gd`, a cena principal;
+  [ADR 0022](adr/0022-menus-3d-em-quadrinho.md)): um cenário 3D de cidade de quadrinho com uma
+  estação por tela (`godot/game/comic/station.gd`: onde a câmera para e as cores do céu). As
+  telas abrem por cima dela; trocar de tela voa com a câmera em vez de trocar de cena. O visual
+  de quadrinho vem de shaders em `godot/game/comic/`: sombra em faixas com retícula nos modelos
+  (`toon.gdshader`, aplicado por `godot/game/comic/comic.gd`), contorno de tinta num passe só
+  (`ink.gdshader`) e o céu de explosão (`comic_sky.gdshader`). O foco dos botões é desenhado por
+  `godot/game/comic/focus_fx.gd`.
+- **Modelos 3D** (`godot/game/models/*.glb`): exportados por `art/build_models.py`, rodado no
+  Blender por `scripts/build_models.sh` ([ADR 0023](adr/0023-modelos-3d-por-script-no-blender.md)).
 - **Autoload `App`** (`godot/game/app.gd`): caminhos de `data/` (na raiz do repositório, ou em
   `$PALHETA_HOME` no jogo instalado pelo `.deb`, [ADR 0018](adr/0018-pacote-deb.md)), a escolha do jogador, a troca de
-  tela, o worker (iniciado pelo menu, pausado durante a partida) e os comandos `pbq`, rodados
+  tela (pela casca, ou carregando a casca já na tela pedida quando vem da partida), o worker (iniciado pelo menu, pausado durante a partida) e os comandos `pbq`, rodados
   por `godot/game/backend_job.gd` numa thread. Nos testes ele fica inerte: sem worker, sem
   comandos e sem trocar de cena.
 - **A partida** (`godot/game/play.tscn` + `godot/game/play.gd`). A parte

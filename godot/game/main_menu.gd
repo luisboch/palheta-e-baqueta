@@ -1,4 +1,5 @@
-## Menu principal: Jogar, Pendrive e Sair, com o andamento do processamento embaixo.
+## Menu principal: 1 Jogador, 2 Jogadores, Gerenciar músicas e Sair, com o andamento do
+## processamento embaixo. O emblema gira no cenário ao lado (Shell, estação "Main").
 ##
 ## Abrir o menu inicia o worker (ADR 0003: o pendrive só é lido quando o jogador pede, mas o
 ## que já está em data/input é processado sozinho).
@@ -8,25 +9,31 @@ const QUEUE_REFRESH := 0.5  ## s entre leituras do queue.json
 
 var _since_refresh := QUEUE_REFRESH
 
-@onready var _background: Background = $Background
-@onready var _play: Button = %Play
-@onready var _drive: Button = %Drive
+@onready var _one: Button = %OnePlayer
+@onready var _two: Button = %TwoPlayers
+@onready var _manage: Button = %Manage
 @onready var _quit: Button = %Quit
 @onready var _status: Label = %Status
 
 
 func _ready() -> void:
 	App.start_worker()
-	_play.pressed.connect(App.goto.bind(App.SONG_SELECT))
-	_drive.pressed.connect(App.goto.bind(App.DRIVE))
+	_one.pressed.connect(start.bind(1))
+	_two.pressed.connect(start.bind(2))
+	_manage.pressed.connect(App.goto.bind(App.DRIVE))
 	_quit.pressed.connect(get_tree().quit)
-	_play.grab_focus()
+	_one.grab_focus()
 	_status.text = ""
 
 
 func _process(delta: float) -> void:
-	_background.update_idle(delta)
 	_since_refresh += delta
 	if _since_refresh >= QUEUE_REFRESH:
 		_since_refresh = 0.0
 		_status.text = QueueStatus.text(QueueStatus.read(App.data_dir.path_join("queue.json")))
+
+
+## Começa o caminho até a partida com 1 ou 2 jogadores.
+func start(players: int) -> void:
+	App.selection["mode"] = "solo" if players == 1 else App.selection.get("mode_2p", "coop")
+	App.goto(App.SONG_SELECT)

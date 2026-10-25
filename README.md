@@ -61,11 +61,11 @@ Todos os comandos e o que o jogo lê estão em [docs/backend-protocol.md](docs/b
 ### Jogar
 
 Abra `godot/project.godot` no editor e aperte **F5** (ou rode `$(scripts/godot.sh) --path godot`).
-O jogo abre no menu:
+O jogo abre no menu, num cenário 3D de quadrinho:
 
-- **Jogar**: lista de músicas prontas → instrumento (os que não tocam na música ficam
-  desabilitados) → dificuldade → Jogar. "Editar nome" corrige título e artista.
-- **Pendrive**: escolha o pendrive e a ação: trazer os MP3s novos de `palheta/` (eles são
+- **1 Jogador** e **2 Jogadores**: lista de músicas prontas → instrumento (os que não tocam na
+  música ficam desabilitados) → dificuldade → Jogar. "Editar nome" corrige título e artista.
+- **Gerenciar músicas**: escolha o pendrive e a ação: trazer os MP3s novos de `palheta/` (eles são
   processados sozinhos, com o andamento embaixo do menu), importar músicas prontas ou salvar a
   biblioteca no pendrive. Nada é lido antes de você escolher ([ADR 0003](docs/adr/0003-pendrive-pelo-menu.md)).
 - Menus: setas/direcional e `Enter`/A; `Esc`/B volta.
@@ -129,6 +129,7 @@ godot/core/     lógica do jogo em classes puras (testáveis)
 godot/tests/    testes GdUnit4
 scripts/        setup, testes, versões fixadas
 docs/           arquitetura, ADRs, roadmap, testes, armadilhas
+art/            modelos 3D, construídos por script no Blender (scripts/build_models.sh)
 ```
 
 Para quem vai mexer no código, as regras ficam em [AGENTS.md](AGENTS.md).
@@ -149,3 +150,6 @@ código do projeto ainda não foi definida.
 | [ADTOF-pytorch](https://github.com/xavriley/ADTOF-pytorch) | conversão dos pesos do ADTOF para PyTorch | pesos derivados do ADTOF (CC BY-NC-SA 4.0) |
 
 A rede do ADTOF em `pbq/models/adtof.py` é implementação própria; só os pesos vêm de fora.
+
+A fonte dos menus é a [Bangers](https://github.com/googlefonts/bangers), sob a SIL Open Font
+License 1.1 (`godot/game/fonts/OFL.txt`). Os modelos 3D são próprios (`art/build_models.py`).
