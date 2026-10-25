@@ -148,6 +148,9 @@ func play() -> void:
 	if picks.size() > 1:
 		App.selection["instrument_p2"] = picks[1].instrument
 		App.selection["difficulty_p2"] = picks[1].difficulty
+	else:  # sobra do 2P anterior faria o jogador 2 entrar numa partida de um só
+		App.selection.erase("instrument_p2")
+		App.selection.erase("difficulty_p2")
 	App.go(App.flow.next(MenuFlow.INSTRUMENTS))
 
 

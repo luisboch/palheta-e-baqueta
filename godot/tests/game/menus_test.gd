@@ -138,7 +138,13 @@ func test_song_select_keeps_the_song_and_handles_an_empty_library() -> void:
 func test_instrument_select_one_player() -> void:
 	_library()
 	App.flow.start(1)
-	App.selection = {"id": "a", "dir": App.library_dir.path_join("a")}
+	# sobra de uma partida de 2 jogadores: não pode levar o jogador 2 para esta
+	App.selection = {
+		"id": "a",
+		"dir": App.library_dir.path_join("a"),
+		"instrument_p2": "drums",
+		"difficulty_p2": "Easy",
+	}
 	var scene := _scene(InstrumentSelectScene)
 	assert_int(scene.picks.size()).is_equal(1)
 	assert_str(scene.picks[0].instrument).is_equal("strings")
