@@ -568,6 +568,17 @@ func _handle_player_input(
 			or (player_index == 0 and event.is_action_released(InputProfile.FRETS[lane]))
 		)
 		# O gatilho (L2/R2) repete "apertado" a cada movimento: só a primeira descida toca.
+		# Um botão (não o gatilho, que repete) que "desce" com o traste já apertado é um soltar
+		# perdido: sem tratar, o toque seria descartado e a nota não contaria.
+		var lost_release := pressed and lane in s.held and not event is InputEventJoypadMotion
+		if lost_release:
+			print(
+				(
+					"traste %d: aperto sem soltar antes (soltar perdido), P%d"
+					% [lane, player_index + 1]
+				)
+			)
+			s.release_fret(lane)
 		if pressed and lane not in s.held:
 			s.press_fret(lane)
 			h.set_fret(lane, true)

@@ -393,3 +393,17 @@ func test_drum_button_released_without_an_event_is_dropped() -> void:
 	scene._drum_down[0][1] = true  # o evento de soltar se perdeu: o Input não vê o botão apertado
 	scene._sync_drum_down(0)
 	assert_bool(scene._drum_down[0].is_empty()).is_true()
+
+
+func test_fret_pressed_again_without_release_still_plays() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	var press := InputEventJoypadButton.new()
+	press.button_index = JOY_BUTTON_LEFT_SHOULDER  # traste 1
+	press.pressed = true
+	scene._unhandled_input(press)
+	assert_bool(1 in scene.session.held).is_true()
+	scene._unhandled_input(press)  # o soltar se perdeu: o jogo ainda acha o traste apertado
+	assert_bool(1 in scene.session.held).is_true()  # apertou de novo, não ficou descartado
+	press.pressed = false
+	scene._unhandled_input(press)
+	assert_bool(1 in scene.session.held).is_false()
