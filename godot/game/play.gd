@@ -526,6 +526,8 @@ func _handle_player_input(
 			if fret_pressed and not down.has(lane):
 				down[lane] = true
 				hit = true
+			elif fret_pressed:
+				print("bateria: P%d pad %d ignorado, ainda apertado" % [player_index + 1, lane])
 			elif fret_released:
 				down.erase(lane)
 			if hit:
