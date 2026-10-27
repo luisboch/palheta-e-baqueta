@@ -18,6 +18,7 @@ const HOME_ENV := "PALHETA_HOME"
 const PBQ := ".venv/bin/pbq"  ## instalado por scripts/setup.sh
 const ENV := "/usr/bin/env"  ## `env -C <repo>`: roda o pbq na raiz do repositório
 const WORKER_LOCK := ".worker.lock"
+const PROC_READ_BYTES := 4096  ## o bastante da linha de comando do worker
 ## Quadro mais longo que isso (s) vai para o game.log: o jogo "engasga" e queremos saber onde.
 const HITCH_LOG := 0.25
 const STATS_EVERY := 60.0  ## s entre os registros de memória no game.log
@@ -136,7 +137,9 @@ func pause_worker(paused: bool) -> void:
 	var pid := worker_pid()
 	if not live or pid <= 0:
 		return
-	OS.execute("kill", ["-STOP" if paused else "-CONT", str(pid)])
+	var signal_name := "-STOP" if paused else "-CONT"
+	OS.execute("kill", [signal_name, str(pid)])
+	OS.execute("pkill", [signal_name, "-P", str(pid)])  # ffmpeg e afins, filhos do worker
 
 
 ## PID do worker rodando, ou -1. O lock guarda o PID mesmo depois que o worker sai: só vale se
@@ -148,8 +151,21 @@ func worker_pid() -> int:
 	var text := FileAccess.get_file_as_string(path).strip_edges()
 	if not text.is_valid_int():
 		return -1
-	var cmdline := FileAccess.get_file_as_string("/proc/%s/cmdline" % text)
+	var cmdline := _read_proc("/proc/%s/cmdline" % text)
 	return int(text) if "pbq" in cmdline and "watch" in cmdline else -1
+
+
+## Lê um arquivo de /proc. Eles dizem ter tamanho 0, e get_file_as_string devolve "" para eles
+## (por isso o worker nunca era pausado na partida): é preciso ler o buffer.
+static func _read_proc(path: String) -> String:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ""
+	var bytes := file.get_buffer(PROC_READ_BYTES)
+	for i in bytes.size():
+		if bytes[i] == 0:
+			bytes[i] = 32  # os argumentos vêm separados por NUL, e a leitura de texto pararia nele
+	return bytes.get_string_from_utf8()
 
 
 func has_backend() -> bool:

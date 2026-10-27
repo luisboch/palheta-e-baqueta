@@ -61,3 +61,17 @@ func test_worker_pid_ignores_stale_lock() -> void:
 	lock.close()
 	assert_int(App.worker_pid()).is_equal(-1)
 	App.data_dir = saved
+
+
+func test_worker_pid_finds_a_running_pbq_watch() -> void:
+	# um processo com "pbq watch" na linha de comando (o bash sem `; true` viraria o sleep)
+	var pid := OS.create_process("bash", ["-c", "sleep 30; true", "pbq", "watch"])
+	var saved := App.data_dir
+	App.data_dir = create_temp_dir("dados")
+	var lock := FileAccess.open(App.data_dir.path_join(App.WORKER_LOCK), FileAccess.WRITE)
+	lock.store_string("%d\n" % pid)
+	lock.close()
+	await get_tree().create_timer(0.3).timeout
+	assert_int(App.worker_pid()).is_equal(pid)
+	OS.kill(pid)
+	App.data_dir = saved

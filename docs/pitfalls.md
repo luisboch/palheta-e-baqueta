@@ -121,3 +121,7 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   Levamos dias nos remendos de evento perdido; o `game.log` mostrava o controle sem perder nada.
   Antes de culpar a entrada, confira o estado que o jogo achava apertado contra o que o
   dispositivo mandou. Agora é o ADR 0024, com o estado lido do dispositivo por quadro.
+- **2026-10-27 · O worker nunca era pausado na partida:** `FileAccess.get_file_as_string` devolve
+  "" para arquivos de `/proc` (eles dizem ter tamanho 0), então `App.worker_pid()` sempre dava -1 e
+  o `SIGSTOP` nunca saía. O `game.log` mostrou o worker separando músicas durante a partida
+  (FPS 39-45). Arquivo de `/proc` se lê pelo buffer (`App._read_proc`).
