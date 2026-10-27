@@ -349,6 +349,9 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	s.whammy = _whammies[index].update(sticks, key, delta)
 	if not s.drums and not _autoplay:
 		for lane in s.sync_frets(_pressed_frets(index)):
+			print(
+				"traste %d preso: P%d soltado pela leitura direta do controle" % [lane, index + 1]
+			)
 			h.set_fret(lane, false)
 	if s.drums and not _autoplay:
 		_sync_drum_down(index)
@@ -374,17 +377,38 @@ func _sync_drum_down(index: int) -> void:
 			down.erase(lane)
 
 
-## Trastes que estão apertados de verdade agora, lidos direto do Input (não dos eventos).
+## Trastes que estão apertados de verdade agora, lidos direto do teclado e do controle (não dos
+## eventos nem do estado das ações do InputMap, que já ficou "apertado" depois de o botão soltar).
 static func _pressed_frets(player_index: int) -> PackedInt32Array:
 	var frets := InputProfile.player_frets(player_index)
 	var out := PackedInt32Array()
 	for lane in frets.size():
 		if (
-			Input.is_action_pressed(frets[lane])
-			or (player_index == 0 and Input.is_action_pressed(InputProfile.FRETS[lane]))
+			_action_down(frets[lane])
+			or (player_index == 0 and _action_down(InputProfile.FRETS[lane]))
 		):
 			out.append(lane)
 	return out
+
+
+## A ação está apertada agora? Confere cada tecla, botão e gatilho dela direto no dispositivo.
+static func _action_down(action: String) -> bool:
+	for event in InputMap.action_get_events(action):
+		if event is InputEventKey:
+			if Input.is_physical_key_pressed((event as InputEventKey).physical_keycode):
+				return true
+			if Input.is_key_pressed((event as InputEventKey).keycode):
+				return true
+		elif event is InputEventJoypadButton:
+			var button := event as InputEventJoypadButton
+			if Input.is_joy_button_pressed(button.device, button.button_index):
+				return true
+		elif event is InputEventJoypadMotion:
+			var motion := event as InputEventJoypadMotion
+			var value := Input.get_joy_axis(motion.device, motion.axis) * signf(motion.axis_value)
+			if value >= InputProfile.TRIGGER_DEADZONE:
+				return true
+	return false
 
 
 ## Posição de um analógico (o esquerdo ou o direito) do controle do jogador.
