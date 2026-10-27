@@ -122,6 +122,7 @@ func start(
 	difficulty = choice[1]
 
 	session = PlaySession.new(_loaded["chart"], instrument, difficulty)
+	print("partida: %s, %s, %s" % [dir.get_file(), instrument, difficulty])  # para ler o game.log
 	App.pause_worker(true)
 	_grid = (
 		BeatGrid.from_beatmap(_loaded["beatmap"])
