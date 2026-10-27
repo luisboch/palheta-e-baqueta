@@ -548,6 +548,8 @@ func _handle_player_input(
 				var tapped := s.tap(now)
 				if not tapped.is_empty():
 					h.on_strum(tapped)
+				else:
+					_log_dead_tap(player_index, s, lane, now)
 		elif released and lane in s.held:
 			s.release_fret(lane)
 			h.set_fret(lane, false)
@@ -562,6 +564,23 @@ func _handle_player_input(
 			h.on_strum(result)
 			if result.get("grade") == Judge.OVERSTRUM and sfx:
 				sfx.play_error()
+
+
+## Diagnóstico: um traste apertado havia uma nota ao alcance e não acertou nada. Mostra os
+## trastes que o jogo achava apertados e a nota que esperava, para separar "traste preso" de
+## "o jogador apertou o traste errado".
+func _log_dead_tap(player_index: int, s: PlaySession, lane: int, now: float) -> void:
+	for note in s.notes:
+		if note.time - s.judge.window > now:
+			return
+		if note.state == PlayNote.State.PENDING and note.time + s.judge.window >= now:
+			print(
+				(
+					"toque sem acerto: P%d traste %d, apertados %s, nota %s a %+d ms"
+					% [player_index + 1, lane, s.held, note.lanes, (note.time - now) * 1000.0]
+				)
+			)
+			return
 
 
 ## Número do controle que gerou o evento; -1 se não veio de controle.
