@@ -26,7 +26,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0012 | [Charts de Cordas e baixo, e as 4 dificuldades](0012-charts-de-cordas-baixo-e-dificuldades.md) | Aceita |
 | 0013 | [librosa como reserva das batidas, com refazer automático](0013-reserva-de-batidas-librosa.md) | Aceita |
 | 0014 | [Regras de jogo: janela de acerto, palhetada, pontuação e stem](0014-regras-de-jogo.md) | Aceita |
-| 0015 | [Teclado e controle tocam no traste, sem palhetada](0015-tocar-no-traste-sem-palhetada.md) | Aceita |
+| 0015 | [Teclado e controle tocam no traste, sem palhetada](0015-tocar-no-traste-sem-palhetada.md) | Substituída por [0024](0024-cada-aperto-e-julgado-sozinho.md) |
 | 0016 | [Menus e navegação](0016-menus-e-navegacao.md) | Aceita |
 | 0017 | [Dois jogadores: Banda e Duelo](0017-modos-banda-e-duelo.md) | Aceita |
 | 0018 | [Distribuição em .deb, só Linux, com o backend instalado pelo uv](0018-pacote-deb.md) | Aceita |
@@ -35,6 +35,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0021 | [Nota sustentada que pontua, whammy nos analógicos e o instrumento do jogador num player próprio](0021-sustentacao-e-whammy.md) | Aceita |
 | 0022 | [Menus num cenário 3D, com visual de quadrinho de herói](0022-menus-3d-em-quadrinho.md) | Aceita |
 | 0023 | [Modelos 3D construídos por script no Blender](0023-modelos-3d-por-script-no-blender.md) | Aceita |
+| 0024 | [Cada aperto de traste é julgado sozinho, lido do dispositivo a cada quadro](0024-cada-aperto-e-julgado-sozinho.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

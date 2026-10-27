@@ -55,7 +55,7 @@ func test_releasing_a_sustain_early_stops_the_points_without_a_miss() -> void:
 	s.update(note.time + 0.25, 0.016)
 	var points := s.scoring.sustain_score
 	assert_int(points).is_greater(0)
-	s.release_fret(note.lanes[1])
+	s.held = PackedInt32Array([note.lanes[0]])  # soltou o outro traste da nota
 	var events := s.update(note.time + 0.5, 0.016)
 	assert_object(events["dropped"]).is_same(note)
 	assert_bool(note.dropped()).is_true()
@@ -81,16 +81,9 @@ func test_drums_pads_and_frets_bookkeeping() -> void:
 	var first := s.notes[0]
 	assert_str(s.pad(first.time, first.lanes[0])["grade"]).is_equal("perfect")
 	assert_dict(s.pad(first.time, 3)).is_empty()
-	s.press_fret(2)
-	s.press_fret(2)
-	s.press_fret(4)
-	s.release_fret(2)
-	s.release_fret(1)
-	assert_array(s.held).is_equal(PackedInt32Array([4]))
+	s.held = PackedInt32Array([4])
 	assert_str(s.strum(-5.0)["grade"]).is_equal(Judge.OVERSTRUM)
 	assert_int(s.scoring.overstrums).is_equal(1)
-	assert_dict(s.tap(-5.0)).is_empty()
-	assert_int(s.scoring.overstrums).is_equal(1)  # traste sem nota não pune
 	assert_bool(s.finished(0.0)).is_false()
 
 
@@ -130,10 +123,41 @@ func test_song_loader_and_input_profile() -> void:
 	assert_bool(joy is InputEventJoypadButton).is_true()
 
 
-func test_sync_frets_releases_a_fret_whose_release_event_was_lost() -> void:
+func test_fret_input_judges_each_press_alone() -> void:
 	var s := _session("strings", "Expert")
-	s.press_fret(0)
-	s.press_fret(3)
-	var released := s.sync_frets(PackedInt32Array([0]))
-	assert_array(released).contains_exactly([3])
-	assert_array(s.held).contains_exactly([0])
+	var note := s.notes[0]
+	var other := 4 if note.lanes[0] != 4 else 3
+	# o traste da nota acerta mesmo com outro traste (mais agudo) já apertado
+	var change := s.fret_input(PackedInt32Array([note.lanes[0], other]), note.time)
+	var results: Array = change["taps"].map(func(t: Dictionary) -> Dictionary: return t["result"])
+	assert_bool(results[0].has("note") or results[1].has("note")).is_true()
+	# o traste sem nota, apertado junto, é erro
+	assert_int(s.scoring.overstrums).is_equal(1)
+	# segurar os dois no quadro seguinte não é aperto novo
+	var again := s.fret_input(PackedInt32Array([note.lanes[0], other]), note.time + 0.016)
+	assert_array(again["taps"]).is_empty()
+	var released := s.fret_input(PackedInt32Array(), note.time + 0.1)
+	assert_array(released["released"]).has_size(2)
+	assert_array(s.held).is_empty()
+
+
+func test_fret_input_alone_without_a_note_is_an_error() -> void:
+	var s := _session("strings", "Expert")
+	var change := s.fret_input(PackedInt32Array([2]), -5.0)
+	assert_int(s.scoring.overstrums).is_equal(1)
+	assert_str(change["taps"][0]["result"]["grade"]).is_equal(Judge.OVERSTRUM)
+
+
+func test_fret_input_chord_pressed_together_counts_once() -> void:
+	var s := _session("strings", "Expert")
+	var chord: PlayNote = null
+	for note in s.notes:
+		if note.lanes.size() > 1:
+			chord = note
+			break
+	if chord == null:
+		return  # o chart de teste não tem acorde
+	s.update(chord.time - 0.2, 0.016)
+	s.fret_input(chord.lanes, chord.time)
+	assert_int(chord.state).is_equal(PlayNote.State.HIT)
+	assert_int(s.scoring.overstrums).is_equal(0)

@@ -151,6 +151,9 @@ Feita antes da 8, para fechar o MVP de 1 jogador: dá para jogar no Deck sem lin
 O jogo ganha cara de jogo: um cenário 3D de quadrinho de herói para os menus, com a câmera
 voando entre as telas ([ADR 0022](adr/0022-menus-3d-em-quadrinho.md)), e modelos próprios
 construídos por script no Blender ([ADR 0023](adr/0023-modelos-3d-por-script-no-blender.md)).
+Nos testes no Deck, o "botão preso" das Cordas era a regra do traste mais agudo: cada aperto passou
+a ser julgado sozinho e a entrada é lida do dispositivo por quadro
+([ADR 0024](adr/0024-cada-aperto-e-julgado-sozinho.md)).
 
 - Casca dos menus (`godot/game/shell.tscn`) com 4 estações: emblema, palco, instrumentos e
   pendrive. Sombra em faixas com retícula, contorno de tinta por pós-processamento e céu de

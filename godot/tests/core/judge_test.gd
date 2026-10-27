@@ -57,9 +57,32 @@ func test_drum_pads() -> void:
 	assert_dict(judge.hit_pad(1.6, 1)).is_empty()
 
 
-func test_tap_builds_chords_without_penalty() -> void:
+func test_press_hits_its_own_lane_whatever_else_is_held() -> void:
+	var judge := Judge.new(_notes([[1.0, [1]], [2.0, [0]]]))
+	# o traste 3 ainda apertado (o caso do R2 nos logs) não atrapalha a nota do traste 1
+	assert_str(judge.press(1.02, 1, PackedInt32Array([1, 3]))["grade"]).is_equal("perfect")
+	# o traste 0 com o 1 ainda apertado: o aperto é do 0 e a nota é a dele
+	assert_str(judge.press(2.0, 0, PackedInt32Array([0, 1]))["grade"]).is_equal("perfect")
+
+
+func test_press_without_a_note_is_an_overstrum() -> void:
+	var judge := Judge.new(_notes([[1.0, [1]]]))
+	assert_str(judge.press(1.0, 2, PackedInt32Array([1, 2]))["grade"]).is_equal(Judge.OVERSTRUM)
+	assert_str(judge.press(0.5, 1, PackedInt32Array([1]))["grade"]).is_equal(Judge.OVERSTRUM)
+	assert_int(judge.remaining()).is_equal(1)  # a nota continua lá
+	assert_str(judge.press(1.0, 1, PackedInt32Array([1]))["grade"]).is_equal("perfect")
+
+
+func test_press_builds_chords_without_penalty() -> void:
 	var judge := Judge.new(_notes([[1.0, [0, 2]], [2.0, [3]]]))
-	assert_dict(judge.tap(1.0, PackedInt32Array([0]))).is_empty()  # montando o acorde
-	assert_str(judge.tap(1.01, PackedInt32Array([0, 2]))["grade"]).is_equal("perfect")
-	assert_dict(judge.tap(1.5, PackedInt32Array([3]))).is_empty()  # cedo demais: nada
-	assert_str(judge.tap(2.1, PackedInt32Array([0, 3]))["grade"]).is_equal("ok")  # ancoragem
+	assert_dict(judge.press(1.0, 0, PackedInt32Array([0]))).is_empty()  # montando o acorde
+	assert_str(judge.press(1.01, 2, PackedInt32Array([0, 2]))["grade"]).is_equal("perfect")
+	# com um traste do acorde já apertado de antes, o outro completa o acorde
+	var again := Judge.new(_notes([[1.0, [0, 2]]]))
+	assert_str(again.press(1.0, 2, PackedInt32Array([0, 2]))["grade"]).is_equal("perfect")
+
+
+func test_holds_needs_every_fret_of_the_note() -> void:
+	assert_bool(Judge.holds(PackedInt32Array([1]), PackedInt32Array([1, 3]))).is_true()
+	assert_bool(Judge.holds(PackedInt32Array([0, 2]), PackedInt32Array([0]))).is_false()
+	assert_bool(Judge.holds(PackedInt32Array([0]), PackedInt32Array())).is_false()

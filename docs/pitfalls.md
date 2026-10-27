@@ -116,3 +116,8 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   (trocar de tela 200 vezes e abrir/fechar a partida 8 vezes) memória, nós e tempo por quadro
   ficam estáveis, então o vazamento não está na lógica. O `App` registra no `data/game.log`
   quadros acima de 250 ms (`travada:`) e, a cada minuto, FPS, nós, memória e vídeo (`stats:`).
+- **2026-10-27 · "Botão preso" que era a regra de acerto:** nas Cordas, o R2 ainda apertado
+  (nota simples valia pelo traste mais agudo) fazia o L1 não acertar, com o anel do R2 aceso.
+  Levamos dias nos remendos de evento perdido; o `game.log` mostrava o controle sem perder nada.
+  Antes de culpar a entrada, confira o estado que o jogo achava apertado contra o que o
+  dispositivo mandou. Agora é o ADR 0024, com o estado lido do dispositivo por quadro.

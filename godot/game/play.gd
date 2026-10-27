@@ -52,7 +52,6 @@ var _spectrum: AudioEffectSpectrumAnalyzerInstance
 var _started_audio := false
 var _whammies: Array[Whammy] = [Whammy.new(), Whammy.new()]
 var _bends: Array[float] = [0.0, 0.0]
-var _drum_down: Array[Dictionary] = [{}, {}]  ## botões da bateria apertados, por jogador
 var _others: Array[int] = []  ## stems dos instrumentos que ninguém está tocando
 var _cameras: Array[Camera3D] = []
 var _camera_rest: Array[Vector3] = []  ## onde cada câmera fica parada
@@ -142,6 +141,7 @@ func start(
 		var inst_2: String = choice_p2[0]
 		var diff_2: String = choice_p2[1]
 		session_2 = PlaySession.new(_loaded["chart"], inst_2, diff_2)
+		print("partida: jogador 2, %s, %s" % [inst_2, diff_2])
 		highway.position.x = -HIGHWAY_2P_OFFSET
 		highway_2 = highway.duplicate()
 		add_child(highway_2)
@@ -348,14 +348,8 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	var sticks: Array[Vector2] = [_stick(index, true), _stick(index, false)]
 	var key := Input.is_action_pressed(InputProfile.player_whammy(index))
 	s.whammy = _whammies[index].update(sticks, key, delta)
-	if not s.drums and not _autoplay:
-		for lane in s.sync_frets(_pressed_frets(index)):
-			print(
-				"traste %d preso: P%d soltado pela leitura direta do controle" % [lane, index + 1]
-			)
-			h.set_fret(lane, false)
-	if s.drums and not _autoplay:
-		_sync_drum_down(index)
+	if not _autoplay:
+		_read_input(s, h, InputReader.lanes_down(index, s.drums), now)
 	var events := s.update(now, delta)
 	if not events["missed"].is_empty() and sfx:
 		sfx.play_miss()
@@ -368,48 +362,25 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	h.set_power(s.scoring.multiplier(), _grid.pulse(now))
 
 
-## Solta da bateria o botão que o Input já não considera apertado: se o evento de soltar se
-## perde, o botão ficaria "apertado" e a próxima batida nele seria ignorada.
-func _sync_drum_down(index: int) -> void:
-	var down: Dictionary = _drum_down[index]
-	var pressed := _pressed_frets(index)
-	for lane in down.keys():
-		if InputProfile.drum_fret(lane) not in pressed:
-			down.erase(lane)
-
-
-## Trastes que estão apertados de verdade agora, lidos direto do teclado e do controle (não dos
-## eventos nem do estado das ações do InputMap, que já ficou "apertado" depois de o botão soltar).
-static func _pressed_frets(player_index: int) -> PackedInt32Array:
-	var frets := InputProfile.player_frets(player_index)
-	var out := PackedInt32Array()
-	for lane in frets.size():
-		if (
-			_action_down(frets[lane])
-			or (player_index == 0 and _action_down(InputProfile.FRETS[lane]))
-		):
-			out.append(lane)
-	return out
-
-
-## A ação está apertada agora? Confere cada tecla, botão e gatilho dela direto no dispositivo.
-static func _action_down(action: String) -> bool:
-	for event in InputMap.action_get_events(action):
-		if event is InputEventKey:
-			if Input.is_physical_key_pressed((event as InputEventKey).physical_keycode):
-				return true
-			if Input.is_key_pressed((event as InputEventKey).keycode):
-				return true
-		elif event is InputEventJoypadButton:
-			var button := event as InputEventJoypadButton
-			if Input.is_joy_button_pressed(button.device, button.button_index):
-				return true
-		elif event is InputEventJoypadMotion:
-			var motion := event as InputEventJoypadMotion
-			var value := Input.get_joy_axis(motion.device, motion.axis) * signf(motion.axis_value)
-			if value >= InputProfile.TRIGGER_DEADZONE:
-				return true
-	return false
+## Os botões deste quadro (`down` = apertados agora): julga cada aperto e desenha o traste (ou
+## pad) apertado e solto.
+func _read_input(s: PlaySession, h: Highway, down: PackedInt32Array, now: float) -> void:
+	if s.drums:
+		for hit: Dictionary in s.pad_input(down, now):
+			h.on_input(hit["lane"], hit["result"])
+		return
+	var change := s.fret_input(down, now, InputProfile.FRET_TAPS)
+	for lane in change["released"]:
+		h.set_fret(lane, false)
+	for lane in change["pressed"]:
+		h.set_fret(lane, true)
+	for tap: Dictionary in change["taps"]:
+		var result: Dictionary = tap["result"]
+		if result.is_empty():
+			continue
+		h.on_strum(result)
+		if result.get("grade") == Judge.OVERSTRUM and sfx:
+			sfx.play_error()
 
 
 ## Posição de um analógico (o esquerdo ou o direito) do controle do jogador.
@@ -475,8 +446,9 @@ func _autoplay_player(s: PlaySession, h: Highway, now: float) -> void:
 			h.on_strum(s.strum(note.time))
 
 
-## Pausa: para o áudio e o relógio (o _process não anda), solta os trastes (soltar uma tecla
-## com o jogo pausado não chegaria à partida) e mostra Continuar / Recomeçar / Sair.
+## Pausa: para o áudio e o relógio (o _process não anda) e mostra Continuar / Recomeçar / Sair.
+## Ao pausar e ao voltar, os trastes passam a valer o que está apertado de verdade, sem contar
+## como aperto novo o botão que o jogador já segurava.
 func set_paused(value: bool) -> void:
 	if session == null or _done or value == paused:
 		return
@@ -486,13 +458,9 @@ func set_paused(value: bool) -> void:
 	for stem in stems:
 		if stem:
 			stem.stream_paused = value
-	for lane in session.held.duplicate():
-		session.release_fret(lane)
-		highway.set_fret(lane, false)
+	_resync_input(0, session, highway)
 	if session_2 and highway_2:
-		for lane in session_2.held.duplicate():
-			session_2.release_fret(lane)
-			highway_2.set_fret(lane, false)
+		_resync_input(1, session_2, highway_2)
 	hud.show_pause(value)
 
 
@@ -509,123 +477,30 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			set_paused(not paused)
 		return
-	if session == null or _done or paused or event.is_echo():
+	if InputProfile.FRET_TAPS or session == null or _done or paused or event.is_echo():
 		return
+	# Guitarra USB (fase 8): a nota toca na palhetada, com os trastes que estão apertados.
 	var now := session.clock.now() if _lead <= 0.0 else -_lead
-	_handle_player_input(0, event, session, highway, now)
+	_strum(0, event, session, highway, now)
 	if session_2 and highway_2:
-		_handle_player_input(1, event, session_2, highway_2, now)
+		_strum(1, event, session_2, highway_2, now)
 
 
-func _handle_player_input(
-	player_index: int, event: InputEvent, s: PlaySession, h: Highway, now: float
-) -> void:
-	if s == null or h == null:
-		return
-	# O InputMap do Godot 4 ignora o device ao casar botões de controle: sem este filtro o
-	# controle 2 também tocaria no jogador 1 (e vice-versa). Teclado e ações puras passam.
-	if _joypad_device(event) not in [-1, player_index]:
-		return
-	var pads := InputProfile.player_pads(player_index)
-	var frets := InputProfile.player_frets(player_index)
-	var strums := InputProfile.player_strum(player_index)
-	if s.drums:
-		# Os botões das Cordas também tocam a bateria: os 4 pads, na ordem da pista, nos trastes
-		# 0-3 (L2 L1 R1 R2) e o bumbo no último (X). O gatilho repete "apertado" a cada
-		# movimento, então só a primeira descida bate.
-		var down: Dictionary = _drum_down[player_index]
-		for lane in pads.size():
-			var fret := InputProfile.drum_fret(lane)
-			var fret_pressed := (
-				event.is_action_pressed(frets[fret])
-				or (player_index == 0 and event.is_action_pressed(InputProfile.FRETS[fret]))
-			)
-			var fret_released := (
-				event.is_action_released(frets[fret])
-				or (player_index == 0 and event.is_action_released(InputProfile.FRETS[fret]))
-			)
-			var hit := (
-				event.is_action_pressed(pads[lane])
-				or (player_index == 0 and event.is_action_pressed(InputProfile.PADS[lane]))
-			)
-			if fret_pressed and not down.has(lane):
-				down[lane] = true
-				hit = true
-			elif fret_pressed:
-				print("bateria: P%d pad %d ignorado, ainda apertado" % [player_index + 1, lane])
-			elif fret_released:
-				down.erase(lane)
-			if hit:
-				h.on_input(lane, s.pad(now, lane))
-		return
-	for lane in frets.size():
-		var pressed := (
-			event.is_action_pressed(frets[lane])
-			or (player_index == 0 and event.is_action_pressed(InputProfile.FRETS[lane]))
-		)
-		var released := (
-			event.is_action_released(frets[lane])
-			or (player_index == 0 and event.is_action_released(InputProfile.FRETS[lane]))
-		)
-		# O gatilho (L2/R2) repete "apertado" a cada movimento: só a primeira descida toca.
-		# Um botão (não o gatilho, que repete) que "desce" com o traste já apertado é um soltar
-		# perdido: sem tratar, o toque seria descartado e a nota não contaria.
-		var lost_release := pressed and lane in s.held and not event is InputEventJoypadMotion
-		if lost_release:
-			print(
-				(
-					"traste %d: aperto sem soltar antes (soltar perdido), P%d"
-					% [lane, player_index + 1]
-				)
-			)
-			s.release_fret(lane)
-		if pressed and lane not in s.held:
-			s.press_fret(lane)
-			h.set_fret(lane, true)
-			if InputProfile.FRET_TAPS:
-				var tapped := s.tap(now)
-				if not tapped.is_empty():
-					h.on_strum(tapped)
-				else:
-					_log_dead_tap(player_index, s, lane, now)
-		elif released and lane in s.held:
-			s.release_fret(lane)
-			h.set_fret(lane, false)
-	if InputProfile.FRET_TAPS:
-		return  # sem palhetada: depois de um acerto no traste, ela viraria overstrum
-	for i in strums.size():
-		if (
-			event.is_action_pressed(strums[i])
-			or (player_index == 0 and event.is_action_pressed(InputProfile.STRUM[i]))
-		):
+func _strum(index: int, event: InputEvent, s: PlaySession, h: Highway, now: float) -> void:
+	for action in InputProfile.player_strum(index):
+		if event.is_action_pressed(action):
 			var result := s.strum(now)
 			h.on_strum(result)
 			if result.get("grade") == Judge.OVERSTRUM and sfx:
 				sfx.play_error()
 
 
-## Diagnóstico: um traste apertado havia uma nota ao alcance e não acertou nada. Mostra os
-## trastes que o jogo achava apertados e a nota que esperava, para separar "traste preso" de
-## "o jogador apertou o traste errado".
-func _log_dead_tap(player_index: int, s: PlaySession, lane: int, now: float) -> void:
-	for note in s.notes:
-		if note.time - s.judge.window > now:
-			return
-		if note.state == PlayNote.State.PENDING and note.time + s.judge.window >= now:
-			print(
-				(
-					"toque sem acerto: P%d traste %d, apertados %s, nota %s a %+d ms"
-					% [player_index + 1, lane, s.held, note.lanes, (note.time - now) * 1000.0]
-				)
-			)
-			return
-
-
-## Número do controle que gerou o evento; -1 se não veio de controle.
-static func _joypad_device(event: InputEvent) -> int:
-	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		return event.device
-	return -1
+## Faz o estado dos botões valer o que está apertado agora, sem contar aperto, e redesenha.
+func _resync_input(index: int, s: PlaySession, h: Highway) -> void:
+	s.buttons.reset(InputReader.lanes_down(index, s.drums))
+	s.held = s.buttons.held
+	for lane in InputProfile.FRETS.size():
+		h.set_fret(lane, lane in s.held and not s.drums and not paused)
 
 
 func _args() -> Dictionary:

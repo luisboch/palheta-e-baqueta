@@ -1,10 +1,12 @@
 ## Julga cada palhetada (Cordas, baixo) ou batida de pad (bateria) contra as notas.
 ##
 ## Janelas (± s em volta da nota): perfect, good, ok. Fora da maior, não acertou.
-## Cordas e baixo: a palhetada vale para a nota pendente mais antiga dentro da janela cujos
-## trastes batem: acorde = exatamente os trastes do acorde; nota simples = o traste mais agudo
-## pressionado (segurar os de baixo é permitido, como no gênero). Palhetada sem nota que bata é
-## "overstrum": quebra a sequência, mas a nota continua lá até sair da janela.
+## Cordas e baixo, tocando no traste (ADR 0024): cada aperto é julgado sozinho. Se a lane dele tem
+## uma nota pendente na janela, acerta, não importa o que mais esteja apertado; acorde = todos os
+## trastes dele apertados. Aperto sem nota é "overstrum": quebra a sequência.
+## Cordas e baixo na palhetada (guitarra USB): a palhetada vale para a nota pendente mais antiga
+## cujos trastes batem: acorde = exatamente os trastes do acorde; nota simples = o traste mais
+## agudo pressionado. Sem nota que bata também é "overstrum"; a nota continua lá até sair da janela.
 ## Bateria: cada pad acerta a nota pendente mais antiga daquela peça na janela; batida a mais não
 ## pune (bateristas enfeitam).
 class_name Judge
@@ -44,6 +46,14 @@ func update(now: float) -> Array[PlayNote]:
 	return missed
 
 
+## Todos os trastes da nota estão apertados (os outros não importam).
+static func holds(note_lanes: PackedInt32Array, held: PackedInt32Array) -> bool:
+	for lane in note_lanes:
+		if lane not in held:
+			return false
+	return true
+
+
 static func frets_match(note_lanes: PackedInt32Array, held: PackedInt32Array) -> bool:
 	if held.is_empty():
 		return false
@@ -59,13 +69,11 @@ static func frets_match(note_lanes: PackedInt32Array, held: PackedInt32Array) ->
 
 ## Palhetada com os trastes `held` pressionados. Devolve {note, grade} ou {grade: "overstrum"}.
 func strum(now: float, held: PackedInt32Array) -> Dictionary:
-	var result := tap(now, held)
+	var result := _strum_hit(now, held)
 	return result if not result.is_empty() else {"grade": OVERSTRUM}
 
 
-## Traste apertado no modo sem palhetada (ADR 0015): {note, grade} se os trastes `held` batem
-## com uma nota na janela; {} se não (sem punição, senão montar um acorde seria um erro).
-func tap(now: float, held: PackedInt32Array) -> Dictionary:
+func _strum_hit(now: float, held: PackedInt32Array) -> Dictionary:
 	for i in range(_first, notes.size()):
 		var note := notes[i]
 		if note.time - window > now:
@@ -75,6 +83,27 @@ func tap(now: float, held: PackedInt32Array) -> Dictionary:
 		if frets_match(note.lanes, held):
 			return _hit(note, now)
 	return {}
+
+
+## O traste `lane` acabou de ser apertado, com `held` apertados (ele incluído). Devolve:
+## - {note, grade}: acertou a nota pendente dele na janela;
+## - {}: é um traste de acorde que ainda não está completo, então nada acontece (montar o acorde
+##   passa por apertar um traste de cada vez);
+## - {grade: OVERSTRUM}: não havia nota dele na janela.
+func press(now: float, lane: int, held: PackedInt32Array) -> Dictionary:
+	var building_chord := false
+	for i in range(_first, notes.size()):
+		var note := notes[i]
+		if note.time - window > now:
+			break
+		if note.state != PlayNote.State.PENDING or note.time + window < now:
+			continue
+		if lane not in note.lanes:
+			continue
+		if holds(note.lanes, held):
+			return _hit(note, now)
+		building_chord = true
+	return {} if building_chord else {"grade": OVERSTRUM}
 
 
 ## Batida no pad `lane` (bateria). Devolve {note, grade} ou {} se não havia nota dela.

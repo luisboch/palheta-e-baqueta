@@ -1,6 +1,6 @@
 # 0015. Teclado e controle tocam no traste, sem palhetada
 
-- **Status:** Aceita
+- **Status:** Substituída por [0024](0024-cada-aperto-e-julgado-sozinho.md)
 - **Data:** 2026-10-23
 
 ## Contexto

@@ -106,18 +106,16 @@ func test_errors_are_shown() -> void:
 
 func test_input_reaches_the_session() -> void:
 	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
-	var fret := InputEventAction.new()
-	fret.action = "fret_0"
-	fret.pressed = true
-	scene._unhandled_input(fret)
+	var road: Highway = scene.highway
+	scene._read_input(scene.session, road, PackedInt32Array([0]), -5.0)
 	assert_array(scene.session.held).is_equal(PackedInt32Array([0]))
+	assert_int(scene.session.scoring.overstrums).is_equal(1)  # traste sem nota é erro (ADR 0024)
 	var strum := InputEventAction.new()
 	strum.action = "strum_down"
 	strum.pressed = true
 	scene._unhandled_input(strum)
-	assert_int(scene.session.scoring.overstrums).is_equal(0)  # sem palhetada (ADR 0015)
-	fret.pressed = false
-	scene._unhandled_input(fret)
+	assert_int(scene.session.scoring.overstrums).is_equal(1)  # a palhetada é ignorada (ADR 0015)
+	scene._read_input(scene.session, road, PackedInt32Array(), -5.0)
 	assert_array(scene.session.held).is_empty()
 
 
@@ -127,13 +125,21 @@ func test_fret_press_plays_the_note() -> void:
 	var note: PlayNote = scene.session.notes[0]
 	while scene._lead > 0.0 or scene.session.clock.now() < note.time - 0.02:
 		scene._process(1.0 / 60.0)
-	for lane in note.lanes:
-		var fret := InputEventAction.new()
-		fret.action = InputProfile.FRETS[lane]
-		fret.pressed = true
-		scene._unhandled_input(fret)
+	scene._read_input(scene.session, scene.highway, note.lanes, scene.session.clock.now())
 	assert_int(note.state).is_equal(PlayNote.State.HIT)
-	assert_int(scene.session.scoring.hits).is_equal(1)
+	assert_int(scene.session.scoring.hits).is_equal(1)  # o acorde conta uma vez
+
+
+func test_a_higher_fret_still_held_does_not_block_the_next_note() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	var note: PlayNote = scene.session.notes[0]
+	var higher := (note.lanes[note.lanes.size() - 1] + 1) % 5
+	if higher < note.lanes[0]:
+		higher = 4  # qualquer traste mais agudo que a nota
+	var down := note.lanes.duplicate()
+	down.append(higher)  # o dedo ainda no outro traste, o caso do R2 nos logs
+	scene._read_input(scene.session, scene.highway, down, note.time)
+	assert_int(note.state).is_equal(PlayNote.State.HIT)
 
 
 func test_default_song_has_the_most_instruments() -> void:
@@ -172,22 +178,17 @@ func test_pause_stops_the_clock_and_resumes() -> void:
 	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
 	for i in 30:
 		scene._process(1.0 / 60.0)
-	var fret := InputEventAction.new()
-	fret.action = "fret_2"
-	fret.pressed = true
-	scene._unhandled_input(fret)
+	scene._read_input(scene.session, scene.highway, PackedInt32Array([2]), 0.0)
 	var esc := InputEventAction.new()
 	esc.action = InputProfile.PAUSE
 	esc.pressed = true
 	scene._unhandled_input(esc)
 	assert_bool(scene.paused).is_true()
 	assert_bool(scene.get_node("%Pause").visible).is_true()
-	assert_array(scene.session.held).is_empty()  # trastes soltos na pausa
+	assert_array(scene.session.held).is_empty()  # os trastes valem o que está apertado de verdade
 	var lead: float = scene._lead
 	scene._process(0.5)
 	assert_float(scene._lead).is_equal(lead)  # parado
-	scene._unhandled_input(fret)  # ignorado na pausa
-	assert_array(scene.session.held).is_empty()
 	scene.get_node("%Resume").pressed.emit()
 	assert_bool(scene.paused).is_false()
 	assert_bool(scene.get_node("%Pause").visible).is_false()
@@ -297,69 +298,31 @@ func test_two_player_mode_routes_inputs_to_correct_player() -> void:
 	scene.start(dir, "strings", "Hard", false, "versus", "bass", "Hard")
 	assert_that(scene.session_2).is_not_null()
 
-	var p1_fret := InputEventAction.new()
-	p1_fret.action = "p1_fret_0"
-	p1_fret.pressed = true
-	scene._unhandled_input(p1_fret)
-
+	scene._read_input(scene.session, scene.highway, PackedInt32Array([0]), -5.0)
 	assert_array(scene.session.held).is_equal(PackedInt32Array([0]))
 	assert_array(scene.session_2.held).is_empty()
 
-	var p2_fret := InputEventAction.new()
-	p2_fret.action = "p2_fret_2"
-	p2_fret.pressed = true
-	scene._unhandled_input(p2_fret)
-
+	scene._read_input(scene.session_2, scene.highway_2, PackedInt32Array([2]), -5.0)
 	assert_array(scene.session.held).is_equal(PackedInt32Array([0]))
 	assert_array(scene.session_2.held).is_equal(PackedInt32Array([2]))
 
-	p1_fret.pressed = false
-	p2_fret.pressed = false
-	scene._unhandled_input(p1_fret)
-	scene._unhandled_input(p2_fret)
-
+	scene._read_input(scene.session, scene.highway, PackedInt32Array(), -5.0)
+	scene._read_input(scene.session_2, scene.highway_2, PackedInt32Array(), -5.0)
 	assert_array(scene.session.held).is_empty()
 	assert_array(scene.session_2.held).is_empty()
 
 
-func test_joypad_events_only_reach_their_own_player() -> void:
-	var dir := _song_dir('{"strings": true, "bass": true}')
-	var scene: Node = PlayScene.instantiate()
-	scene.auto_start = false
-	add_child(scene)
-	auto_free(scene)
-	scene.start(dir, "strings", "Hard", false, "versus", "bass", "Hard")
-
-	# Botão A do controle 2 = traste 4 do jogador 2; o jogador 1 não pode reagir.
-	var pad := InputEventJoypadButton.new()
-	pad.button_index = JOY_BUTTON_A
-	pad.device = 1
-	pad.pressed = true
-	scene._unhandled_input(pad)
-
-	assert_array(scene.session.held).is_empty()
-	assert_array(scene.session_2.held).is_equal(PackedInt32Array([4]))
-
-
-func test_drums_use_the_fret_buttons() -> void:
+func test_drum_pads_hit_once_per_press() -> void:
 	var scene := _play(_song_dir('{"strings": false, "drums": true}'), "drums", "Expert")
 	scene._autoplay = false
 	var note: PlayNote = scene.session.notes[0]
-	while scene._lead > 0.0 or scene.session.clock.now() < note.time - 0.02:
-		scene._process(1.0 / 60.0)
-	var press := InputEventAction.new()
-	press.pressed = true
-	for lane in note.lanes:
-		press.action = InputProfile.FRETS[InputProfile.drum_fret(lane)]
-		scene._unhandled_input(press)
-		scene._unhandled_input(press)  # o gatilho repete: só a primeira descida bate
+	scene._read_input(scene.session, scene.highway, note.lanes, note.time)
 	assert_int(note.state).is_equal(PlayNote.State.HIT)
-	assert_int(scene._drum_down[0].size()).is_equal(note.lanes.size())
-	press.pressed = false
-	for lane in note.lanes:
-		press.action = InputProfile.FRETS[InputProfile.drum_fret(lane)]
-		scene._unhandled_input(press)
-	assert_bool(scene._drum_down[0].is_empty()).is_true()
+	var hits: int = scene.session.scoring.hits
+	scene._read_input(scene.session, scene.highway, note.lanes, note.time + 0.01)  # segurando
+	assert_int(scene.session.scoring.hits).is_equal(hits)
+	scene._read_input(scene.session, scene.highway, PackedInt32Array(), note.time + 0.02)
+	assert_array(scene.session.held).is_empty()
 
 
 func test_comic_effects_follow_the_player() -> void:
@@ -386,24 +349,3 @@ func test_comic_effects_follow_the_player() -> void:
 	for i in 30:  # balanço da câmera, palco e refletores no ritmo
 		scene._process(1.0 / 60.0)
 	assert_vector(scene.camera.position).is_not_equal(scene._camera_rest[0])
-
-
-func test_drum_button_released_without_an_event_is_dropped() -> void:
-	var scene := _play(_song_dir('{"drums": true}'), "drums", "Expert")
-	scene._drum_down[0][1] = true  # o evento de soltar se perdeu: o Input não vê o botão apertado
-	scene._sync_drum_down(0)
-	assert_bool(scene._drum_down[0].is_empty()).is_true()
-
-
-func test_fret_pressed_again_without_release_still_plays() -> void:
-	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
-	var press := InputEventJoypadButton.new()
-	press.button_index = JOY_BUTTON_LEFT_SHOULDER  # traste 1
-	press.pressed = true
-	scene._unhandled_input(press)
-	assert_bool(1 in scene.session.held).is_true()
-	scene._unhandled_input(press)  # o soltar se perdeu: o jogo ainda acha o traste apertado
-	assert_bool(1 in scene.session.held).is_true()  # apertou de novo, não ficou descartado
-	press.pressed = false
-	scene._unhandled_input(press)
-	assert_bool(1 in scene.session.held).is_false()

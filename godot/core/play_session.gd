@@ -14,6 +14,7 @@ var judge: Judge
 var scoring := Scoring.new()
 var mix := StemMix.new()
 var clock := SongClock.new()
+var buttons := FretPad.new()  ## o que está apertado e o que mudou, quadro a quadro
 var held := PackedInt32Array()  ## trastes pressionados agora
 var whammy := 0.0  ## alavanca agora (0-1), vinda de Whammy na cena
 var sustain: PlayNote  ## sustentada sendo segurada agora (null se nenhuma)
@@ -33,42 +34,42 @@ func _init(chart: Dictionary, chosen_instrument: String, chosen_difficulty: Stri
 		duration = maxf(duration, note.end_time)
 
 
-func press_fret(lane: int) -> void:
-	if lane not in held:
-		held.append(lane)
+## Os trastes deste quadro (`down` = apertados agora, lidos do dispositivo): julga cada aperto e
+## devolve {pressed, released, taps}. `taps` é uma lista de {lane, result} com o que o juiz disse
+## de cada aperto: {note, grade}, {grade: overstrum} ou {} (traste de um acorde ainda incompleto).
+## Com `judge_presses` falso (palhetada, guitarra USB) só acompanha quais trastes estão apertados.
+func fret_input(down: PackedInt32Array, now: float, judge_presses := true) -> Dictionary:
+	var change := buttons.poll(down)
+	held = buttons.held
+	var taps: Array[Dictionary] = []
+	var played := PackedInt32Array()  # trastes de acorde que o acorde acertado já cobriu
+	for lane in change["pressed"] if judge_presses else PackedInt32Array():
+		if lane in played:
+			continue
+		var result := judge.press(now, lane, held)
+		if result.has("note"):
+			played.append_array(result["note"].lanes)
+		if not result.is_empty():
+			_score(result)
+		taps.append({"lane": lane, "result": result})
+	change["taps"] = taps
+	return change
 
 
-func release_fret(lane: int) -> void:
-	var i := held.find(lane)
-	if i >= 0:
-		held.remove_at(i)
-
-
-## Solta os trastes que o jogo acha apertados mas o controle já soltou (`pressed` = os que estão
-## apertados de verdade). Um evento de soltar perdido (pausa, troca de foco, gatilho analógico)
-## deixaria o traste preso, e como a nota simples vale pelo traste mais agudo, travaria as
-## próximas notas. Devolve os trastes soltos.
-func sync_frets(pressed: PackedInt32Array) -> PackedInt32Array:
-	var released := PackedInt32Array()
-	for lane in held.duplicate():
-		if lane not in pressed:
-			release_fret(lane)
-			released.append(lane)
-	return released
+## Os pads deste quadro (bateria): cada batida acerta a nota daquela peça; batida a mais não pune.
+## Devolve a lista de {lane, result} (result vazio: batida sem nota).
+func pad_input(down: PackedInt32Array, now: float) -> Array[Dictionary]:
+	var hits: Array[Dictionary] = []
+	for lane in buttons.poll(down)["pressed"]:
+		hits.append({"lane": lane, "result": pad(now, lane)})
+	held = buttons.held
+	return hits
 
 
 ## Palhetada agora (s). Devolve o resultado do juiz ({note, grade} ou overstrum).
 func strum(now: float) -> Dictionary:
 	var result := judge.strum(now, held)
 	_score(result)
-	return result
-
-
-## Traste apertado agora, no modo sem palhetada (ADR 0015). {} se não tocou nota.
-func tap(now: float) -> Dictionary:
-	var result := judge.tap(now, held)
-	if not result.is_empty():
-		_score(result)
 	return result
 
 
@@ -98,12 +99,12 @@ func update(now: float, delta: float) -> Dictionary:
 
 
 ## Segura a sustentada até `now`: pontua as batidas desde o último quadro e acaba no fim dela
-## ou quando os trastes deixam de bater (aí devolve a nota, que foi solta).
+## ou quando solta um traste dela (aí devolve a nota, que foi solta); apertar outros não atrapalha.
 func _hold(now: float) -> PlayNote:
 	if sustain == null:
 		return null
 	var note := sustain
-	if not Judge.frets_match(note.lanes, held):
+	if not Judge.holds(note.lanes, held):
 		_end_sustain()
 		return note
 	var until := clampf(now, note.held_until, note.end_time)
