@@ -34,19 +34,27 @@ func _init(chart: Dictionary, chosen_instrument: String, chosen_difficulty: Stri
 		duration = maxf(duration, note.end_time)
 
 
-## Os trastes deste quadro (`down` = apertados agora, lidos do dispositivo): julga cada aperto e
+## Os trastes deste quadro (`down` = apertados agora, lidos do dispositivo; `tapped` = os que
+## tiveram evento de aperto, ver FretPad): julga cada aperto e
 ## devolve {pressed, released, taps}. `taps` é uma lista de {lane, result} com o que o juiz disse
 ## de cada aperto: {note, grade}, {grade: overstrum} ou {} (traste de um acorde ainda incompleto).
 ## Com `judge_presses` falso (palhetada, guitarra USB) só acompanha quais trastes estão apertados.
-func fret_input(down: PackedInt32Array, now: float, judge_presses := true) -> Dictionary:
-	var change := buttons.poll(down)
+func fret_input(
+	down: PackedInt32Array, now: float, judge_presses := true, tapped := PackedInt32Array()
+) -> Dictionary:
+	var change := buttons.poll(down, tapped)
 	held = buttons.held
+	# Para o juiz, o toque que já soltou neste quadro ainda conta como apertado.
+	var touching := held.duplicate()
+	for lane in change["pressed"]:
+		if lane not in touching:
+			touching.append(lane)
 	var taps: Array[Dictionary] = []
 	var played := PackedInt32Array()  # trastes de acorde que o acorde acertado já cobriu
 	for lane in change["pressed"] if judge_presses else PackedInt32Array():
 		if lane in played:
 			continue
-		var result := judge.press(now, lane, held)
+		var result := judge.press(now, lane, touching)
 		if result.has("note"):
 			played.append_array(result["note"].lanes)
 		if not result.is_empty():
@@ -58,9 +66,11 @@ func fret_input(down: PackedInt32Array, now: float, judge_presses := true) -> Di
 
 ## Os pads deste quadro (bateria): cada batida acerta a nota daquela peça; batida a mais não pune.
 ## Devolve a lista de {lane, result} (result vazio: batida sem nota).
-func pad_input(down: PackedInt32Array, now: float) -> Array[Dictionary]:
+func pad_input(
+	down: PackedInt32Array, now: float, tapped := PackedInt32Array()
+) -> Array[Dictionary]:
 	var hits: Array[Dictionary] = []
-	for lane in buttons.poll(down)["pressed"]:
+	for lane in buttons.poll(down, tapped)["pressed"]:
 		hits.append({"lane": lane, "result": pad(now, lane)})
 	held = buttons.held
 	return hits

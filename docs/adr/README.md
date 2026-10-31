@@ -36,6 +36,7 @@ O índice abaixo é gerado (`python -m tools.docs_check --fix`) e conferido no p
 | 0022 | [Menus num cenário 3D, com visual de quadrinho de herói](0022-menus-3d-em-quadrinho.md) | Aceita |
 | 0023 | [Modelos 3D construídos por script no Blender](0023-modelos-3d-por-script-no-blender.md) | Aceita |
 | 0024 | [Cada aperto de traste é julgado sozinho, lido do dispositivo a cada quadro](0024-cada-aperto-e-julgado-sozinho.md) | Aceita |
+| 0025 | [Apertos também pelos eventos; o estado do dispositivo continua dizendo o que está apertado](0025-apertos-tambem-pelos-eventos.md) | Aceita |
 <!-- /gen:adr-index -->
 
 ## Modelo

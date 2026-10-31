@@ -161,3 +161,24 @@ func test_fret_input_chord_pressed_together_counts_once() -> void:
 	s.fret_input(chord.lanes, chord.time)
 	assert_int(chord.state).is_equal(PlayNote.State.HIT)
 	assert_int(s.scoring.overstrums).is_equal(0)
+
+
+func test_a_tap_released_before_the_frame_still_hits() -> void:
+	var s := _session("strings", "Expert")
+	var note: PlayNote = null
+	for candidate in s.notes:
+		if candidate.lanes.size() == 1:
+			note = candidate
+			break
+	# apertou e soltou entre dois quadros: o estado lido diz "nada", o evento diz "apertou"
+	var change := s.fret_input(PackedInt32Array(), note.time, true, note.lanes)
+	assert_int(note.state).is_equal(PlayNote.State.HIT)
+	assert_array(change["pressed"]).is_equal(note.lanes)
+	assert_array(s.held).is_empty()
+
+
+func test_drum_tap_released_before_the_frame_still_hits() -> void:
+	var s := _session("drums", "Expert")
+	var note := s.notes[0]
+	var hits := s.pad_input(PackedInt32Array(), note.time, PackedInt32Array([note.lanes[0]]))
+	assert_bool(hits[0]["result"].has("note")).is_true()

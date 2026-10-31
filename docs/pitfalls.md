@@ -125,3 +125,6 @@ Uma linha por armadilha: data, o que acontece e o porquê. Regra 4 da
   "" para arquivos de `/proc` (eles dizem ter tamanho 0), então `App.worker_pid()` sempre dava -1 e
   o `SIGSTOP` nunca saía. O `game.log` mostrou o worker separando músicas durante a partida
   (FPS 39-45). Arquivo de `/proc` se lê pelo buffer (`App._read_proc`).
+- **2026-10-31 · Toque rápido sumia a 30 FPS:** com o gamescope limitando o jogo a 30 FPS (no log:
+  "refresh cycle: 33.33ms"), ler só o estado do botão a cada quadro perde o toque que aperta e
+  solta entre dois quadros. Os apertos também vêm dos eventos (ADR 0025).

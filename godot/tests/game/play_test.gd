@@ -130,6 +130,25 @@ func test_fret_press_plays_the_note() -> void:
 	assert_int(scene.session.scoring.hits).is_equal(1)  # o acorde conta uma vez
 
 
+func test_a_quick_tap_between_frames_plays_the_note() -> void:
+	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
+	scene._autoplay = false
+	InputProfile.apply()
+	var note: PlayNote = scene.session.notes[0]
+	assert_int(note.lanes.size()).is_equal(1)  # o toque rápido de um traste só
+	while scene._lead > 0.0 or scene.session.clock.now() < note.time - 0.02:
+		scene._process(1.0 / 60.0)
+	# apertou e soltou antes do quadro: só o evento de aperto sabe
+	var key := InputEventKey.new()
+	var binding: Array = InputProfile.DEFAULTS["p1_fret_%d" % note.lanes[0]][0]
+	key.physical_keycode = binding[1]
+	key.pressed = true
+	scene._input(key)
+	scene._process(1.0 / 60.0)
+	assert_int(note.state).is_equal(PlayNote.State.HIT)
+	assert_array(scene.session.held).is_empty()
+
+
 func test_a_higher_fret_still_held_does_not_block_the_next_note() -> void:
 	var scene := _play(_song_dir('{"strings": true}'), "strings", "Expert")
 	var note: PlayNote = scene.session.notes[0]

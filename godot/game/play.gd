@@ -57,6 +57,8 @@ var _cameras: Array[Camera3D] = []
 var _camera_rest: Array[Vector3] = []  ## onde cada câmera fica parada
 var _fov := 0.0
 var _clock := 0.0  ## s desde o começo, para o balanço da câmera
+var _reader := InputReader.new()
+var _tapped: Array[PackedInt32Array] = [PackedInt32Array(), PackedInt32Array()]  ## por jogador
 
 @onready var background: Background = $Background
 @onready var camera: Camera3D = $Camera3D
@@ -349,7 +351,9 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	var key := Input.is_action_pressed(InputProfile.player_whammy(index))
 	s.whammy = _whammies[index].update(sticks, key, delta)
 	if not _autoplay:
-		_read_input(s, h, InputReader.lanes_down(index, s.drums), now)
+		var tapped: PackedInt32Array = _tapped[index]
+		_tapped[index] = PackedInt32Array()
+		_read_input(s, h, InputReader.lanes_down(index, s.drums), now, tapped)
 	var events := s.update(now, delta)
 	if not events["missed"].is_empty() and sfx:
 		sfx.play_miss()
@@ -362,18 +366,20 @@ func _update_player(index: int, s: PlaySession, h: Highway, now: float, delta: f
 	h.set_power(s.scoring.multiplier(), _grid.pulse(now))
 
 
-## Os botões deste quadro (`down` = apertados agora): julga cada aperto e desenha o traste (ou
-## pad) apertado e solto.
-func _read_input(s: PlaySession, h: Highway, down: PackedInt32Array, now: float) -> void:
+## Os botões deste quadro (`down` = apertados agora; `tapped` = apertados por evento desde o
+## quadro anterior): julga cada aperto e desenha o traste (ou pad) apertado e solto.
+func _read_input(
+	s: PlaySession, h: Highway, down: PackedInt32Array, now: float, tapped := PackedInt32Array()
+) -> void:
 	if s.drums:
-		for hit: Dictionary in s.pad_input(down, now):
+		for hit: Dictionary in s.pad_input(down, now, tapped):
 			h.on_input(hit["lane"], hit["result"])
 		return
-	var change := s.fret_input(down, now, InputProfile.FRET_TAPS)
+	var change := s.fret_input(down, now, InputProfile.FRET_TAPS, tapped)
 	for lane in change["released"]:
 		h.set_fret(lane, false)
 	for lane in change["pressed"]:
-		h.set_fret(lane, true)
+		h.set_fret(lane, lane in s.held)  # o toque que já soltou não fica aceso
 	for tap: Dictionary in change["taps"]:
 		var result: Dictionary = tap["result"]
 		if result.is_empty():
@@ -470,6 +476,24 @@ func _notification(what: int) -> void:
 		set_paused(true)
 
 
+## Guarda os apertos que chegam entre dois quadros: a leitura do estado, no quadro, perde o toque
+## que já soltou. Em _input (e não _unhandled_input) para nenhum controle de tela engolir o evento.
+func _input(event: InputEvent) -> void:
+	if session == null or _done or paused or _autoplay:
+		return
+	_tap(0, event, session)
+	if session_2:
+		_tap(1, event, session_2)
+
+
+func _tap(index: int, event: InputEvent, s: PlaySession) -> void:
+	var lanes: PackedInt32Array = _tapped[index]
+	for lane in _reader.pressed_by(event, index, s.drums):
+		if lane not in lanes:
+			lanes.append(lane)
+	_tapped[index] = lanes
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(InputProfile.PAUSE):
 		if session == null or _done:
@@ -497,6 +521,7 @@ func _strum(index: int, event: InputEvent, s: PlaySession, h: Highway, now: floa
 
 ## Faz o estado dos botões valer o que está apertado agora, sem contar aperto, e redesenha.
 func _resync_input(index: int, s: PlaySession, h: Highway) -> void:
+	_tapped[index] = PackedInt32Array()
 	s.buttons.reset(InputReader.lanes_down(index, s.drums))
 	s.held = s.buttons.held
 	for lane in InputProfile.FRETS.size():

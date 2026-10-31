@@ -40,3 +40,6 @@ o repetido do gatilho, reler o dispositivo).
 - Sai o código dos remendos (`sync_frets`, `_drum_down`, soltar perdido, filtro de controle por
   evento). O julgamento é por quadro: a precisão do instante é a de um quadro (16 ms a 60 FPS),
   a mesma que os eventos já tinham.
+
+> **Nota (2026-10-31):** a 30 FPS o toque entre dois quadros sumia; os apertos passaram a vir
+> também dos eventos ([ADR 0025](0025-apertos-tambem-pelos-eventos.md)). O resto continua valendo.

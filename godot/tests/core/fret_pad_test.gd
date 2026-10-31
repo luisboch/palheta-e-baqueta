@@ -29,3 +29,19 @@ func test_reset_takes_the_state_without_counting_presses() -> void:
 	pad.reset(PackedInt32Array([2]))
 	assert_array(pad.held).is_equal(PackedInt32Array([2]))
 	assert_array(pad.poll(PackedInt32Array([2]))["pressed"]).is_empty()
+
+
+func test_a_tap_between_frames_counts_as_a_press() -> void:
+	var pad := FretPad.new()
+	# apertou e soltou entre dois quadros: o estado não viu, o evento viu
+	var change := pad.poll(PackedInt32Array(), PackedInt32Array([2]))
+	assert_array(change["pressed"]).is_equal(PackedInt32Array([2]))
+	assert_array(pad.held).is_empty()
+	# soltou e apertou de novo no mesmo quadro: segue apertado e conta como aperto novo
+	pad.poll(PackedInt32Array([1]))
+	change = pad.poll(PackedInt32Array([1]), PackedInt32Array([1]))
+	assert_array(change["pressed"]).is_equal(PackedInt32Array([1]))
+	assert_array(change["released"]).is_empty()
+	# evento e estado do mesmo aperto contam uma vez só
+	change = pad.poll(PackedInt32Array([1, 3]), PackedInt32Array([3]))
+	assert_array(change["pressed"]).is_equal(PackedInt32Array([3]))
